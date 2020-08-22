@@ -16,6 +16,13 @@
     <PackageReference Include="System.Net.Http.Json" Version="3.2.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Meowtrix.Generators\Meowtrix.Generators.csproj">
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <OutputItemType>Analyzer</OutputItemType>
+    </ProjectReference>
+  </ItemGroup>
+
   <PropertyGroup Condition="'$(TargetFramework)' != 'net5.0'">
     <Nullable>annotation</Nullable>
   </PropertyGroup>
