@@ -1,5 +1,6 @@
 ﻿namespace Meowtrix.PixivApi.Json
 {
+    [GenerateNullTest]
     public class AuthResult
     {
         public Response? Response { get; set; }

@@ -36,7 +36,7 @@ namespace Meowtrix.Generated
                 if (typeSymbol.GetAttributes().Any(a => attr.Equals(a.AttributeClass, SymbolEqualityComparer.Default)))
                 {
                     sourceBuilder.Append(@$"
-        public static {typeSymbol.Name} DeepNullTest(this {typeSymbol.Name}? obj)
+        public static global::{typeSymbol.ContainingNamespace}.{typeSymbol.Name} DeepNullTest(this global::{typeSymbol.ContainingNamespace}.{typeSymbol.Name}? obj)
         {{");
 
                     sourceBuilder.Append(@"
