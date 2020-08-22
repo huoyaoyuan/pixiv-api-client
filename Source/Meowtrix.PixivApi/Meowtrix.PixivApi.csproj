@@ -12,6 +12,10 @@
     <Reference Include="System.Net.Http" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(TargetFramework)' != 'net5.0'">
+    <PackageReference Include="System.Net.Http.Json" Version="3.2.1" />
+  </ItemGroup>
+
   <PropertyGroup Condition="'$(TargetFramework)' != 'net5.0'">
     <Nullable>annotation</Nullable>
   </PropertyGroup>
