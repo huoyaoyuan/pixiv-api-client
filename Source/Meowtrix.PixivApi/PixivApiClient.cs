@@ -7,6 +7,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Meowtrix.PixivApi.Json;
 
 namespace Meowtrix.PixivApi
 {
@@ -50,10 +51,10 @@ namespace Meowtrix.PixivApi
         private const string ClientSecret = "lsACyCD94FhDUtGTXi3QzcFE2uU1hqtDaKeqrdwj";
         private const string UserAgent = "PixivAndroidApp/5.0.64 (Android 6.0)";
         private const string HashSecret = "28c1fdd170a5204386cb1313c7077b34f83e4aaf4aa829ce78c231e05b0bae2c";
+        private const string AuthUrl = "https://oauth.secure.pixiv.net/auth/token";
 
-        public async Task AuthAsync(string username, string password)
+        public async Task<AuthResult> AuthAsync(string username, string password)
         {
-            const string Url = "https://oauth.secure.pixiv.net/auth/token";
 #pragma warning disable CA1305 // 指定 IFormatProvider
             string time = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss+00:00");
 #pragma warning restore CA1305 // 指定 IFormatProvider
@@ -81,7 +82,7 @@ namespace Meowtrix.PixivApi
 #endif
             }
 
-            using var request = new HttpRequestMessage(HttpMethod.Post, Url)
+            using var request = new HttpRequestMessage(HttpMethod.Post, AuthUrl)
             {
                 Content = new FormUrlEncodedContent(new KeyValuePair<string?, string?>[]
                 {
@@ -101,7 +102,33 @@ namespace Meowtrix.PixivApi
             };
 
             using var response = await _httpClient.SendAsync(request).ConfigureAwait(false);
-            var json = response.Content.ReadFromJsonAsync<object>(s_serializerOptions);
+            var json = await response.Content.ReadFromJsonAsync<AuthResult>(s_serializerOptions).ConfigureAwait(false);
+
+            return json ?? throw new InvalidOperationException("Bad authentication response.");
+        }
+
+        public async Task<AuthResult> AuthAsync(string refreshToken)
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Post, AuthUrl)
+            {
+                Content = new FormUrlEncodedContent(new KeyValuePair<string?, string?>[]
+                {
+                    new ("get_secure_url", "1"),
+                    new ("client_id", ClientId),
+                    new ("client_secret", ClientSecret),
+                    new ("grant_type", "refresh_token"),
+                    new ("refresh_token", refreshToken),
+                }),
+                Headers =
+                {
+                    { "User-Agent", UserAgent }
+                }
+            };
+
+            using var response = await _httpClient.SendAsync(request).ConfigureAwait(false);
+            var json = await response.Content.ReadFromJsonAsync<AuthResult>(s_serializerOptions).ConfigureAwait(false);
+
+            return json ?? throw new InvalidOperationException("Bad authentication response.");
         }
     }
 }
