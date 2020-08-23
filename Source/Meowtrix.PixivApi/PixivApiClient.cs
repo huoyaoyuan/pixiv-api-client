@@ -7,6 +7,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Web;
 using Meowtrix.PixivApi.Json;
 
 namespace Meowtrix.PixivApi
@@ -171,6 +172,14 @@ namespace Meowtrix.PixivApi
             var json = await response.Content.ReadFromJsonAsync<T>(s_serializerOptions).ConfigureAwait(false);
 
             return json ?? throw new InvalidOperationException("Bad api response.");
+        }
+
+        public Task<UserDetail> GetUserDetailAsync(string userId, string filter = "for_ios", string? authToken = null)
+        {
+            return InvokeApiAsync<UserDetail>(
+                $"https://app-api.pixiv.net/v1/user/detail?user_id={HttpUtility.UrlEncode(userId)}&filter={HttpUtility.UrlEncode(filter)}",
+                HttpMethod.Post,
+                authToken: authToken);
         }
     }
 }
