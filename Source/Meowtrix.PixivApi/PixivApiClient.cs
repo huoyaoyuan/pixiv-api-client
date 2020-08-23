@@ -332,5 +332,15 @@ namespace Meowtrix.PixivApi
                 HttpMethod.Get,
                 authToken);
         }
+
+        public Task<TrendingTagsIllust> GetTrendingTagsIllustAsync(
+            string filter = "for_ios",
+            string? authToken = null)
+        {
+            return InvokeApiAsync<TrendingTagsIllust>(
+                $"https://app-api.pixiv.net/v1/trending-tags/illust?filter={HttpUtility.UrlEncode(filter)}",
+                HttpMethod.Get,
+                authToken);
+        }
     }
 }
