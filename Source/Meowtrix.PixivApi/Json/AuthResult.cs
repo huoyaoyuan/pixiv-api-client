@@ -1,4 +1,6 @@
-﻿namespace Meowtrix.PixivApi.Json
+﻿using System;
+
+namespace Meowtrix.PixivApi.Json
 {
     [GenerateNullTest]
     public class AuthResult
@@ -31,8 +33,8 @@
 
     public class ProfileImageUrls
     {
-        public string? Px16x16 { get; set; }
-        public string? Px50x50 { get; set; }
-        public string? Px170x170 { get; set; }
+        public Uri? Px16x16 { get; set; }
+        public Uri? Px50x50 { get; set; }
+        public Uri? Px170x170 { get; set; }
     }
 }

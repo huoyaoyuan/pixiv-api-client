@@ -53,10 +53,11 @@ namespace Meowtrix.PixivApi
         private const string HashSecret = "28c1fdd170a5204386cb1313c7077b34f83e4aaf4aa829ce78c231e05b0bae2c";
         private const string AuthUrl = "https://oauth.secure.pixiv.net/auth/token";
 
-        public async Task<AuthResult> AuthAsync(string username, string password)
+        public async Task<(DateTimeOffset authTime, AuthResult authResponse)> AuthAsync(string username, string password)
         {
+            DateTimeOffset authTime = DateTimeOffset.UtcNow;
 #pragma warning disable CA1305 // 指定 IFormatProvider
-            string time = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss+00:00");
+            string time = authTime.UtcDateTime.ToString("yyyy-MM-ddTHH:mm:ss+00:00");
 #pragma warning restore CA1305 // 指定 IFormatProvider
 
             static string MD5Hash(string input)
@@ -104,11 +105,13 @@ namespace Meowtrix.PixivApi
             using var response = await _httpClient.SendAsync(request).ConfigureAwait(false);
             var json = await response.Content.ReadFromJsonAsync<AuthResult>(s_serializerOptions).ConfigureAwait(false);
 
-            return json ?? throw new InvalidOperationException("Bad authentication response.");
+            return (authTime, json ?? throw new InvalidOperationException("Bad authentication response."));
         }
 
-        public async Task<AuthResult> AuthAsync(string refreshToken)
+        public async Task<(DateTimeOffset authTime, AuthResult authResponse)> AuthAsync(string refreshToken)
         {
+            DateTimeOffset authTime = DateTimeOffset.UtcNow;
+
             using var request = new HttpRequestMessage(HttpMethod.Post, AuthUrl)
             {
                 Content = new FormUrlEncodedContent(new KeyValuePair<string?, string?>[]
@@ -128,7 +131,15 @@ namespace Meowtrix.PixivApi
             using var response = await _httpClient.SendAsync(request).ConfigureAwait(false);
             var json = await response.Content.ReadFromJsonAsync<AuthResult>(s_serializerOptions).ConfigureAwait(false);
 
-            return json ?? throw new InvalidOperationException("Bad authentication response.");
+            return (authTime, json ?? throw new InvalidOperationException("Bad authentication response."));
+        }
+
+        public ValueTask<(DateTimeOffset authTime, AuthResult authResponse)> RefreshIfRequiredAsync(DateTimeOffset authTime, AuthResult authResponse, int epsilonSeconds = 60)
+        {
+            if ((DateTimeOffset.UtcNow - authTime).TotalSeconds < authResponse.Response!.ExpiresIn - epsilonSeconds)
+                return new((authTime, authResponse));
+
+            return new(AuthAsync(authResponse.Response!.RefreshToken!));
         }
     }
 }
