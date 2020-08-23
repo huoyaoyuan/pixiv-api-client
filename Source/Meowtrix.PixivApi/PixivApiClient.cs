@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
@@ -236,6 +237,28 @@ namespace Meowtrix.PixivApi
                 $"https://app-api.pixiv.net/v1/illust/comments?illust_id={illustId}&offset={offset}&include_total_comments={(includeTotalComments ? "true" : "false")}",
                 HttpMethod.Get,
                 authToken);
+        }
+
+        public Task<PostIllustCommentResult> PostIllustCommentAsync(
+            int illustId,
+            string comment,
+            int? parentCommentId = null,
+            string? authToken = null)
+        {
+            var data = new Dictionary<string, string>
+            {
+                ["illust_id"] = illustId.ToString(NumberFormatInfo.InvariantInfo),
+                ["comment"] = comment
+            };
+
+            if (parentCommentId is int p)
+                data.Add("parent_comment_id", p.ToString(NumberFormatInfo.InvariantInfo));
+
+            return InvokeApiAsync<PostIllustCommentResult>(
+                "https://app-api.pixiv.net/v1/illust/comment/add",
+                HttpMethod.Post,
+                authToken,
+                body: new FormUrlEncodedContent(data!));
         }
     }
 }
