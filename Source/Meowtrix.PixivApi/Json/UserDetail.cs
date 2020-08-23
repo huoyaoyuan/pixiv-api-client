@@ -7,7 +7,7 @@ namespace Meowtrix.PixivApi.Json
     public class UserDetail
     {
         public IllustUser User { get; set; }
-        public Profile Profile { get; set; }
+        public UserProfile Profile { get; set; }
         public ProfilePublicity ProfilePublicity { get; set; }
         public Workspace Workspace { get; set; }
     }
@@ -22,7 +22,7 @@ namespace Meowtrix.PixivApi.Json
         public string Comment { get; set; }
     }
 
-    public class Profile
+    public class UserProfile
     {
         public object WebPage { get; set; }
         public string Gender { get; set; }
