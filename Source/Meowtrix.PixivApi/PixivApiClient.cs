@@ -225,5 +225,17 @@ namespace Meowtrix.PixivApi
                 HttpMethod.Get,
                 authToken);
         }
+
+        public Task<IllustComments> GetIllustCommentsAsync(
+            int illustId,
+            int offset = 0,
+            bool includeTotalComments = false,
+            string? authToken = null)
+        {
+            return InvokeApiAsync<IllustComments>(
+                $"https://app-api.pixiv.net/v1/illust/comments?illust_id={illustId}&offset={offset}&include_total_comments={(includeTotalComments ? "true" : "false")}",
+                HttpMethod.Get,
+                authToken);
+        }
     }
 }
