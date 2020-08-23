@@ -342,5 +342,25 @@ namespace Meowtrix.PixivApi
                 HttpMethod.Get,
                 authToken);
         }
+
+        public Task<SearchIllustResult> SearchIllustsAsync(
+            string word,
+            string searchTarget = "partial_match_for_tags",
+            string sort = "date_desc",
+            string? duration = null,
+            string filter = "for_ios",
+            int offset = 0,
+            string? authToken = null)
+        {
+            string url = $"https://app-api.pixiv.net/v1/search/illust?word={HttpUtility.UrlEncode(word)}&search_target={searchTarget}"
+                + $"&sort={sort}&filter={HttpUtility.UrlEncode(filter)}&offset={offset}";
+            if (duration is not null)
+                url += $"&duration={duration}";
+
+            return InvokeApiAsync<SearchIllustResult>(
+                url,
+                HttpMethod.Get,
+                authToken);
+        }
     }
 }
