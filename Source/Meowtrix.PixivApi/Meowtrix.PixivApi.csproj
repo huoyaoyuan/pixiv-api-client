@@ -2,6 +2,18 @@
 
   <PropertyGroup>
     <TargetFrameworks>net461;netstandard2.0;netcoreapp3.0;net5.0</TargetFrameworks>
+    <IsPackable>true</IsPackable>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <VersionPrefix>0.1.0</VersionPrefix>
+    <VersionSuffix>alpha</VersionSuffix>
+    <Company>Meowtrix</Company>
+    <Authors>huoyaoyuan</Authors>
+    <Description>A pixiv api client implemented in pure C# with latest language features.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/huoyaoyuan/pixiv-api-client.git</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/huoyaoyuan/pixiv-api-client</PackageProjectUrl>
+    <PackageTags>pixiv</PackageTags>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' != 'net5.0'">
