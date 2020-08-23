@@ -191,9 +191,28 @@ namespace Meowtrix.PixivApi
         {
             return InvokeApiAsync<UserIllusts>(
                 $"https://app-api.pixiv.net/v1/user/illusts?user_id={HttpUtility.UrlEncode(userId)}&filter={HttpUtility.UrlEncode(filter)}"
-                + $"&type={HttpUtility.UrlDecode(illustType)}$offset={offset}",
+                + $"&type={HttpUtility.UrlEncode(illustType)}$offset={offset}",
                 HttpMethod.Get,
                 authToken: authToken);
+        }
+
+        public Task<UserIllusts> GetUserBookmarkIllustsAsync(
+            string userId,
+            string restrict = "public",
+            string filter = "for_ios",
+            int? maxBookmarkId = null,
+            string? tag = null,
+            string? authToken = null)
+        {
+            string url = $"https://app-api.pixiv.net/v1/user/bookmarks/illust?user_id={HttpUtility.UrlEncode(userId)}&restrict={HttpUtility.UrlEncode(restrict)}&filter={HttpUtility.UrlEncode(filter)}";
+            if (maxBookmarkId != null)
+                url += $"&max_bookmark_id={maxBookmarkId}";
+            if (!string.IsNullOrWhiteSpace(tag))
+                url += $"&tag={HttpUtility.UrlEncode(tag.Trim())}";
+            return InvokeApiAsync<UserIllusts>(
+                url,
+                HttpMethod.Get,
+                authToken);
         }
     }
 }
