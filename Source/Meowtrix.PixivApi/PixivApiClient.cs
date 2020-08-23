@@ -178,7 +178,21 @@ namespace Meowtrix.PixivApi
         {
             return InvokeApiAsync<UserDetail>(
                 $"https://app-api.pixiv.net/v1/user/detail?user_id={HttpUtility.UrlEncode(userId)}&filter={HttpUtility.UrlEncode(filter)}",
-                HttpMethod.Post,
+                HttpMethod.Get,
+                authToken: authToken);
+        }
+
+        public Task<UserIllusts> GetUserIllustsAsync(
+            string userId,
+            string illustType = "illust",
+            string filter = "for_ios",
+            int offset = 0,
+            string? authToken = null)
+        {
+            return InvokeApiAsync<UserIllusts>(
+                $"https://app-api.pixiv.net/v1/user/illusts?user_id={HttpUtility.UrlEncode(userId)}&filter={HttpUtility.UrlEncode(filter)}"
+                + $"&type={HttpUtility.UrlDecode(illustType)}$offset={offset}",
+                HttpMethod.Get,
                 authToken: authToken);
         }
     }
