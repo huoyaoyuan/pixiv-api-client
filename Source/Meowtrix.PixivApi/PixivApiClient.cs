@@ -260,5 +260,22 @@ namespace Meowtrix.PixivApi
                 authToken,
                 body: new FormUrlEncodedContent(data!));
         }
+
+        public Task<UserIllusts> GetIllustRelatedAsync(
+            int illustId,
+            string filter = "for_ios",
+            IEnumerable<int>? seedIllustIds = null,
+            string? authToken = null)
+        {
+            string url = $"https://app-api.pixiv.net/v2/illust/related?illust_id={illustId}&filter={filter}";
+            if (seedIllustIds != null)
+                foreach (int seed in seedIllustIds)
+                    url += $"&seed_illust_ids[]={seed}";
+
+            return InvokeApiAsync<UserIllusts>(
+                url,
+                HttpMethod.Get,
+                authToken);
+        }
     }
 }
