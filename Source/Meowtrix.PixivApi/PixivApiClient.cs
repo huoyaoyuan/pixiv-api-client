@@ -136,10 +136,10 @@ namespace Meowtrix.PixivApi
 
         public ValueTask<(DateTimeOffset authTime, AuthResult authResponse)> RefreshIfRequiredAsync(DateTimeOffset authTime, AuthResult authResponse, int epsilonSeconds = 60)
         {
-            if ((DateTimeOffset.UtcNow - authTime).TotalSeconds < authResponse.Response!.ExpiresIn - epsilonSeconds)
+            if ((DateTimeOffset.UtcNow - authTime).TotalSeconds < authResponse.Response.ExpiresIn - epsilonSeconds)
                 return new((authTime, authResponse));
 
-            return new(AuthAsync(authResponse.Response!.RefreshToken!));
+            return new(AuthAsync(authResponse.Response.RefreshToken));
         }
     }
 }
