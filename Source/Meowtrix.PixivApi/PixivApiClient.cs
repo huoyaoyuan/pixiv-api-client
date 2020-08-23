@@ -277,5 +277,42 @@ namespace Meowtrix.PixivApi
                 HttpMethod.Get,
                 authToken);
         }
+
+        public Task<RecommendedIllusts> GetRecommendedIllustsAsync(
+            string contentType = "illust",
+            bool includeRankingLabel = true,
+            string filter = "for_ios",
+            int? maxBookmarkIdForRecommended = null,
+            int? minBookmarkIdForRecentIllust = null,
+            int offset = 0,
+            bool includeRankingIllusts = false,
+            IEnumerable<int>? bookmarkIllustIds = null,
+            bool includePrivacyPolicy = false,
+            string? authToken = null)
+        {
+            string url = authToken is null
+                ? "https://app-api.pixiv.net/v1/illust/recommended-nologin"
+                : "https://app-api.pixiv.net/v1/illust/recommended";
+            url += $"?content_type={HttpUtility.UrlEncode(contentType)}"
+                + $"&filter={HttpUtility.UrlEncode(filter)}&offset={offset}"
+                + $"&include_ranking_label={(includeRankingLabel ? "true" : "false")}"
+                + $"&include_ranking_illusts={(includeRankingIllusts ? "true" : "false")}"
+                + $"&include_privacy_policy={(includePrivacyPolicy ? "true" : "false")}";
+            if (maxBookmarkIdForRecommended is int rId)
+                url += $"&max_bookmark_id_for_recommend={rId}";
+            if (minBookmarkIdForRecentIllust is int iId)
+                url += $"&min_bookmark_id_for_recent_illust={iId}";
+            if (bookmarkIllustIds != null)
+#if NETCOREAPP
+                url += $"&bookmark_illust_ids={string.Join(',', bookmarkIllustIds)}";
+#else
+                url += $"&bookmark_illust_ids={string.Join(",", bookmarkIllustIds)}";
+#endif
+
+            return InvokeApiAsync<RecommendedIllusts>(
+                url,
+                HttpMethod.Get,
+                authToken);
+        }
     }
 }
