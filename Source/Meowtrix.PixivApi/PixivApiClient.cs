@@ -141,5 +141,36 @@ namespace Meowtrix.PixivApi
 
             return new(AuthAsync(authResponse.Response.RefreshToken));
         }
+
+        private async Task<T> InvokeApiAsync<T>(
+            string url,
+            HttpMethod method,
+            string? authToken = null,
+            IEnumerable<KeyValuePair<string, string>>? additionalHeaders = null,
+            HttpContent? body = null)
+        {
+            using var request = new HttpRequestMessage(method, url)
+            {
+                Content = body,
+                Headers =
+                {
+                    { "App-OS", "ios" },
+                    { "App-OS-Version", "10.3.1" },
+                    { "App-Version", "6.7.1" },
+                    { "User-Agent", "PixivIOSApp/6.7.1 (iOS 10.3.1; iPhone8,1)" }
+                }
+            };
+
+            if (authToken is not null)
+                request.Headers.Add("Authorization", $"Bearer {authToken}");
+            if (additionalHeaders is not null)
+                foreach (var header in additionalHeaders)
+                    request.Headers.Add(header.Key, header.Value);
+
+            using var response = await _httpClient.SendAsync(request).ConfigureAwait(false);
+            var json = await response.Content.ReadFromJsonAsync<T>(s_serializerOptions).ConfigureAwait(false);
+
+            return json ?? throw new InvalidOperationException("Bad api response.");
+        }
     }
 }
