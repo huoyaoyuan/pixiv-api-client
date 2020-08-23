@@ -2,7 +2,7 @@
 
   <PropertyGroup Condition="'$(Language)' == 'C#'">
     <LangVersion>preview</LangVersion>
-    <Nullable>enable</Nullable>
+    <Nullable Condition="'$(Nullable)' == ''">enable</Nullable>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Language)' == 'VB'">
