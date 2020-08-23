@@ -314,5 +314,23 @@ namespace Meowtrix.PixivApi
                 HttpMethod.Get,
                 authToken);
         }
+
+        public Task<UserIllusts> GetIllustRankingAsync(
+            string mode = "day",
+            DateTime? date = null,
+            string filter = "for_ios",
+            int offset = 0,
+            string? authToken = null)
+        {
+            string url = $"https://app-api.pixiv.net/v1/illust/ranking?mode={HttpUtility.UrlEncode(mode)}&filter={HttpUtility.UrlEncode(filter)}"
+                + $"&offset={offset}";
+            if (date is DateTime d)
+                url += $"&date={d:yyyy-MM-dd}";
+
+            return InvokeApiAsync<UserIllusts>(
+                url,
+                HttpMethod.Get,
+                authToken);
+        }
     }
 }
