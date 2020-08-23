@@ -214,5 +214,16 @@ namespace Meowtrix.PixivApi
                 HttpMethod.Get,
                 authToken);
         }
+
+        public Task<UserIllusts> GetIllustFollowAsync(
+            string restrict = "public",
+            int offset = 0,
+            string? authToken = null)
+        {
+            return InvokeApiAsync<UserIllusts>(
+                $"https://app-api.pixiv.net/v2/illust/follow?restrict={HttpUtility.UrlEncode(restrict)}&offset={offset}",
+                HttpMethod.Get,
+                authToken);
+        }
     }
 }
