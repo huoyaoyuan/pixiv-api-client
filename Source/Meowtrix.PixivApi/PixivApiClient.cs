@@ -491,5 +491,15 @@ namespace Meowtrix.PixivApi
                 HttpMethod.Get,
                 authToken);
         }
+
+        public Task<MotionPicMetadata> GetMotionPicMetadataAsync(
+            int illustId,
+            string? authToken = null)
+        {
+            return InvokeApiAsync<MotionPicMetadata>(
+                $"https://app-api.pixiv.net/v1/ugoira/metadata?illust_id={illustId}",
+                HttpMethod.Get,
+                authToken);
+        }
     }
 }
