@@ -387,5 +387,19 @@ namespace Meowtrix.PixivApi
                 authToken,
                 body: new FormUrlEncodedContent(data!));
         }
+
+        public Task<JsonElement> DeleteIllustBookmarkAsync(
+            int illustId,
+            string? authToken = null)
+        {
+            return InvokeApiAsync<JsonElement>(
+                "https://app-api.pixiv.net/v1/illust/bookmark/delete",
+                HttpMethod.Post,
+                authToken,
+                body: new FormUrlEncodedContent(new[]
+                {
+                    new KeyValuePair<string?, string?>("illust_id", illustId.ToString(NumberFormatInfo.InvariantInfo))
+                }));
+        }
     }
 }
