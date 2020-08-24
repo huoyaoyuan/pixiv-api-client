@@ -401,5 +401,16 @@ namespace Meowtrix.PixivApi
                     new KeyValuePair<string?, string?>("illust_id", illustId.ToString(NumberFormatInfo.InvariantInfo))
                 }));
         }
+
+        public Task<UserBookmarkTags> GetUserBookmarkTagsIllustAsync(
+            string restrict = "public",
+            int offset = 0,
+            string? authToken = null)
+        {
+            return InvokeApiAsync<UserBookmarkTags>(
+                $"https://app-api.pixiv.net/v1/user/bookmark-tags/illust?restrict={HttpUtility.UrlEncode(restrict)}&offset={offset}",
+                HttpMethod.Get,
+                authToken);
+        }
     }
 }
