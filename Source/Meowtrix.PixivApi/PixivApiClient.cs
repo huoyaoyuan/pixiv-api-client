@@ -412,5 +412,84 @@ namespace Meowtrix.PixivApi
                 HttpMethod.Get,
                 authToken);
         }
+
+        public Task<UserFollowList> GetUserFollowingsAsync(
+            string userId,
+            string restrict = "public",
+            int offset = 0,
+            string? authToken = null)
+        {
+            return InvokeApiAsync<UserFollowList>(
+                $"https://app-api.pixiv.net/v1/user/following?user_id={HttpUtility.UrlEncode(userId)}&restrict={HttpUtility.UrlEncode(restrict)}&offset={offset}",
+                HttpMethod.Get,
+                authToken);
+        }
+
+        public Task<UserFollowList> GetUserFollowersAsync(
+            string userId,
+            string restrict = "public",
+            int offset = 0,
+            string? authToken = null)
+        {
+            return InvokeApiAsync<UserFollowList>(
+                $"https://app-api.pixiv.net/v1/user/follower?user_id={HttpUtility.UrlEncode(userId)}&restrict={HttpUtility.UrlEncode(restrict)}&offset={offset}",
+                HttpMethod.Get,
+                authToken);
+        }
+
+        public Task<JsonElement> AddUserFollowAsync(
+            string userId,
+            string restrict = "public",
+            string? authToken = null)
+        {
+            return InvokeApiAsync<JsonElement>(
+                "https://app-api.pixiv.net/v1/user/follow/add",
+                HttpMethod.Post,
+                authToken,
+                body: new FormUrlEncodedContent(new Dictionary<string, string>
+                {
+                    ["user_id"] = userId.ToString(NumberFormatInfo.InvariantInfo),
+                    ["restrict"] = restrict
+                }!));
+        }
+
+        public Task<JsonElement> DeleteUserFollowAsync(
+            string userId,
+            string restrict = "public",
+            string? authToken = null)
+        {
+            return InvokeApiAsync<JsonElement>(
+                "https://app-api.pixiv.net/v1/user/follow/delete",
+                HttpMethod.Post,
+                authToken,
+                body: new FormUrlEncodedContent(new Dictionary<string, string>
+                {
+                    ["user_id"] = userId.ToString(NumberFormatInfo.InvariantInfo),
+                    ["restrict"] = restrict
+                }!));
+        }
+
+        public Task<UserFollowList> GetMyPixivUsersAsync(
+            string userId,
+            int offset = 0,
+            string? authToken = null)
+        {
+            return InvokeApiAsync<UserFollowList>(
+                $"https://app-api.pixiv.net/v1/user/mypixiv?user_id={HttpUtility.UrlEncode(userId)}&offset={offset}",
+                HttpMethod.Get,
+                authToken);
+        }
+
+        public Task<UserFollowList> GetBlockedUsersAsync(
+            string userId,
+            string filter = "for_ios",
+            int offset = 0,
+            string? authToken = null)
+        {
+            return InvokeApiAsync<UserFollowList>(
+                $"https://app-api.pixiv.net/v2/user/list?user_id={HttpUtility.UrlEncode(userId)}&filter={HttpUtility.UrlEncode(filter)}&offset={offset}",
+                HttpMethod.Get,
+                authToken);
+        }
     }
 }
