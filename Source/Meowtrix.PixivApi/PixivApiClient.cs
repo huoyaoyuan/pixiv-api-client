@@ -362,5 +362,30 @@ namespace Meowtrix.PixivApi
                 HttpMethod.Get,
                 authToken);
         }
+
+        public Task<JsonElement> AddIllustBookmarkAsync(
+            int illustId,
+            string restrict = "public",
+            IEnumerable<string>? tags = null,
+            string? authToken = null)
+        {
+            var data = new Dictionary<string, string>
+            {
+                ["illust_id"] = illustId.ToString(NumberFormatInfo.InvariantInfo),
+                ["restrict"] = restrict
+            };
+            if (tags != null)
+#if NETCOREAPP
+                data.Add("tags", string.Join(' ', tags));
+#else
+                data.Add("tags", string.Join(" ", tags));
+#endif
+
+            return InvokeApiAsync<JsonElement>(
+                "https://app-api.pixiv.net/v2/illust/bookmark/add",
+                HttpMethod.Post,
+                authToken,
+                body: new FormUrlEncodedContent(data!));
+        }
     }
 }
