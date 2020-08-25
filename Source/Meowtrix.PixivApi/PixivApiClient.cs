@@ -21,6 +21,8 @@ namespace Meowtrix.PixivApi
         };
 
         #region Constructors
+        public PixivApiClient(HttpMessageHandler handler) => _httpClient = new HttpClient(handler);
+
         public PixivApiClient()
             : this(false, null)
         {
