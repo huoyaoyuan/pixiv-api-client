@@ -81,13 +81,33 @@ namespace Meowtrix.PixivApi.ManualTest
             var trendingTags = await client.GetTrendingTagsIllustAsync(authToken: authToken);
             Debugger.Break();
 
-            //Console.WriteLine("Adding bookmark");
-            //await client.AddIllustBookmarkAsync(83492606, authToken: authToken);
-            //Debugger.Break();
+            Console.WriteLine("Adding bookmark");
+            await client.AddIllustBookmarkAsync(83492606, authToken: authToken);
+            Debugger.Break();
 
-            //Console.WriteLine("Deleting bookmark");
-            //await client.DeleteIllustBookmarkAsync(83492606, authToken: authToken);
-            //Debugger.Break();
+            Console.WriteLine("Deleting bookmark");
+            await client.DeleteIllustBookmarkAsync(83492606, authToken: authToken);
+            Debugger.Break();
+
+            Console.WriteLine("Begin search");
+            var search = await client.SearchIllustsAsync("女の子", authToken: authToken);
+            Debugger.Break();
+
+            Console.WriteLine("Begin user/bookmark-tags/illust");
+            var bookmarkTags = await client.GetUserBookmarkTagsIllustAsync(authToken: authToken);
+            Debugger.Break();
+
+            Console.WriteLine("Begin user/following");
+            var following = await client.GetUserFollowingsAsync(1113943, authToken: authToken);
+            Debugger.Break();
+
+            Console.WriteLine("Begin user/follower");
+            var follower = await client.GetUserFollowersAsync(1113943, authToken: authToken);
+            Debugger.Break();
+
+            Console.WriteLine("Begin mypixiv");
+            var mypixiv = await client.GetMyPixivUsersAsync(1113943, authToken: authToken);
+            Debugger.Break();
         }
     }
 }

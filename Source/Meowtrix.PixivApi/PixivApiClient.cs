@@ -484,17 +484,19 @@ namespace Meowtrix.PixivApi
                 authToken);
         }
 
-        public Task<UserFollowList> GetBlockedUsersAsync(
-            int userId,
-            string filter = "for_ios",
-            int offset = 0,
-            string? authToken = null)
-        {
-            return InvokeApiAsync<UserFollowList>(
-                $"https://app-api.pixiv.net/v2/user/list?user_id={userId}&filter={HttpUtility.UrlEncode(filter)}&offset={offset}",
-                HttpMethod.Get,
-                authToken);
-        }
+        // api v2 doesn't return the same structure with v1
+
+        //public Task<UserFollowList> GetBlockedUsersAsync(
+        //    int userId,
+        //    string filter = "for_ios",
+        //    int offset = 0,
+        //    string? authToken = null)
+        //{
+        //    return InvokeApiAsync<UserFollowList>(
+        //        $"https://app-api.pixiv.net/v2/user/list?user_id={userId}&filter={HttpUtility.UrlEncode(filter)}&offset={offset}",
+        //        HttpMethod.Get,
+        //        authToken);
+        //}
 
         public Task<MotionPicMetadata> GetMotionPicMetadataAsync(
             int illustId,
