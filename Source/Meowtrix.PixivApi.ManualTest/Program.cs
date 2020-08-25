@@ -80,6 +80,14 @@ namespace Meowtrix.PixivApi.ManualTest
             Console.WriteLine("Begin trending-tags/illust");
             var trendingTags = await client.GetTrendingTagsIllustAsync(authToken: authToken);
             Debugger.Break();
+
+            //Console.WriteLine("Adding bookmark");
+            //await client.AddIllustBookmarkAsync(83492606, authToken: authToken);
+            //Debugger.Break();
+
+            //Console.WriteLine("Deleting bookmark");
+            //await client.DeleteIllustBookmarkAsync(83492606, authToken: authToken);
+            //Debugger.Break();
         }
     }
 }

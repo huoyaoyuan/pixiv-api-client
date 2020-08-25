@@ -367,7 +367,7 @@ namespace Meowtrix.PixivApi
                 authToken);
         }
 
-        public Task<JsonElement> AddIllustBookmarkAsync(
+        public Task AddIllustBookmarkAsync(
             int illustId,
             string restrict = "public",
             IEnumerable<string>? tags = null,
@@ -385,18 +385,18 @@ namespace Meowtrix.PixivApi
                 data.Add("tags", string.Join(" ", tags));
 #endif
 
-            return InvokeApiAsync<JsonElement>(
+            return InvokeApiAsync<object>(
                 "https://app-api.pixiv.net/v2/illust/bookmark/add",
                 HttpMethod.Post,
                 authToken,
                 body: new FormUrlEncodedContent(data!));
         }
 
-        public Task<JsonElement> DeleteIllustBookmarkAsync(
+        public Task DeleteIllustBookmarkAsync(
             int illustId,
             string? authToken = null)
         {
-            return InvokeApiAsync<JsonElement>(
+            return InvokeApiAsync<object>(
                 "https://app-api.pixiv.net/v1/illust/bookmark/delete",
                 HttpMethod.Post,
                 authToken,
@@ -441,12 +441,12 @@ namespace Meowtrix.PixivApi
                 authToken);
         }
 
-        public Task<JsonElement> AddUserFollowAsync(
+        public Task AddUserFollowAsync(
             int userId,
             string restrict = "public",
             string? authToken = null)
         {
-            return InvokeApiAsync<JsonElement>(
+            return InvokeApiAsync<object>(
                 "https://app-api.pixiv.net/v1/user/follow/add",
                 HttpMethod.Post,
                 authToken,
@@ -457,12 +457,12 @@ namespace Meowtrix.PixivApi
                 }!));
         }
 
-        public Task<JsonElement> DeleteUserFollowAsync(
+        public Task DeleteUserFollowAsync(
             int userId,
             string restrict = "public",
             string? authToken = null)
         {
-            return InvokeApiAsync<JsonElement>(
+            return InvokeApiAsync<object>(
                 "https://app-api.pixiv.net/v1/user/follow/delete",
                 HttpMethod.Post,
                 authToken,
