@@ -108,6 +108,10 @@ namespace Meowtrix.PixivApi.ManualTest
             Console.WriteLine("Begin mypixiv");
             var mypixiv = await client.GetMyPixivUsersAsync(1113943, authToken: authToken);
             Debugger.Break();
+
+            Console.WriteLine("Begin motion pic metadata");
+            var motionMetadata = await client.GetMotionPicMetadataAsync(44340318, authToken: authToken);
+            Debugger.Break();
         }
     }
 }
