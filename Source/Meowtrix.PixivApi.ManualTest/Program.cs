@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Net;
 using System.Threading.Tasks;
 using Meowtrix.PixivApi.Json;
@@ -42,7 +43,17 @@ namespace Meowtrix.PixivApi.ManualTest
                 authToken = response.AccessToken;
                 Console.WriteLine($"Access token: {response.AccessToken}");
                 Console.WriteLine($"Refresh token: {response.RefreshToken}");
+
+                Debugger.Break();
             }
+
+            Console.WriteLine("Begin user/detail");
+            var userDetail = await client.GetUserDetailAsync(1113943, authToken: authToken);
+            Debugger.Break();
+
+            Console.WriteLine("Begin user/illusts");
+            var userIllusts = await client.GetUserIllustsAsync(1113943, authToken: authToken);
+            Debugger.Break();
         }
     }
 }

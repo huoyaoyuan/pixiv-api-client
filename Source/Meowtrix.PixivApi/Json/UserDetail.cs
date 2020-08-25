@@ -55,7 +55,7 @@ namespace Meowtrix.PixivApi.Json
         public string Gender { get; set; }
         public string Region { get; set; }
         public string BirthDay { get; set; }
-        public int BirthYear { get; set; }
+        public string BirthYear { get; set; }
         public string Job { get; set; }
         public bool Pawoo { get; set; }
     }

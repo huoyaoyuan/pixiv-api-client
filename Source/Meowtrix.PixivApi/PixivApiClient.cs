@@ -170,6 +170,7 @@ namespace Meowtrix.PixivApi
                     request.Headers.Add(header.Key, header.Value);
 
             using var response = await _httpClient.SendAsync(request).ConfigureAwait(false);
+            response.EnsureSuccessStatusCode();
             var json = await response.Content.ReadFromJsonAsync<T>(s_serializerOptions).ConfigureAwait(false);
 
             return json ?? throw new InvalidOperationException("Bad api response.");
@@ -195,7 +196,7 @@ namespace Meowtrix.PixivApi
         {
             return InvokeApiAsync<UserIllusts>(
                 $"https://app-api.pixiv.net/v1/user/illusts?user_id={userId}&filter={HttpUtility.UrlEncode(filter)}"
-                + $"&type={HttpUtility.UrlEncode(illustType)}$offset={offset}",
+                + $"&type={HttpUtility.UrlEncode(illustType)}&offset={offset}",
                 HttpMethod.Get,
                 authToken: authToken);
         }
