@@ -66,6 +66,20 @@ namespace Meowtrix.PixivApi.ManualTest
             Console.WriteLine("Begin illust/comments");
             var illustComments = await client.GetIllustCommentsAsync(76995599, authToken: authToken);
             Debugger.Break();
+
+            Console.WriteLine("Begin illust/related");
+            var illustRelated = await client.GetIllustRelatedAsync(76995599,
+                seedIllustIds: new[] { 83492606, 82693472 },
+                authToken: authToken);
+            Debugger.Break();
+
+            Console.WriteLine("Begin illust/ranking");
+            var illustRanking = await client.GetIllustRankingAsync(authToken: authToken);
+            Debugger.Break();
+
+            Console.WriteLine("Begin trending-tags/illust");
+            var trendingTags = await client.GetTrendingTagsIllustAsync(authToken: authToken);
+            Debugger.Break();
         }
     }
 }

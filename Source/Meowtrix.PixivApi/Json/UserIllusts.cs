@@ -46,7 +46,7 @@ namespace Meowtrix.PixivApi.Json
         {
             public SizedImageUrls ImageUrls { get; set; }
         }
-        public Meta MetaPage { get; set; }
+        public ImmutableArray<Meta> MetaPages { get; set; }
         public int TotalView { get; set; }
         public int TotalBookmarks { get; set; }
         public bool IsBookmarked { get; set; }
