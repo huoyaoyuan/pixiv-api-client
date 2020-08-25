@@ -16,7 +16,7 @@ namespace Meowtrix.PixivApi.Json
     {
         public int Id { get; set; }
         public string Comment { get; set; }
-        public string Date { get; set; }
+        public DateTimeOffset Date { get; set; }
         public IllustUser User { get; set; }
         public bool HasReplies { get; set; }
         public IllustComment ParentComment { get; set; }

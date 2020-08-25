@@ -54,6 +54,18 @@ namespace Meowtrix.PixivApi.ManualTest
             Console.WriteLine("Begin user/illusts");
             var userIllusts = await client.GetUserIllustsAsync(1113943, authToken: authToken);
             Debugger.Break();
+
+            Console.WriteLine("Begin user/bookmarks/illust");
+            var userBookmarksIllust = await client.GetUserBookmarkIllustsAsync(1113943, authToken: authToken);
+            Debugger.Break();
+
+            Console.WriteLine("Begin illust/follow");
+            var illustFollow = await client.GetIllustFollowAsync(authToken: authToken);
+            Debugger.Break();
+
+            Console.WriteLine("Begin illust/comments");
+            var illustComments = await client.GetIllustCommentsAsync(76995599, authToken: authToken);
+            Debugger.Break();
         }
     }
 }

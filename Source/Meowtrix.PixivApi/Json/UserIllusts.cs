@@ -16,13 +16,13 @@ namespace Meowtrix.PixivApi.Json
         public int Id { get; set; }
         public string Title { get; set; }
         public string Type { get; set; }
-        public ImageUrls Urls { get; set; }
+        public SizedImageUrls ImageUrls { get; set; }
         public string Caption { get; set; }
         public int Restrict { get; set; }
         public IllustUser User { get; set; }
         public ImmutableArray<IllustTag> Tags { get; set; }
         public ImmutableArray<string> Tools { get; set; }
-        public string CreateDate { get; set; }
+        public DateTimeOffset CreateDate { get; set; }
         public int PageCount { get; set; }
         public int Width { get; set; }
         public int Height { get; set; }
@@ -44,7 +44,7 @@ namespace Meowtrix.PixivApi.Json
 
         public class Meta
         {
-            public ImageUrls ImageUrls { get; set; }
+            public SizedImageUrls ImageUrls { get; set; }
         }
         public Meta MetaPage { get; set; }
         public int TotalView { get; set; }
@@ -55,7 +55,7 @@ namespace Meowtrix.PixivApi.Json
         public int TotalComments { get; set; }
     }
 
-    public class ImageUrls
+    public class SizedImageUrls
     {
         public Uri SquareMedium { get; set; }
         public Uri Medium { get; set; }
