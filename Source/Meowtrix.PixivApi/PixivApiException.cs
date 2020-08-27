@@ -7,9 +7,9 @@ namespace Meowtrix.PixivApi
     public class PixivApiException : Exception
     {
         public string? OriginalMessage { get; }
-        public PixivErrorMessage? Error { get; }
+        public PixivApiErrorMessage? Error { get; }
 
-        public PixivApiException(string originalMessage, PixivErrorMessage? error, string message)
+        public PixivApiException(string originalMessage, PixivApiErrorMessage? error, string message)
             : base(message)
         {
             OriginalMessage = originalMessage;
@@ -24,15 +24,10 @@ namespace Meowtrix.PixivApi
 
 #pragma warning disable IDE1006 // Naming style
 
-    public sealed class PixivErrorMessage
+    public sealed class PixivApiErrorMessage
     {
-        public bool HasError { get; init; }
-        public string? Error { get; init; }
-        public ErrorsType? Errors { get; init; }
+        public ErrorType? Error { get; init; }
 
-
-        public sealed record ErrorsType(SystemError? System);
-
-        public sealed record SystemError(int Code, string? Message);
+        public record ErrorType(string? UserMessage, string? Message, string? Reason, object? UserMessageDetails);
     }
 }

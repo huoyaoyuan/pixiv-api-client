@@ -57,7 +57,7 @@ namespace Meowtrix.PixivApi
         private const string HashSecret = "28c1fdd170a5204386cb1313c7077b34f83e4aaf4aa829ce78c231e05b0bae2c";
         private const string AuthUrl = "https://oauth.secure.pixiv.net/auth/token";
 
-        public async Task<(DateTimeOffset authTime, AuthResponse authResponse)> AuthAsync(string username, string password)
+        public Task<(DateTimeOffset authTime, AuthResponse authResponse)> AuthAsync(string username, string password)
         {
             DateTimeOffset authTime = DateTimeOffset.Now;
             string time = authTime.ToString("yyyy-MM-ddTHH:mm:ssK", null);
@@ -102,10 +102,10 @@ namespace Meowtrix.PixivApi
                 }
             };
 
-            return (authTime, await SendAndVerifyAsync<AuthResponse>(request).ConfigureAwait(false));
+            return AuthAsync(authTime, request);
         }
 
-        public async Task<(DateTimeOffset authTime, AuthResponse authResponse)> AuthAsync(string refreshToken)
+        public Task<(DateTimeOffset authTime, AuthResponse authResponse)> AuthAsync(string refreshToken)
         {
             DateTimeOffset authTime = DateTimeOffset.Now;
 
@@ -125,7 +125,25 @@ namespace Meowtrix.PixivApi
                 }
             };
 
-            return (authTime, await SendAndVerifyAsync<AuthResponse>(request).ConfigureAwait(false));
+            return AuthAsync(authTime, request);
+        }
+
+        private async Task<(DateTimeOffset authTime, AuthResponse authResponse)> AuthAsync(DateTimeOffset authTime, HttpRequestMessage request)
+        {
+            using var response = await _httpClient.SendAsync(request).ConfigureAwait(false);
+
+            if (response.StatusCode == HttpStatusCode.BadRequest)
+            {
+                string original = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                var error = JsonSerializer.Deserialize<PixivAuthErrorMessage>(original, s_serializerOptions);
+                throw new PixivAuthException(original, error, error?.Errors?.System?.Message ?? original);
+            }
+
+            response.EnsureSuccessStatusCode();
+
+            var json = await response.Content.ReadFromJsonAsync<AuthResponse>(s_serializerOptions).ConfigureAwait(false);
+
+            return (authTime, json ?? throw new InvalidOperationException("The api responses a null object."));
         }
 
         public ValueTask<(DateTimeOffset authTime, AuthResponse authResponse)> RefreshIfRequiredAsync(DateTimeOffset authTime, AuthResponse authResponse, int epsilonSeconds = 60)
@@ -149,7 +167,7 @@ namespace Meowtrix.PixivApi
                 additionalHeaders,
                 body);
 
-        public Task<T> InvokeApiAsync<T>(
+        public async Task<T> InvokeApiAsync<T>(
             Uri url,
             HttpMethod method,
             string? authToken = null,
@@ -174,18 +192,13 @@ namespace Meowtrix.PixivApi
                 foreach (var header in additionalHeaders)
                     request.Headers.Add(header.Key, header.Value);
 
-            return SendAndVerifyAsync<T>(request);
-        }
-
-        private async Task<T> SendAndVerifyAsync<T>(HttpRequestMessage request)
-        {
             using var response = await _httpClient.SendAsync(request).ConfigureAwait(false);
 
             if (response.StatusCode == HttpStatusCode.BadRequest)
             {
                 string original = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                var error = JsonSerializer.Deserialize<PixivErrorMessage>(original, s_serializerOptions);
-                throw new PixivApiException(original, error, error?.Errors?.System?.Message ?? original);
+                var error = JsonSerializer.Deserialize<PixivApiErrorMessage>(original, s_serializerOptions);
+                throw new PixivApiException(original, error, error?.Error?.Message ?? original);
             }
 
             response.EnsureSuccessStatusCode();
