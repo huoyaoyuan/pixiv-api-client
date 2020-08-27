@@ -149,7 +149,7 @@ namespace Meowtrix.PixivApi.Json
 
     public sealed record IllustTag(string Name, string? TranslatedName);
 
-    public sealed record IllustComments(int TotalComments, ImmutableArray<IllustComment> Comments, Uri NextUri);
+    public sealed record IllustComments(int TotalComments, ImmutableArray<IllustComment> Comments, Uri? NextUrl);
 
     public sealed record IllustComment(
         int Id,

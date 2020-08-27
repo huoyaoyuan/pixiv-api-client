@@ -216,11 +216,10 @@ namespace Meowtrix.PixivApi
 
         public Task<UserDetail> GetUserDetailAsync(
             int userId,
-            string filter = "for_ios",
             string? authToken = null)
         {
             return InvokeApiAsync<UserDetail>(
-                $"https://app-api.pixiv.net/v1/user/detail?user_id={userId}&filter={HttpUtility.UrlEncode(filter)}",
+                $"https://app-api.pixiv.net/v1/user/detail?user_id={userId}",
                 HttpMethod.Get,
                 authToken: authToken);
         }
@@ -228,12 +227,11 @@ namespace Meowtrix.PixivApi
         public Task<UserIllusts> GetUserIllustsAsync(
             int userId,
             string illustType = "illust",
-            string filter = "for_ios",
             int offset = 0,
             string? authToken = null)
         {
             return InvokeApiAsync<UserIllusts>(
-                $"https://app-api.pixiv.net/v1/user/illusts?user_id={userId}&filter={HttpUtility.UrlEncode(filter)}"
+                $"https://app-api.pixiv.net/v1/user/illusts?user_id={userId}"
                 + $"&type={HttpUtility.UrlEncode(illustType)}&offset={offset}",
                 HttpMethod.Get,
                 authToken: authToken);
@@ -242,12 +240,11 @@ namespace Meowtrix.PixivApi
         public Task<UserIllusts> GetUserBookmarkIllustsAsync(
             int userId,
             string restrict = "public",
-            string filter = "for_ios",
             int? maxBookmarkId = null,
             string? tag = null,
             string? authToken = null)
         {
-            string url = $"https://app-api.pixiv.net/v1/user/bookmarks/illust?user_id={userId}&restrict={HttpUtility.UrlEncode(restrict)}&filter={HttpUtility.UrlEncode(filter)}";
+            string url = $"https://app-api.pixiv.net/v1/user/bookmarks/illust?user_id={userId}&restrict={HttpUtility.UrlEncode(restrict)}";
             if (maxBookmarkId != null)
                 url += $"&max_bookmark_id={maxBookmarkId}";
             if (!string.IsNullOrWhiteSpace(tag))
@@ -305,11 +302,10 @@ namespace Meowtrix.PixivApi
 
         public Task<UserIllusts> GetIllustRelatedAsync(
             int illustId,
-            string filter = "for_ios",
             IEnumerable<int>? seedIllustIds = null,
             string? authToken = null)
         {
-            string url = $"https://app-api.pixiv.net/v2/illust/related?illust_id={illustId}&filter={filter}";
+            string url = $"https://app-api.pixiv.net/v2/illust/related?illust_id={illustId}";
             if (seedIllustIds != null)
                 foreach (int seed in seedIllustIds)
                     url += $"&seed_illust_ids[]={seed}";
@@ -323,7 +319,6 @@ namespace Meowtrix.PixivApi
         public Task<RecommendedIllusts> GetRecommendedIllustsAsync(
             string contentType = "illust",
             bool includeRankingLabel = true,
-            string filter = "for_ios",
             int? maxBookmarkIdForRecommended = null,
             int? minBookmarkIdForRecentIllust = null,
             int offset = 0,
@@ -336,7 +331,7 @@ namespace Meowtrix.PixivApi
                 ? "https://app-api.pixiv.net/v1/illust/recommended-nologin"
                 : "https://app-api.pixiv.net/v1/illust/recommended";
             url += $"?content_type={HttpUtility.UrlEncode(contentType)}"
-                + $"&filter={HttpUtility.UrlEncode(filter)}&offset={offset}"
+                + $"&offset={offset}"
                 + $"&include_ranking_label={(includeRankingLabel ? "true" : "false")}"
                 + $"&include_ranking_illusts={(includeRankingIllusts ? "true" : "false")}"
                 + $"&include_privacy_policy={(includePrivacyPolicy ? "true" : "false")}";
@@ -360,11 +355,10 @@ namespace Meowtrix.PixivApi
         public Task<UserIllusts> GetIllustRankingAsync(
             string mode = "day",
             DateTime? date = null,
-            string filter = "for_ios",
             int offset = 0,
             string? authToken = null)
         {
-            string url = $"https://app-api.pixiv.net/v1/illust/ranking?mode={HttpUtility.UrlEncode(mode)}&filter={HttpUtility.UrlEncode(filter)}"
+            string url = $"https://app-api.pixiv.net/v1/illust/ranking?mode={HttpUtility.UrlEncode(mode)}"
                 + $"&offset={offset}";
             if (date is DateTime d)
                 url += $"&date={d:yyyy-MM-dd}";
@@ -376,11 +370,10 @@ namespace Meowtrix.PixivApi
         }
 
         public Task<TrendingTagsIllust> GetTrendingTagsIllustAsync(
-            string filter = "for_ios",
             string? authToken = null)
         {
             return InvokeApiAsync<TrendingTagsIllust>(
-                $"https://app-api.pixiv.net/v1/trending-tags/illust?filter={HttpUtility.UrlEncode(filter)}",
+                $"https://app-api.pixiv.net/v1/trending-tags/illust",
                 HttpMethod.Get,
                 authToken);
         }
@@ -390,12 +383,11 @@ namespace Meowtrix.PixivApi
             string searchTarget = "partial_match_for_tags",
             string sort = "date_desc",
             string? duration = null,
-            string filter = "for_ios",
             int offset = 0,
             string? authToken = null)
         {
             string url = $"https://app-api.pixiv.net/v1/search/illust?word={HttpUtility.UrlEncode(word)}&search_target={searchTarget}"
-                + $"&sort={sort}&filter={HttpUtility.UrlEncode(filter)}&offset={offset}";
+                + $"&sort={sort}&offset={offset}";
             if (duration is not null)
                 url += $"&duration={duration}";
 
