@@ -13,6 +13,12 @@ using Meowtrix.PixivApi.Json;
 
 namespace Meowtrix.PixivApi
 {
+    /// <summary>
+    /// A state-less type to provide direct API call to Pixiv.
+    /// </summary>
+    /// <remarks>
+    /// This type is state-less. Every call must be performed with access token.
+    /// </remarks>
     public sealed class PixivApiClient : IDisposable
     {
         private static readonly JsonSerializerOptions s_serializerOptions = new JsonSerializerOptions
