@@ -57,7 +57,7 @@ namespace Meowtrix.PixivApi
         private const string HashSecret = "28c1fdd170a5204386cb1313c7077b34f83e4aaf4aa829ce78c231e05b0bae2c";
         private const string AuthUrl = "https://oauth.secure.pixiv.net/auth/token";
 
-        public async Task<(DateTimeOffset authTime, AuthResult authResponse)> AuthAsync(string username, string password)
+        public async Task<(DateTimeOffset authTime, AuthResponse authResponse)> AuthAsync(string username, string password)
         {
             DateTimeOffset authTime = DateTimeOffset.UtcNow;
 #pragma warning disable CA1305 // 指定 IFormatProvider
@@ -107,12 +107,12 @@ namespace Meowtrix.PixivApi
             };
 
             using var response = await _httpClient.SendAsync(request).ConfigureAwait(false);
-            var json = await response.Content.ReadFromJsonAsync<AuthResult>(s_serializerOptions).ConfigureAwait(false);
+            var json = await response.Content.ReadFromJsonAsync<AuthResponse>(s_serializerOptions).ConfigureAwait(false);
 
             return (authTime, json ?? throw new InvalidOperationException("Bad authentication response."));
         }
 
-        public async Task<(DateTimeOffset authTime, AuthResult authResponse)> AuthAsync(string refreshToken)
+        public async Task<(DateTimeOffset authTime, AuthResponse authResponse)> AuthAsync(string refreshToken)
         {
             DateTimeOffset authTime = DateTimeOffset.UtcNow;
 
@@ -133,17 +133,17 @@ namespace Meowtrix.PixivApi
             };
 
             using var response = await _httpClient.SendAsync(request).ConfigureAwait(false);
-            var json = await response.Content.ReadFromJsonAsync<AuthResult>(s_serializerOptions).ConfigureAwait(false);
+            var json = await response.Content.ReadFromJsonAsync<AuthResponse>(s_serializerOptions).ConfigureAwait(false);
 
             return (authTime, json ?? throw new InvalidOperationException("Bad authentication response."));
         }
 
-        public ValueTask<(DateTimeOffset authTime, AuthResult authResponse)> RefreshIfRequiredAsync(DateTimeOffset authTime, AuthResult authResponse, int epsilonSeconds = 60)
+        public ValueTask<(DateTimeOffset authTime, AuthResponse authResponse)> RefreshIfRequiredAsync(DateTimeOffset authTime, AuthResponse authResponse, int epsilonSeconds = 60)
         {
-            if ((DateTimeOffset.UtcNow - authTime).TotalSeconds < authResponse.Response.ExpiresIn - epsilonSeconds)
+            if ((DateTimeOffset.UtcNow - authTime).TotalSeconds < authResponse.ExpiresIn - epsilonSeconds)
                 return new((authTime, authResponse));
 
-            return new(AuthAsync(authResponse.Response.RefreshToken));
+            return new(AuthAsync(authResponse.RefreshToken));
         }
 
         private async Task<T> InvokeApiAsync<T>(

@@ -27,10 +27,10 @@ namespace Meowtrix.PixivApi.ManualTest
                 Console.Write("Saved refresh token:");
                 string? refreshToken = Console.ReadLine();
 
-                Response response;
+                AuthResponse response;
                 if (!string.IsNullOrWhiteSpace(refreshToken))
                 {
-                    response = (await client.AuthAsync(refreshToken)).authResponse.Response;
+                    response = (await client.AuthAsync(refreshToken)).authResponse;
                 }
                 else
                 {
@@ -38,7 +38,7 @@ namespace Meowtrix.PixivApi.ManualTest
                     string username = Console.ReadLine()!;
                     Console.Write("Password:");
                     string password = Console.ReadLine()!;
-                    response = (await client.AuthAsync(username, password)).authResponse.Response;
+                    response = (await client.AuthAsync(username, password)).authResponse;
                 }
                 authToken = response.AccessToken;
                 Console.WriteLine($"Access token: {response.AccessToken}");
@@ -81,13 +81,13 @@ namespace Meowtrix.PixivApi.ManualTest
             var trendingTags = await client.GetTrendingTagsIllustAsync(authToken: authToken);
             Debugger.Break();
 
-            Console.WriteLine("Adding bookmark");
-            await client.AddIllustBookmarkAsync(83492606, authToken: authToken);
-            Debugger.Break();
+            //Console.WriteLine("Adding bookmark");
+            //await client.AddIllustBookmarkAsync(83492606, authToken: authToken);
+            //Debugger.Break();
 
-            Console.WriteLine("Deleting bookmark");
-            await client.DeleteIllustBookmarkAsync(83492606, authToken: authToken);
-            Debugger.Break();
+            //Console.WriteLine("Deleting bookmark");
+            //await client.DeleteIllustBookmarkAsync(83492606, authToken: authToken);
+            //Debugger.Break();
 
             Console.WriteLine("Begin search");
             var search = await client.SearchIllustsAsync("女の子", authToken: authToken);

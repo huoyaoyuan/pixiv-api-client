@@ -1,51 +1,59 @@
 ﻿using System;
 using System.Collections.Immutable;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
-#nullable disable
 #pragma warning disable IDE1006 // Naming style
 
 namespace Meowtrix.PixivApi.Json
 {
-    public record AuthResult(Response Response);
-
-    public record Response(
+    public sealed record AuthResponse(
         string AccessToken,
         int ExpiresIn,
         string TokenType,
         string Scope,
         string RefreshToken,
-        AuthUser User,
-        string DeviceToken);
+        AuthUser User);
 
-    public record AuthUser(
-        ProfileImageUrls ProfileImageUrls,
+    public sealed record AuthUser(
+        AuthProfileImageUrls ProfileImageUrls,
         string Id,
         string Name,
         string Account,
-        string MainAddress,
+        string MailAddress,
         bool IsPremium,
         int XRestrict,
-        bool IsMainAuthorized);
+        bool IsMailAuthorized);
 
-    public record ProfileImageUrls(Uri Px16x16, Uri Px50x50, Uri Px170x170);
+#pragma warning disable CA1801, IDE0060 // false positive
+    public sealed record AuthProfileImageUrls(
+        [property: JsonPropertyName("px_16x16")]
+        Uri PixelSize16,
+        [property: JsonPropertyName("px_50x50")]
+        Uri PixelSize50,
+        [property: JsonPropertyName("px_170x170")]
+        Uri PixelSize170);
+#pragma warning restore CA1801
 
-    public record UserDetail(
-        IllustUser User,
+    public sealed record UserDetail(
+        UserSummary User,
         UserProfile Profile,
         ProfilePublicity ProfilePublicity,
         Workspace Workspace);
 
-    public record IllustUser(
+    public sealed record UserSummary(
         int Id,
         string Name,
         string Account,
-        ProfileImageUrls ProfileImageUrls,
+        UserSummary.ImageUrls ProfileImageUrls,
         bool IsFollowed,
-        string Comment);
+        string Comment)
+    {
+        public sealed record ImageUrls(Uri medium);
+    }
 
-    public record UserProfile(
-        JsonElement WebPage,
+    public sealed record UserProfile(
+        Uri? WebPage,
         string Gender,
         string Birth,
         string BirthDay,
@@ -63,14 +71,14 @@ namespace Meowtrix.PixivApi.Json
         int TotalIllustBookmarksPublic,
         int TotalIllustSeries,
         int TotalNovelSeries,
-        Uri BackgroundImageUrl,
-        string TwitterAccount,
-        Uri TwitterUrl,
-        Uri PawooUrl,
+        Uri? BackgroundImageUrl,
+        string? TwitterAccount,
+        Uri? TwitterUrl,
+        Uri? PawooUrl,
         bool IsPremium,
         bool IsUsingCustomProfileImage);
 
-    public record ProfilePublicity(
+    public sealed record ProfilePublicity(
         string Gender,
         string Region,
         string BirthDay,
@@ -78,7 +86,7 @@ namespace Meowtrix.PixivApi.Json
         string Job,
         bool Pawoo);
 
-    public record Workspace(
+    public sealed record Workspace(
         string Pc,
         string Monitor,
         string Tool,
@@ -91,18 +99,18 @@ namespace Meowtrix.PixivApi.Json
         string Desk,
         string Chair,
         string Comment,
-        Uri WorkspaceImageUrl);
+        Uri? WorkspaceImageUrl);
 
-    public record UserIllusts(ImmutableArray<UserIllustPreview> Illusts, Uri NextUrl);
+    public sealed record UserIllusts(ImmutableArray<UserIllustPreview> Illusts, Uri? NextUrl);
 
-    public record UserIllustPreview(
+    public sealed record UserIllustPreview(
         int Id,
         string Title,
         string Type,
-        SizedImageUrls ImageUrls,
+        UserIllustPreview.PreviewImageUrls ImageUrls,
         string Caption,
         int Restrict,
-        IllustUser User,
+        UserSummary User,
         ImmutableArray<IllustTag> Tags,
         ImmutableArray<string> Tools,
         DateTimeOffset CreateDate,
@@ -121,62 +129,67 @@ namespace Meowtrix.PixivApi.Json
         bool IsMuted,
         int TotalComments)
     {
-        public record IllustSeries(int Id, string Title);
+        public sealed record IllustSeries(int Id, string Title);
 
-        public record MetaSingle(Uri OriginalImageUrl);
+        public sealed record MetaSingle(Uri OriginalImageUrl);
 
-        public record MetaPage(SizedImageUrls ImageUrls);
+        public sealed record MetaPage(MetaPageImageUrls ImageUrls);
+
+        public record PreviewImageUrls(
+            Uri SquareMedium,
+            Uri Medium,
+            Uri Large);
+
+        public record MetaPageImageUrls(
+            Uri SquareMedium,
+            Uri Medium,
+            Uri Large,
+            Uri Original);
     }
 
-    public record SizedImageUrls(
-        Uri SquareMedium,
-        Uri Medium,
-        Uri Large,
-        Uri Original);
+    public sealed record IllustTag(string Name, string? TranslatedName);
 
-    public record IllustTag(string Name, string TranslatedName);
+    public sealed record IllustComments(int TotalComments, ImmutableArray<IllustComment> Comments, Uri NextUri);
 
-    public record IllustComments(int TotalComments, ImmutableArray<IllustComment> Comments, Uri NextUri);
-
-    public record IllustComment(
+    public sealed record IllustComment(
         int Id,
         string Comment,
         DateTimeOffset Date,
-        IllustUser User,
+        UserSummary User,
         bool HasReplies,
         IllustComment ParentComment);
 
-    public record PostIllustCommentResult(IllustComment Comment);
+    public sealed record PostIllustCommentResult(IllustComment Comment);
 
-    public record RecommendedIllusts(
+    public sealed record RecommendedIllusts(
         ImmutableArray<UserIllustPreview> Illusts,
         ImmutableArray<object> RankingIllusts,
         bool ContestExists,
         JsonElement PrivacyPolicy,
-        Uri NextUrl);
+        Uri? NextUrl);
 
-    public record TrendingTagsIllust(ImmutableArray<TrendTag> TrendTags);
+    public sealed record TrendingTagsIllust(ImmutableArray<TrendTag> TrendTags);
 
-    public record TrendTag(string Tag, string TranslatedName, UserIllustPreview Illust);
+    public sealed record TrendTag(string Tag, string? TranslatedName, UserIllustPreview Illust);
 
-    public record SearchIllustResult(ImmutableArray<UserIllustPreview> Illusts, Uri NextUrl, int SearchSpanLimit);
+    public sealed record SearchIllustResult(ImmutableArray<UserIllustPreview> Illusts, Uri? NextUrl, int SearchSpanLimit);
 
-    public record UserBookmarkTags(ImmutableArray<JsonElement> BookmarkTags, Uri NextUrl);
+    public sealed record UserBookmarkTags(ImmutableArray<object> BookmarkTags, Uri? NextUrl);
 
-    public record UserFollowList(ImmutableArray<UserPreview> UserPreviews, Uri NextUrl);
+    public sealed record UserFollowList(ImmutableArray<UserPreview> UserPreviews, Uri? NextUrl);
 
-    public record UserPreview(
-        IllustUser User,
+    public sealed record UserPreview(
+        UserSummary User,
         ImmutableArray<UserIllustPreview> Illusts,
-        ImmutableArray<JsonElement> Novels,
+        ImmutableArray<object> Novels,
         bool IsMuted);
 
-    public record MotionPicMetadata(MotionPicMetadata.MetadataClass UgoiraMetadata)
+    public sealed record MotionPicMetadata(MotionPicMetadata.MetadataClass UgoiraMetadata)
     {
-        public record MetadataClass(Urls ZipUrls, ImmutableArray<Frame> Frames);
+        public sealed record MetadataClass(Urls ZipUrls, ImmutableArray<Frame> Frames);
 
-        public record Urls(Uri Medium);
+        public sealed record Urls(Uri Medium);
 
-        public record Frame(string File, int Delay);
+        public sealed record Frame(string File, int Delay);
     }
 }
