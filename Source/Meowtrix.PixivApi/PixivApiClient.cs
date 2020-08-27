@@ -63,7 +63,7 @@ namespace Meowtrix.PixivApi
         private const string HashSecret = "28c1fdd170a5204386cb1313c7077b34f83e4aaf4aa829ce78c231e05b0bae2c";
         private const string AuthUrl = "https://oauth.secure.pixiv.net/auth/token";
 
-        public Task<(DateTimeOffset authTime, AuthResponse authResponse)> AuthAsync(string username, string password)
+        public async Task<(DateTimeOffset authTime, AuthResponse authResponse)> AuthAsync(string username, string password)
         {
             DateTimeOffset authTime = DateTimeOffset.Now;
             string time = authTime.ToString("yyyy-MM-ddTHH:mm:ssK", null);
@@ -108,10 +108,10 @@ namespace Meowtrix.PixivApi
                 }
             };
 
-            return AuthAsync(authTime, request);
+            return (authTime, await AuthAsync(request).ConfigureAwait(false));
         }
 
-        public Task<(DateTimeOffset authTime, AuthResponse authResponse)> AuthAsync(string refreshToken)
+        public async Task<(DateTimeOffset authTime, AuthResponse authResponse)> AuthAsync(string refreshToken)
         {
             DateTimeOffset authTime = DateTimeOffset.Now;
 
@@ -131,10 +131,10 @@ namespace Meowtrix.PixivApi
                 }
             };
 
-            return AuthAsync(authTime, request);
+            return (authTime, await AuthAsync(request).ConfigureAwait(false));
         }
 
-        private async Task<(DateTimeOffset authTime, AuthResponse authResponse)> AuthAsync(DateTimeOffset authTime, HttpRequestMessage request)
+        private async Task<AuthResponse> AuthAsync(HttpRequestMessage request)
         {
             using var response = await _httpClient.SendAsync(request).ConfigureAwait(false);
 
@@ -149,7 +149,7 @@ namespace Meowtrix.PixivApi
 
             var json = await response.Content.ReadFromJsonAsync<AuthResponse>(s_serializerOptions).ConfigureAwait(false);
 
-            return (authTime, json ?? throw new InvalidOperationException("The api responses a null object."));
+            return json ?? throw new InvalidOperationException("The api responses a null object.");
         }
 
         public ValueTask<(DateTimeOffset authTime, AuthResponse authResponse)> RefreshIfRequiredAsync(DateTimeOffset authTime, AuthResponse authResponse, int epsilonSeconds = 60)
