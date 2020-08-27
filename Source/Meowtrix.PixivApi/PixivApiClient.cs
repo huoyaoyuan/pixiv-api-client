@@ -353,12 +353,12 @@ namespace Meowtrix.PixivApi
         }
 
         public Task<UserIllusts> GetIllustRankingAsync(
-            string mode = "day",
+            IllustRankingMode mode = IllustRankingMode.Day,
             DateTime? date = null,
             int offset = 0,
             string? authToken = null)
         {
-            string url = $"https://app-api.pixiv.net/v1/illust/ranking?mode={HttpUtility.UrlEncode(mode)}"
+            string url = $"https://app-api.pixiv.net/v1/illust/ranking?mode={mode.ToQueryString()}"
                 + $"&offset={offset}";
             if (date is DateTime d)
                 url += $"&date={d:yyyy-MM-dd}";
