@@ -59,10 +59,8 @@ namespace Meowtrix.PixivApi
 
         public async Task<(DateTimeOffset authTime, AuthResponse authResponse)> AuthAsync(string username, string password)
         {
-            DateTimeOffset authTime = DateTimeOffset.UtcNow;
-#pragma warning disable CA1305 // 指定 IFormatProvider
-            string time = authTime.UtcDateTime.ToString("yyyy-MM-ddTHH:mm:ss+00:00");
-#pragma warning restore CA1305 // 指定 IFormatProvider
+            DateTimeOffset authTime = DateTimeOffset.Now;
+            string time = authTime.ToString("yyyy-MM-ddTHH:mm:ssK", null);
 
             static string MD5Hash(string input)
             {
@@ -80,9 +78,7 @@ namespace Meowtrix.PixivApi
 #else
                 var sb = new StringBuilder(bytes.Length * 2);
                 foreach (byte b in bytes)
-#pragma warning disable CA1305 // 指定 IFormatProvider
-                    sb.Append(b.ToString("x2"));
-#pragma warning restore CA1305 // 指定 IFormatProvider
+                    sb.Append(b.ToString("x2", null));
                 return sb.ToString();
 #endif
             }
@@ -106,15 +102,12 @@ namespace Meowtrix.PixivApi
                 }
             };
 
-            using var response = await _httpClient.SendAsync(request).ConfigureAwait(false);
-            var json = await response.Content.ReadFromJsonAsync<AuthResponse>(s_serializerOptions).ConfigureAwait(false);
-
-            return (authTime, json ?? throw new InvalidOperationException("Bad authentication response."));
+            return (authTime, await SendAndVerifyAsync<AuthResponse>(request).ConfigureAwait(false));
         }
 
         public async Task<(DateTimeOffset authTime, AuthResponse authResponse)> AuthAsync(string refreshToken)
         {
-            DateTimeOffset authTime = DateTimeOffset.UtcNow;
+            DateTimeOffset authTime = DateTimeOffset.Now;
 
             using var request = new HttpRequestMessage(HttpMethod.Post, AuthUrl)
             {
@@ -132,10 +125,7 @@ namespace Meowtrix.PixivApi
                 }
             };
 
-            using var response = await _httpClient.SendAsync(request).ConfigureAwait(false);
-            var json = await response.Content.ReadFromJsonAsync<AuthResponse>(s_serializerOptions).ConfigureAwait(false);
-
-            return (authTime, json ?? throw new InvalidOperationException("Bad authentication response."));
+            return (authTime, await SendAndVerifyAsync<AuthResponse>(request).ConfigureAwait(false));
         }
 
         public ValueTask<(DateTimeOffset authTime, AuthResponse authResponse)> RefreshIfRequiredAsync(DateTimeOffset authTime, AuthResponse authResponse, int epsilonSeconds = 60)
@@ -146,8 +136,21 @@ namespace Meowtrix.PixivApi
             return new(AuthAsync(authResponse.RefreshToken));
         }
 
-        private async Task<T> InvokeApiAsync<T>(
+        public Task<T> InvokeApiAsync<T>(
             string url,
+            HttpMethod method,
+            string? authToken = null,
+            IEnumerable<KeyValuePair<string, string>>? additionalHeaders = null,
+            HttpContent? body = null)
+            => InvokeApiAsync<T>(
+                new Uri(url),
+                method,
+                authToken,
+                additionalHeaders,
+                body);
+
+        public Task<T> InvokeApiAsync<T>(
+            Uri url,
             HttpMethod method,
             string? authToken = null,
             IEnumerable<KeyValuePair<string, string>>? additionalHeaders = null,
@@ -171,11 +174,25 @@ namespace Meowtrix.PixivApi
                 foreach (var header in additionalHeaders)
                     request.Headers.Add(header.Key, header.Value);
 
+            return SendAndVerifyAsync<T>(request);
+        }
+
+        private async Task<T> SendAndVerifyAsync<T>(HttpRequestMessage request)
+        {
             using var response = await _httpClient.SendAsync(request).ConfigureAwait(false);
+
+            if (response.StatusCode == HttpStatusCode.BadRequest)
+            {
+                string original = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                var error = JsonSerializer.Deserialize<PixivErrorMessage>(original, s_serializerOptions);
+                throw new PixivApiException(original, error, error?.Errors?.System?.Message ?? original);
+            }
+
             response.EnsureSuccessStatusCode();
+
             var json = await response.Content.ReadFromJsonAsync<T>(s_serializerOptions).ConfigureAwait(false);
 
-            return json ?? throw new InvalidOperationException("Bad api response.");
+            return json ?? throw new InvalidOperationException("The api responses a null object.");
         }
 
         public Task<UserDetail> GetUserDetailAsync(
