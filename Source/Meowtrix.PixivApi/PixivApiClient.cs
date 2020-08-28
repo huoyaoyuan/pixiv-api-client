@@ -382,14 +382,23 @@ namespace Meowtrix.PixivApi
             string word,
             IllustSearchTarget searchTarget = IllustSearchTarget.ExactTag,
             IllustSortMode sort = IllustSortMode.Latest,
-            string? duration = null,
+            int? maxBookmarkCount = null,
+            int? minBookmarkCount = null,
+            DateTime? startDate = null,
+            DateTime? endDate = null,
             int offset = 0,
             string? authToken = null)
         {
             string url = $"https://app-api.pixiv.net/v1/search/illust?word={HttpUtility.UrlEncode(word)}&search_target={searchTarget.ToQueryString()}"
                 + $"&sort={sort.ToQueryString()}&offset={offset}";
-            if (duration is not null)
-                url += $"&duration={duration}";
+            if (maxBookmarkCount is int max)
+                url += $"&bookmark_num_max={max}";
+            if (minBookmarkCount is int min)
+                url += $"&bookmark_num_min={min}";
+            if (startDate is not null)
+                url += $"&start_date={startDate:yyyy-MM-dd}";
+            if (endDate is not null)
+                url += $"&end_date={endDate:yyyy-MM-dd}";
 
             return InvokeApiAsync<SearchIllustResult>(
                 url,
