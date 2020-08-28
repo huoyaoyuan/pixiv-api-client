@@ -380,14 +380,14 @@ namespace Meowtrix.PixivApi
 
         public Task<SearchIllustResult> SearchIllustsAsync(
             string word,
-            string searchTarget = "partial_match_for_tags",
-            string sort = "date_desc",
+            IllustSearchTarget searchTarget = IllustSearchTarget.ExactTag,
+            IllustSortMode sort = IllustSortMode.Latest,
             string? duration = null,
             int offset = 0,
             string? authToken = null)
         {
-            string url = $"https://app-api.pixiv.net/v1/search/illust?word={HttpUtility.UrlEncode(word)}&search_target={searchTarget}"
-                + $"&sort={sort}&offset={offset}";
+            string url = $"https://app-api.pixiv.net/v1/search/illust?word={HttpUtility.UrlEncode(word)}&search_target={searchTarget.ToQueryString()}"
+                + $"&sort={sort.ToQueryString()}&offset={offset}";
             if (duration is not null)
                 url += $"&duration={duration}";
 
