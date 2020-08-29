@@ -7,6 +7,7 @@ using System.Net.Http.Json;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Web;
 using Meowtrix.PixivApi.Json;
@@ -23,7 +24,11 @@ namespace Meowtrix.PixivApi
     {
         private static readonly JsonSerializerOptions s_serializerOptions = new JsonSerializerOptions
         {
-            PropertyNamingPolicy = new UnderscoreCaseNamingPolicy()
+            PropertyNamingPolicy = new UnderscoreCaseNamingPolicy(),
+            Converters =
+            {
+                new JsonStringEnumConverter(new UnderscoreCaseNamingPolicy())
+            }
         };
 
         #region Constructors
@@ -226,25 +231,25 @@ namespace Meowtrix.PixivApi
 
         public Task<UserIllusts> GetUserIllustsAsync(
             int userId,
-            string illustType = "illust",
+            UserIllustType illustType = UserIllustType.Illustrations,
             int offset = 0,
             string? authToken = null)
         {
             return InvokeApiAsync<UserIllusts>(
                 $"https://app-api.pixiv.net/v1/user/illusts?user_id={userId}"
-                + $"&type={HttpUtility.UrlEncode(illustType)}&offset={offset}",
+                + $"&type={illustType.ToQueryString()}&offset={offset}",
                 HttpMethod.Get,
                 authToken: authToken);
         }
 
         public Task<UserIllusts> GetUserBookmarkIllustsAsync(
             int userId,
-            string restrict = "public",
+            Visibility restrict = Visibility.Public,
             int? maxBookmarkId = null,
             string? tag = null,
             string? authToken = null)
         {
-            string url = $"https://app-api.pixiv.net/v1/user/bookmarks/illust?user_id={userId}&restrict={HttpUtility.UrlEncode(restrict)}";
+            string url = $"https://app-api.pixiv.net/v1/user/bookmarks/illust?user_id={userId}&restrict={restrict.ToQueryString()}";
             if (maxBookmarkId != null)
                 url += $"&max_bookmark_id={maxBookmarkId}";
             if (!string.IsNullOrWhiteSpace(tag))
@@ -256,12 +261,12 @@ namespace Meowtrix.PixivApi
         }
 
         public Task<UserIllusts> GetIllustFollowAsync(
-            string restrict = "public",
+            Visibility restrict = Visibility.Public,
             int offset = 0,
             string? authToken = null)
         {
             return InvokeApiAsync<UserIllusts>(
-                $"https://app-api.pixiv.net/v2/illust/follow?restrict={HttpUtility.UrlEncode(restrict)}&offset={offset}",
+                $"https://app-api.pixiv.net/v2/illust/follow?restrict={restrict.ToQueryString()}&offset={offset}",
                 HttpMethod.Get,
                 authToken);
         }
@@ -317,7 +322,7 @@ namespace Meowtrix.PixivApi
         }
 
         public Task<RecommendedIllusts> GetRecommendedIllustsAsync(
-            string contentType = "illust",
+            UserIllustType contentType = UserIllustType.Illustrations,
             bool includeRankingLabel = true,
             int? maxBookmarkIdForRecommended = null,
             int? minBookmarkIdForRecentIllust = null,
@@ -330,7 +335,7 @@ namespace Meowtrix.PixivApi
             string url = authToken is null
                 ? "https://app-api.pixiv.net/v1/illust/recommended-nologin"
                 : "https://app-api.pixiv.net/v1/illust/recommended";
-            url += $"?content_type={HttpUtility.UrlEncode(contentType)}"
+            url += $"?content_type={contentType.ToQueryString()}"
                 + $"&offset={offset}"
                 + $"&include_ranking_label={(includeRankingLabel ? "true" : "false")}"
                 + $"&include_ranking_illusts={(includeRankingIllusts ? "true" : "false")}"
@@ -408,14 +413,14 @@ namespace Meowtrix.PixivApi
 
         public Task AddIllustBookmarkAsync(
             int illustId,
-            string restrict = "public",
+            Visibility restrict = Visibility.Public,
             IEnumerable<string>? tags = null,
             string? authToken = null)
         {
             var data = new Dictionary<string, string>
             {
                 ["illust_id"] = illustId.ToString(NumberFormatInfo.InvariantInfo),
-                ["restrict"] = restrict
+                ["restrict"] = restrict.ToQueryString()
             };
             if (tags != null)
 #if NETCOREAPP
@@ -446,43 +451,43 @@ namespace Meowtrix.PixivApi
         }
 
         public Task<UserBookmarkTags> GetUserBookmarkTagsIllustAsync(
-            string restrict = "public",
+            Visibility restrict = Visibility.Public,
             int offset = 0,
             string? authToken = null)
         {
             return InvokeApiAsync<UserBookmarkTags>(
-                $"https://app-api.pixiv.net/v1/user/bookmark-tags/illust?restrict={HttpUtility.UrlEncode(restrict)}&offset={offset}",
+                $"https://app-api.pixiv.net/v1/user/bookmark-tags/illust?restrict={restrict.ToQueryString()}&offset={offset}",
                 HttpMethod.Get,
                 authToken);
         }
 
         public Task<UserFollowList> GetUserFollowingsAsync(
             int userId,
-            string restrict = "public",
+            Visibility restrict = Visibility.Public,
             int offset = 0,
             string? authToken = null)
         {
             return InvokeApiAsync<UserFollowList>(
-                $"https://app-api.pixiv.net/v1/user/following?user_id={userId}&restrict={HttpUtility.UrlEncode(restrict)}&offset={offset}",
+                $"https://app-api.pixiv.net/v1/user/following?user_id={userId}&restrict={restrict.ToQueryString()}&offset={offset}",
                 HttpMethod.Get,
                 authToken);
         }
 
         public Task<UserFollowList> GetUserFollowersAsync(
             int userId,
-            string restrict = "public",
+            Visibility restrict = Visibility.Public,
             int offset = 0,
             string? authToken = null)
         {
             return InvokeApiAsync<UserFollowList>(
-                $"https://app-api.pixiv.net/v1/user/follower?user_id={userId}&restrict={HttpUtility.UrlEncode(restrict)}&offset={offset}",
+                $"https://app-api.pixiv.net/v1/user/follower?user_id={userId}&restrict={restrict.ToQueryString()}&offset={offset}",
                 HttpMethod.Get,
                 authToken);
         }
 
         public Task AddUserFollowAsync(
             int userId,
-            string restrict = "public",
+            Visibility restrict = Visibility.Public,
             string? authToken = null)
         {
             return InvokeApiAsync<object>(
@@ -492,13 +497,13 @@ namespace Meowtrix.PixivApi
                 body: new FormUrlEncodedContent(new Dictionary<string, string>
                 {
                     ["user_id"] = userId.ToString(NumberFormatInfo.InvariantInfo),
-                    ["restrict"] = restrict
+                    ["restrict"] = restrict.ToQueryString()
                 }!));
         }
 
         public Task DeleteUserFollowAsync(
             int userId,
-            string restrict = "public",
+            Visibility restrict = Visibility.Public,
             string? authToken = null)
         {
             return InvokeApiAsync<object>(
@@ -508,7 +513,7 @@ namespace Meowtrix.PixivApi
                 body: new FormUrlEncodedContent(new Dictionary<string, string>
                 {
                     ["user_id"] = userId.ToString(NumberFormatInfo.InvariantInfo),
-                    ["restrict"] = restrict
+                    ["restrict"] = restrict.ToQueryString()
                 }!));
         }
 
