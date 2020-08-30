@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
@@ -550,6 +551,22 @@ namespace Meowtrix.PixivApi
                 $"https://app-api.pixiv.net/v1/ugoira/metadata?illust_id={illustId}",
                 HttpMethod.Get,
                 authToken);
+        }
+
+        public async Task<Stream> GetImageAsync(Uri imageUri)
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Get, imageUri)
+            {
+                Headers =
+                {
+                    Referrer = new Uri("https://app-api.pixiv.net/")
+                }
+            };
+
+            // Don't dispose
+            var response = await _httpClient.SendAsync(request).ConfigureAwait(false);
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
         }
     }
 }
