@@ -16,10 +16,11 @@ using Meowtrix.PixivApi.Json;
 namespace Meowtrix.PixivApi
 {
     /// <summary>
-    /// A state-less type to provide direct API call to Pixiv.
+    /// A stateless type to provide direct API call to Pixiv.
     /// </summary>
     /// <remarks>
-    /// This type is state-less. Every call must be performed with access token.
+    /// This type is stateless. Every call must be performed with access token.
+    /// For stateful usage, please use <see cref="PixivClient"/> instead.
     /// </remarks>
     public sealed class PixivApiClient : IDisposable
     {
