@@ -569,5 +569,14 @@ namespace Meowtrix.PixivApi
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
         }
+
+        public async ValueTask<T?> GetNextPageAsync<T>(T previous, string? authToken = null)
+            where T : class, IHasNextPage
+        {
+            if (previous.NextUrl is null)
+                return null;
+
+            return await InvokeApiAsync<T>(previous.NextUrl, HttpMethod.Get, authToken).ConfigureAwait(false);
+        }
     }
 }

@@ -101,7 +101,8 @@ namespace Meowtrix.PixivApi.Json
         string Comment,
         Uri? WorkspaceImageUrl);
 
-    public sealed record UserIllusts(ImmutableArray<UserIllustPreview> Illusts, Uri? NextUrl);
+    public sealed record UserIllusts(ImmutableArray<UserIllustPreview> Illusts, Uri? NextUrl)
+        : IHasNextPage;
 
     public sealed record UserIllustPreview(
         int Id,
@@ -149,7 +150,8 @@ namespace Meowtrix.PixivApi.Json
 
     public sealed record IllustTag(string Name, string? TranslatedName);
 
-    public sealed record IllustComments(int TotalComments, ImmutableArray<IllustComment> Comments, Uri? NextUrl);
+    public sealed record IllustComments(int TotalComments, ImmutableArray<IllustComment> Comments, Uri? NextUrl)
+        : IHasNextPage;
 
     public sealed record IllustComment(
         int Id,
@@ -166,17 +168,21 @@ namespace Meowtrix.PixivApi.Json
         ImmutableArray<object> RankingIllusts,
         bool ContestExists,
         JsonElement PrivacyPolicy,
-        Uri? NextUrl);
+        Uri? NextUrl)
+        : IHasNextPage;
 
     public sealed record TrendingTagsIllust(ImmutableArray<TrendTag> TrendTags);
 
     public sealed record TrendTag(string Tag, string? TranslatedName, UserIllustPreview Illust);
 
-    public sealed record SearchIllustResult(ImmutableArray<UserIllustPreview> Illusts, Uri? NextUrl, int SearchSpanLimit);
+    public sealed record SearchIllustResult(ImmutableArray<UserIllustPreview> Illusts, Uri? NextUrl, int SearchSpanLimit)
+        : IHasNextPage;
 
-    public sealed record UserBookmarkTags(ImmutableArray<object> BookmarkTags, Uri? NextUrl);
+    public sealed record UserBookmarkTags(ImmutableArray<object> BookmarkTags, Uri? NextUrl)
+        : IHasNextPage;
 
-    public sealed record UserFollowList(ImmutableArray<UserPreview> UserPreviews, Uri? NextUrl);
+    public sealed record UserFollowList(ImmutableArray<UserPreview> UserPreviews, Uri? NextUrl)
+        : IHasNextPage;
 
     public sealed record UserPreview(
         UserSummary User,
