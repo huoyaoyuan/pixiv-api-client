@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Meowtrix.PixivApi.Json;
+using Meowtrix.PixivApi.Models;
 
 namespace Meowtrix.PixivApi
 {
@@ -15,21 +18,21 @@ namespace Meowtrix.PixivApi
     /// </remarks>
     public sealed class PixivClient : IDisposable
     {
-        private PixivApiClient _api;
+        internal PixivApiClient Api { get; private set; }
 
         #region Construction and disposal
         public PixivClient(bool useDefaultProxy = true)
-            => _api = new PixivApiClient(useDefaultProxy);
+            => Api = new PixivApiClient(useDefaultProxy);
 
         public PixivClient(IWebProxy? proxy)
         {
-            _api = proxy is null
+            Api = proxy is null
                 ? new PixivApiClient(false)
                 : new PixivApiClient(proxy);
         }
 
         public PixivClient(HttpMessageHandler handler)
-            => _api = new PixivApiClient(handler);
+            => Api = new PixivApiClient(handler);
 
         public void SetProxy(IWebProxy? proxy)
         {
@@ -46,13 +49,13 @@ namespace Meowtrix.PixivApi
 
         private void ChangeApiClient(PixivApiClient api)
         {
-            _api.Dispose();
-            _api = api;
+            Api.Dispose();
+            Api = api;
         }
 
         public void Dispose()
         {
-            _api.Dispose();
+            Api.Dispose();
             _authLock.Dispose();
         }
         #endregion
@@ -65,20 +68,36 @@ namespace Meowtrix.PixivApi
         private string? _refreshToken;
 
 #if NET5_0
-        [System.Diagnostics.CodeAnalysis.MemberNotNullWhen(true, nameof(_accessToken), nameof(_refreshToken))]
+        [System.Diagnostics.CodeAnalysis.MemberNotNullWhen(true,
+            nameof(_accessToken),
+            nameof(_refreshToken),
+            nameof(CurrentUser))]
 #endif
-        public bool IsLogin => _accessToken is not null && _refreshToken is not null;
+        public bool IsLogin
+        {
+            get
+            {
+                if (_accessToken is not null)
+                {
+                    Debug.Assert(CurrentUser is not null);
+                    Debug.Assert(_refreshToken is not null);
+                    return true;
+                }
 
-        public async Task LoginAsync(string username, string password)
+                return false;
+            }
+        }
+
+        public async Task<string> LoginAsync(string username, string password)
         {
             try
             {
                 _authLock.EnterWriteLock();
 
-                var (time, response) = await _api.AuthAsync(username, password).ConfigureAwait(false);
-                _accessToken = response.AccessToken;
-                _refreshToken = response.RefreshToken;
-                _authValidateUntil = time.AddSeconds(response.ExpiresIn);
+                var (time, response) = await Api.AuthAsync(username, password).ConfigureAwait(false);
+                SetLogin(time, response);
+
+                return response.RefreshToken;
             }
             finally
             {
@@ -86,16 +105,16 @@ namespace Meowtrix.PixivApi
             }
         }
 
-        public async Task LoginAsync(string refreshToken)
+        public async Task<string> LoginAsync(string refreshToken)
         {
             try
             {
                 _authLock.EnterWriteLock();
 
-                var (time, response) = await _api.AuthAsync(refreshToken).ConfigureAwait(false);
-                _accessToken = response.AccessToken;
-                _refreshToken = response.RefreshToken;
-                _authValidateUntil = time.AddSeconds(response.ExpiresIn);
+                var (time, response) = await Api.AuthAsync(refreshToken).ConfigureAwait(false);
+                SetLogin(time, response);
+
+                return response.RefreshToken;
             }
             finally
             {
@@ -122,12 +141,10 @@ namespace Meowtrix.PixivApi
 
                         if ((_authValidateUntil - DateTimeOffset.Now).TotalSeconds < epsilonTimeSeconds)
                         {
-                            var (time, response) = await _api.AuthAsync(_refreshToken).ConfigureAwait(false);
-                            _accessToken = response.AccessToken;
-                            _refreshToken = response.RefreshToken;
-                            _authValidateUntil = time.AddSeconds(response.ExpiresIn);
+                            var (time, response) = await Api.AuthAsync(_refreshToken).ConfigureAwait(false);
+                            SetLogin(time, response);
 
-                            return _accessToken;
+                            return response.AccessToken;
                         }
                     }
                     finally
@@ -143,6 +160,22 @@ namespace Meowtrix.PixivApi
 
             return _accessToken;
         }
+
+        private void SetLogin(DateTimeOffset authTime, AuthResponse response)
+        {
+            _accessToken = response.AccessToken;
+            _refreshToken = response.RefreshToken;
+            _authValidateUntil = authTime.AddSeconds(response.ExpiresIn);
+
+            CurrentUser = new LoginUser(this, response.User);
+        }
         #endregion
+
+        public LoginUser? CurrentUser { get; private set; }
+
+#if NET5_0
+        [System.Diagnostics.CodeAnalysis.MemberNotNull(nameof(CurrentUser))]
+#endif
+        public int CurrentUserId => CurrentUser?.Id ?? throw new InvalidOperationException("No user login.");
     }
 }
