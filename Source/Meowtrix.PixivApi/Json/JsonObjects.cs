@@ -107,7 +107,7 @@ namespace Meowtrix.PixivApi.Json
     public sealed record UserIllustPreview(
         int Id,
         string Title,
-        string Type,
+        UserIllustType Type,
         UserIllustPreview.PreviewImageUrls ImageUrls,
         string Caption,
         int Restrict,

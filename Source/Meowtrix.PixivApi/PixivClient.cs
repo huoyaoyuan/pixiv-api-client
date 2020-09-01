@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
@@ -122,7 +123,11 @@ namespace Meowtrix.PixivApi
             }
         }
 
-        private async ValueTask<string> CheckValidAccessToken(int epsilonTimeSeconds = 60)
+
+#if NET5_0
+        [System.Diagnostics.CodeAnalysis.MemberNotNull(nameof(CurrentUser))]
+#endif
+        internal async ValueTask<string> CheckValidAccessToken(int epsilonTimeSeconds = 60)
         {
             if (!IsLogin)
             {
@@ -177,5 +182,20 @@ namespace Meowtrix.PixivApi
         [System.Diagnostics.CodeAnalysis.MemberNotNull(nameof(CurrentUser))]
 #endif
         public int CurrentUserId => CurrentUser?.Id ?? throw new InvalidOperationException("No user login.");
+
+        public async IAsyncEnumerable<Illust> GetMyBookmarksAsync(Visibility visibility = Visibility.Public)
+        {
+            var response = await Api.GetUserBookmarkIllustsAsync(CurrentUserId, visibility,
+                authToken: await CheckValidAccessToken().ConfigureAwait(false)).ConfigureAwait(false);
+
+            while (response is not null)
+            {
+                foreach (var r in response.Illusts)
+                    yield return new Illust(this, r);
+
+                response = await Api.GetNextPageAsync(response,
+                    await CheckValidAccessToken().ConfigureAwait(false)).ConfigureAwait(false);
+            }
+        }
     }
 }
