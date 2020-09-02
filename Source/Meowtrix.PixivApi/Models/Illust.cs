@@ -26,6 +26,21 @@ namespace Meowtrix.PixivApi.Models
             TotalView = api.TotalView;
             TotalBookmarks = api.TotalBookmarks;
             IsBookmarked = api.IsBookmarked;
+
+            if (api.PageCount == 1)
+            {
+                if (api.MetaSinglePage.OriginalImageUrl is null)
+                    throw new InvalidOperationException("Corrupt api response");
+
+                Pages = new[] { new IllustPage(_client, api.ImageUrls, api.MetaSinglePage.OriginalImageUrl) };
+            }
+            else
+            {
+                if (api.MetaPages.IsDefault || api.MetaPages.Length != api.PageCount)
+                    throw new InvalidOperationException("Corrupt api response");
+
+                Pages = api.MetaPages.Select(p => new IllustPage(_client, p.ImageUrls)).ToArray();
+            }
         }
 
         public int Id { get; }
@@ -62,5 +77,7 @@ namespace Meowtrix.PixivApi.Models
 
             IsBookmarked = false;
         }
+
+        public IReadOnlyList<IllustPage> Pages { get; }
     }
 }

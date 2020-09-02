@@ -132,7 +132,7 @@ namespace Meowtrix.PixivApi.Json
     {
         public sealed record IllustSeries(int Id, string Title);
 
-        public sealed record MetaSingle(Uri OriginalImageUrl);
+        public sealed record MetaSingle(Uri? OriginalImageUrl);
 
         public sealed record MetaPage(MetaPageImageUrls ImageUrls);
 
