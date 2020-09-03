@@ -1,5 +1,5 @@
 ﻿using System;
-using System.IO;
+using System.Net.Http;
 using System.Threading.Tasks;
 using static Meowtrix.PixivApi.Json.UserIllustPreview;
 
@@ -30,7 +30,7 @@ namespace Meowtrix.PixivApi.Models
             _large = urls.Large;
         }
 
-        public Task<Stream> OpenImageAsync(IllustSize size)
+        public Task<HttpResponseMessage> OpenImageAsync(IllustSize size)
             => _client.Api.GetImageAsync(size switch
             {
                 IllustSize.Original => _original,

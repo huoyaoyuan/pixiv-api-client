@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
@@ -554,7 +553,7 @@ namespace Meowtrix.PixivApi
                 authToken);
         }
 
-        public async Task<Stream> GetImageAsync(Uri imageUri)
+        public async Task<HttpResponseMessage> GetImageAsync(Uri imageUri)
         {
             using var request = new HttpRequestMessage(HttpMethod.Get, imageUri)
             {
@@ -564,10 +563,8 @@ namespace Meowtrix.PixivApi
                 }
             };
 
-            // Don't dispose
-            var response = await _httpClient.SendAsync(request).ConfigureAwait(false);
-            response.EnsureSuccessStatusCode();
-            return await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
+            return (await _httpClient.SendAsync(request).ConfigureAwait(false))
+                .EnsureSuccessStatusCode();
         }
 
         public async ValueTask<T?> GetNextPageAsync<T>(T previous, string? authToken = null)

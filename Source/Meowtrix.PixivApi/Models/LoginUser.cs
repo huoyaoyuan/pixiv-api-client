@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Globalization;
-using System.IO;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Meowtrix.PixivApi.Json;
 
@@ -30,6 +30,6 @@ namespace Meowtrix.PixivApi.Models
         private readonly Uri _avatarUri;
         private readonly PixivClient _client;
 
-        public Task<Stream> GetAvatarAsync() => _client.Api.GetImageAsync(_avatarUri);
+        public Task<HttpResponseMessage> GetAvatarAsync() => _client.Api.GetImageAsync(_avatarUri);
     }
 }
