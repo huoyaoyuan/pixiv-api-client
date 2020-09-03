@@ -57,12 +57,12 @@ namespace Meowtrix.PixivApi
         public void Dispose()
         {
             Api.Dispose();
-            _authLock.Dispose();
+            _semaphore.Dispose();
         }
         #endregion
 
         #region Lock and token refresh
-        private readonly ReaderWriterLockSlim _authLock = new ReaderWriterLockSlim();
+        private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1);
         private DateTimeOffset _authValidateUntil;
 
         private string? _accessToken;
@@ -93,7 +93,7 @@ namespace Meowtrix.PixivApi
         {
             try
             {
-                _authLock.EnterWriteLock();
+                await _semaphore.WaitAsync().ConfigureAwait(false);
 
                 var (time, response) = await Api.AuthAsync(username, password).ConfigureAwait(false);
                 SetLogin(time, response);
@@ -102,7 +102,7 @@ namespace Meowtrix.PixivApi
             }
             finally
             {
-                _authLock.ExitWriteLock();
+                _semaphore.Release();
             }
         }
 
@@ -110,7 +110,7 @@ namespace Meowtrix.PixivApi
         {
             try
             {
-                _authLock.EnterWriteLock();
+                await _semaphore.WaitAsync().ConfigureAwait(false);
 
                 var (time, response) = await Api.AuthAsync(refreshToken).ConfigureAwait(false);
                 SetLogin(time, response);
@@ -119,7 +119,7 @@ namespace Meowtrix.PixivApi
             }
             finally
             {
-                _authLock.ExitWriteLock();
+                _semaphore.Release();
             }
         }
 
@@ -134,33 +134,24 @@ namespace Meowtrix.PixivApi
                 throw new InvalidOperationException("The client isn't logged in.");
             }
 
-            try
+            if ((_authValidateUntil - DateTimeOffset.Now).TotalSeconds < epsilonTimeSeconds)
             {
-                _authLock.EnterUpgradeableReadLock();
-
-                if ((_authValidateUntil - DateTimeOffset.Now).TotalSeconds < epsilonTimeSeconds)
+                try
                 {
-                    try
-                    {
-                        _authLock.EnterWriteLock();
+                    await _semaphore.WaitAsync().ConfigureAwait(false);
 
-                        if ((_authValidateUntil - DateTimeOffset.Now).TotalSeconds < epsilonTimeSeconds)
-                        {
-                            var (time, response) = await Api.AuthAsync(_refreshToken).ConfigureAwait(false);
-                            SetLogin(time, response);
-
-                            return response.AccessToken;
-                        }
-                    }
-                    finally
+                    if ((_authValidateUntil - DateTimeOffset.Now).TotalSeconds < epsilonTimeSeconds)
                     {
-                        _authLock.ExitWriteLock();
+                        var (time, response) = await Api.AuthAsync(_refreshToken).ConfigureAwait(false);
+                        SetLogin(time, response);
+
+                        return response.AccessToken;
                     }
                 }
-            }
-            finally
-            {
-                _authLock.ExitUpgradeableReadLock();
+                finally
+                {
+                    _semaphore.Release();
+                }
             }
 
             return _accessToken;
