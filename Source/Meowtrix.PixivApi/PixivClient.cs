@@ -174,10 +174,9 @@ namespace Meowtrix.PixivApi
 #endif
         public int CurrentUserId => CurrentUser?.Id ?? throw new InvalidOperationException("No user login.");
 
-        public async IAsyncEnumerable<Illust> GetMyBookmarksAsync(Visibility visibility = Visibility.Public)
+        internal async IAsyncEnumerable<Illust> ToAsyncEnumerable(Func<string, Task<UserIllusts>> task)
         {
-            var response = await Api.GetUserBookmarkIllustsAsync(CurrentUserId, visibility,
-                authToken: await CheckValidAccessToken().ConfigureAwait(false)).ConfigureAwait(false);
+            var response = await task(await CheckValidAccessToken().ConfigureAwait(false)).ConfigureAwait(false);
 
             while (response is not null)
             {
@@ -187,6 +186,13 @@ namespace Meowtrix.PixivApi
                 response = await Api.GetNextPageAsync(response,
                     await CheckValidAccessToken().ConfigureAwait(false)).ConfigureAwait(false);
             }
+        }
+
+        public IAsyncEnumerable<Illust> GetMyBookmarksAsync(Visibility visibility = Visibility.Public)
+        {
+            return ToAsyncEnumerable(auth
+                => Api.GetUserBookmarkIllustsAsync(CurrentUserId, visibility,
+                authToken: auth));
         }
 
         public async Task<UserDetailInfo> GetUserDetailAsync(int userId)

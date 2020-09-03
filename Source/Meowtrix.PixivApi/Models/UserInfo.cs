@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Meowtrix.PixivApi.Json;
@@ -54,5 +55,17 @@ namespace Meowtrix.PixivApi.Models
         public Task<HttpResponseMessage> GetAvatarAsync() => Client.Api.GetImageAsync(_avatarUri);
 
         public virtual ValueTask<UserDetailInfo> GetDetailAsync() => new(Client.GetUserDetailAsync(Id));
+
+        public IAsyncEnumerable<Illust> GetIllustsAsync(UserIllustType illustType = UserIllustType.Illustrations)
+        {
+            return Client.ToAsyncEnumerable(auth
+                => Client.Api.GetUserIllustsAsync(Id, illustType, authToken: auth));
+        }
+
+        public IAsyncEnumerable<Illust> GetBookmarksAsync()
+        {
+            return Client.ToAsyncEnumerable(auth
+                => Client.Api.GetUserBookmarkIllustsAsync(Id));
+        }
     }
 }
