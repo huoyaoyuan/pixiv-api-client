@@ -189,12 +189,12 @@ namespace Meowtrix.PixivApi
             }
         }
 
-        public async Task<User> GetUserDetailAsync(int userId)
+        public async Task<UserDetailInfo> GetUserDetailAsync(int userId)
         {
             var response = await Api.GetUserDetailAsync(userId,
                 await CheckValidAccessToken().ConfigureAwait(false)).ConfigureAwait(false);
 
-            return new User(this, response);
+            return new UserDetailInfo(this, response);
         }
     }
 }

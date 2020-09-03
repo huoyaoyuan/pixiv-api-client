@@ -41,6 +41,8 @@ namespace Meowtrix.PixivApi.Models
 
                 Pages = api.MetaPages.Select(p => new IllustPage(_client, p.ImageUrls)).ToArray();
             }
+
+            User = new UserInfo(client, api.User);
         }
 
         public int Id { get; }
@@ -53,6 +55,8 @@ namespace Meowtrix.PixivApi.Models
         public int TotalView { get; }
         public int TotalBookmarks { get; }
         public bool IsBookmarked { get; private set; }
+
+        public UserInfo User { get; }
 
         public async Task AddBookmarkAsync(Visibility visibility = Visibility.Public)
         {
