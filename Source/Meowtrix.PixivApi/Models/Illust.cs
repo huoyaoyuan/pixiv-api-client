@@ -64,7 +64,7 @@ namespace Meowtrix.PixivApi.Models
                 throw new InvalidOperationException("The illust is already bookmarked.");
 
             await _client.Api.AddIllustBookmarkAsync(Id, visibility,
-                  authToken: await _client.CheckValidAccessToken().ConfigureAwait(false))
+                  authToken: await _client.CheckTokenAsync())
               .ConfigureAwait(false);
 
             IsBookmarked = true;
@@ -76,7 +76,7 @@ namespace Meowtrix.PixivApi.Models
                 throw new InvalidOperationException("There's no bookmark on this illust.");
 
             await _client.Api.DeleteIllustBookmarkAsync(Id,
-                  authToken: await _client.CheckValidAccessToken().ConfigureAwait(false))
+                  authToken: await _client.CheckTokenAsync())
               .ConfigureAwait(false);
 
             IsBookmarked = false;
@@ -87,7 +87,7 @@ namespace Meowtrix.PixivApi.Models
         public async IAsyncEnumerable<Comment> GetCommentsAsync()
         {
             var response = await _client.Api.GetIllustCommentsAsync(Id,
-                authToken: await _client.CheckValidAccessToken().ConfigureAwait(false)).ConfigureAwait(false);
+                authToken: await _client.CheckTokenAsync()).ConfigureAwait(false);
 
             while (response is not null)
             {
@@ -95,14 +95,14 @@ namespace Meowtrix.PixivApi.Models
                     yield return new Comment(_client, this, c);
 
                 response = await _client.Api.GetNextPageAsync(response,
-                    await _client.CheckValidAccessToken().ConfigureAwait(false)).ConfigureAwait(false);
+                    await _client.CheckTokenAsync()).ConfigureAwait(false);
             }
         }
 
         public async Task<Comment> PostCommentAsync(string content, Comment? parent = null)
         {
             var response = await _client.Api.PostIllustCommentAsync(Id, content, parent?.Id,
-                await _client.CheckValidAccessToken().ConfigureAwait(false)).ConfigureAwait(false);
+                await _client.CheckTokenAsync()).ConfigureAwait(false);
 
             return new Comment(_client, this, response.Comment);
         }

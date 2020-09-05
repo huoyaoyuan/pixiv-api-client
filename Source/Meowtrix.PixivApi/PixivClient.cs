@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Meowtrix.PixivApi.Json;
@@ -127,7 +128,7 @@ namespace Meowtrix.PixivApi
 #if NET5_0
         [System.Diagnostics.CodeAnalysis.MemberNotNull(nameof(CurrentUser))]
 #endif
-        internal async ValueTask<string> CheckValidAccessToken(int epsilonTimeSeconds = 60)
+        private async ValueTask<string> CheckTokenAsyncCore(int epsilonTimeSeconds = 60)
         {
             if (!IsLogin)
             {
@@ -157,6 +158,9 @@ namespace Meowtrix.PixivApi
             return _accessToken;
         }
 
+        internal ConfiguredValueTaskAwaitable<string> CheckTokenAsync(int epsilonTimeSeconds = 60)
+            => CheckTokenAsyncCore(epsilonTimeSeconds).ConfigureAwait(false);
+
         private void SetLogin(DateTimeOffset authTime, AuthResponse response)
         {
             _accessToken = response.AccessToken;
@@ -176,7 +180,7 @@ namespace Meowtrix.PixivApi
 
         internal async IAsyncEnumerable<Illust> ToAsyncEnumerable(Func<string, Task<UserIllusts>> task)
         {
-            var response = await task(await CheckValidAccessToken().ConfigureAwait(false)).ConfigureAwait(false);
+            var response = await task(await CheckTokenAsync()).ConfigureAwait(false);
 
             while (response is not null)
             {
@@ -184,7 +188,7 @@ namespace Meowtrix.PixivApi
                     yield return new Illust(this, r);
 
                 response = await Api.GetNextPageAsync(response,
-                    await CheckValidAccessToken().ConfigureAwait(false)).ConfigureAwait(false);
+                    await CheckTokenAsync()).ConfigureAwait(false);
             }
         }
 
@@ -198,7 +202,7 @@ namespace Meowtrix.PixivApi
         public async Task<UserDetailInfo> GetUserDetailAsync(int userId)
         {
             var response = await Api.GetUserDetailAsync(userId,
-                await CheckValidAccessToken().ConfigureAwait(false)).ConfigureAwait(false);
+                await CheckTokenAsync()).ConfigureAwait(false);
 
             return new UserDetailInfo(this, response);
         }
@@ -206,7 +210,7 @@ namespace Meowtrix.PixivApi
         public async Task<Illust> GetIllustDetailAsync(int illustId)
         {
             var response = await Api.GetIllustDetailAsync(illustId,
-                await CheckValidAccessToken().ConfigureAwait(false)).ConfigureAwait(false);
+                await CheckTokenAsync()).ConfigureAwait(false);
 
             return new Illust(this, response.Illust);
         }

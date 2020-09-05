@@ -36,7 +36,7 @@ namespace Meowtrix.PixivApi.Models
                 throw new InvalidOperationException("The user has already been followed!");
 
             await Client.Api.AddUserFollowAsync(Id, visibility,
-                await Client.CheckValidAccessToken().ConfigureAwait(false)).ConfigureAwait(false);
+                await Client.CheckTokenAsync()).ConfigureAwait(false);
 
             IsFollowed = true;
         }
@@ -47,7 +47,7 @@ namespace Meowtrix.PixivApi.Models
                 throw new InvalidOperationException("The user has not been followed!");
 
             await Client.Api.DeleteUserFollowAsync(Id, visibility,
-                await Client.CheckValidAccessToken().ConfigureAwait(false)).ConfigureAwait(false);
+                await Client.CheckTokenAsync()).ConfigureAwait(false);
 
             IsFollowed = false;
         }
