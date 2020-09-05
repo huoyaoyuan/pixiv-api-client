@@ -19,6 +19,18 @@
     <PackageTags>pixiv</PackageTags>
   </PropertyGroup>
 
+  <PropertyGroup Label="SourceLink">
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <ItemGroup Label="SourceLink">
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
+  </ItemGroup>
+
   <PropertyGroup Condition="'$(TargetFramework)' != 'net5.0'">
     <Nullable>annotations</Nullable>
   </PropertyGroup>
