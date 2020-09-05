@@ -28,7 +28,7 @@ namespace Meowtrix.PixivApi.Models
         public string Name { get; }
         public string Account { get; }
         public bool IsFollowed { get; private set; }
-        public string Comment { get; }
+        public string? Comment { get; }
 
         public async Task FollowAsync(Visibility visibility = Visibility.Public)
         {

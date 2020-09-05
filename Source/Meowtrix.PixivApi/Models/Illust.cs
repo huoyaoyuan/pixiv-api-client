@@ -83,5 +83,28 @@ namespace Meowtrix.PixivApi.Models
         }
 
         public IReadOnlyList<IllustPage> Pages { get; }
+
+        public async IAsyncEnumerable<Comment> GetCommentsAsync()
+        {
+            var response = await _client.Api.GetIllustCommentsAsync(Id,
+                authToken: await _client.CheckValidAccessToken().ConfigureAwait(false)).ConfigureAwait(false);
+
+            while (response is not null)
+            {
+                foreach (var c in response.Comments)
+                    yield return new Comment(_client, this, c);
+
+                response = await _client.Api.GetNextPageAsync(response,
+                    await _client.CheckValidAccessToken().ConfigureAwait(false)).ConfigureAwait(false);
+            }
+        }
+
+        public async Task<Comment> PostCommentAsync(string content, Comment? parent = null)
+        {
+            var response = await _client.Api.PostIllustCommentAsync(Id, content, parent?.Id,
+                await _client.CheckValidAccessToken().ConfigureAwait(false)).ConfigureAwait(false);
+
+            return new Comment(_client, this, response.Comment);
+        }
     }
 }

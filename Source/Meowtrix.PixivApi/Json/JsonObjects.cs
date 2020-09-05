@@ -47,7 +47,7 @@ namespace Meowtrix.PixivApi.Json
         string Account,
         UserSummary.ImageUrls ProfileImageUrls,
         bool IsFollowed,
-        string Comment)
+        string? Comment)
     {
         public sealed record ImageUrls(Uri Medium);
     }
