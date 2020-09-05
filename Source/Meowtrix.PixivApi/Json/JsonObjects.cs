@@ -104,6 +104,8 @@ namespace Meowtrix.PixivApi.Json
     public sealed record UserIllusts(ImmutableArray<UserIllustPreview> Illusts, Uri? NextUrl)
         : IHasNextPage;
 
+    public sealed record IllustDetail(UserIllustPreview Illust);
+
     public sealed record UserIllustPreview(
         int Id,
         string Title,

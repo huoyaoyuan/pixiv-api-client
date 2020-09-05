@@ -230,6 +230,16 @@ namespace Meowtrix.PixivApi
                 authToken: authToken);
         }
 
+        public Task<IllustDetail> GetIllustDetailAsync(
+            int illustId,
+            string? authToken = null)
+        {
+            return InvokeApiAsync<IllustDetail>(
+                $"https://app-api.pixiv.net/v1/illust/detail?illust_id={illustId}",
+                HttpMethod.Get,
+                authToken: authToken);
+        }
+
         public Task<UserIllusts> GetUserIllustsAsync(
             int userId,
             UserIllustType illustType = UserIllustType.Illustrations,

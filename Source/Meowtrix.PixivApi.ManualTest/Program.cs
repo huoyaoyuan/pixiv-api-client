@@ -109,6 +109,10 @@ namespace Meowtrix.PixivApi.ManualTest
             var mypixiv = await client.GetMyPixivUsersAsync(1113943, authToken: authToken);
             Debugger.Break();
 
+            Console.WriteLine("Begin illust/detail");
+            var illustDetail = await client.GetIllustDetailAsync(44340318, authToken: authToken);
+            Debugger.Break();
+
             Console.WriteLine("Begin motion pic metadata");
             var motionMetadata = await client.GetMotionPicMetadataAsync(44340318, authToken: authToken);
             Debugger.Break();

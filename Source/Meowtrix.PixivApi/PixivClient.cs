@@ -202,5 +202,13 @@ namespace Meowtrix.PixivApi
 
             return new UserDetailInfo(this, response);
         }
+
+        public async Task<Illust> GetIllustDetailAsync(int illustId)
+        {
+            var response = await Api.GetIllustDetailAsync(illustId,
+                await CheckValidAccessToken().ConfigureAwait(false)).ConfigureAwait(false);
+
+            return new Illust(this, response.Illust);
+        }
     }
 }
