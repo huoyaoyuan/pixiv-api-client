@@ -553,11 +553,11 @@ namespace Meowtrix.PixivApi
         //        authToken);
         //}
 
-        public Task<MotionPicMetadata> GetMotionPicMetadataAsync(
+        public Task<AnimatedPictureMetadata> GetAnimatedPictureMetadataAsync(
             int illustId,
             string? authToken = null)
         {
-            return InvokeApiAsync<MotionPicMetadata>(
+            return InvokeApiAsync<AnimatedPictureMetadata>(
                 $"https://app-api.pixiv.net/v1/ugoira/metadata?illust_id={illustId}",
                 HttpMethod.Get,
                 authToken);
@@ -573,7 +573,7 @@ namespace Meowtrix.PixivApi
                 }
             };
 
-            return (await _httpClient.SendAsync(request).ConfigureAwait(false))
+            return (await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false))
                 .EnsureSuccessStatusCode();
         }
 

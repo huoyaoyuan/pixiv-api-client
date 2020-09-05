@@ -114,7 +114,7 @@ namespace Meowtrix.PixivApi.ManualTest
             Debugger.Break();
 
             Console.WriteLine("Begin motion pic metadata");
-            var motionMetadata = await client.GetMotionPicMetadataAsync(44340318, authToken: authToken);
+            var motionMetadata = await client.GetAnimatedPictureMetadataAsync(84137005, authToken: authToken);
             Debugger.Break();
         }
     }

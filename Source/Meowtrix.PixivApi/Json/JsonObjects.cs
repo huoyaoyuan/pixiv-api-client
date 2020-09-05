@@ -192,7 +192,7 @@ namespace Meowtrix.PixivApi.Json
         ImmutableArray<object> Novels,
         bool IsMuted);
 
-    public sealed record MotionPicMetadata(MotionPicMetadata.MetadataClass UgoiraMetadata)
+    public sealed record AnimatedPictureMetadata(AnimatedPictureMetadata.MetadataClass UgoiraMetadata)
     {
         public sealed record MetadataClass(Urls ZipUrls, ImmutableArray<Frame> Frames);
 

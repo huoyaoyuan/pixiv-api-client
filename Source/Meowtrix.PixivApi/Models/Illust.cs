@@ -43,6 +43,7 @@ namespace Meowtrix.PixivApi.Models
             }
 
             User = new UserInfo(client, api.User);
+            IsAnimated = api.Type == "ugoira";
         }
 
         public int Id { get; }
@@ -105,6 +106,19 @@ namespace Meowtrix.PixivApi.Models
                 await _client.CheckTokenAsync()).ConfigureAwait(false);
 
             return new Comment(_client, this, response.Comment);
+        }
+
+        public bool IsAnimated { get; }
+
+        public async Task<AnimatedPictureDetail> GetAnimatedDetail()
+        {
+            if (!IsAnimated)
+                throw new InvalidOperationException("This illust is not an animated picture.");
+
+            var response = await _client.Api.GetAnimatedPictureMetadataAsync(Id,
+                await _client.CheckTokenAsync()).ConfigureAwait(false);
+
+            return new AnimatedPictureDetail(_client, response);
         }
     }
 }
