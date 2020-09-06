@@ -55,17 +55,16 @@ jobs:
         versioningScheme: 'byEnvVar'
         versionEnvVar: 'tagVersion'
 
-    - task: DotNetCoreCLI@2
-      displayName: 'Publish to NuGet'
-      condition: and(succeeded(), eq(variables.IsTag, true))
-      inputs:
-        command: 'push'
-        packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
-        nuGetFeedType: 'external'
-        publishFeedCredentials: 'NuGet push feed'
-
     - task: PublishBuildArtifacts@1
       inputs:
         PathtoPublish: '$(Build.ArtifactStagingDirectory)'
         ArtifactName: 'Packages'
         publishLocation: 'Container'
+    - task: NuGetCommand@2
+      displayName: Push Nuget Package
+      condition: and(succeeded(), eq(variables.IsTag, true))
+      inputs:
+        command: 'push'
+        packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg'
+        nuGetFeedType: 'external'
+        publishFeedCredentials: 'nuget meowtrix'
