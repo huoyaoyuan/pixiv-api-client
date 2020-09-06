@@ -20,7 +20,7 @@ jobs:
       buildConfiguration: 'Release'
       ${{ if startsWith(variables['Build.SourceBranch'], 'refs/tags/') }}:
         isTag: true
-        tagVersion: replace(variables['Build.SourceBranch'], 'refs/tags/', '')
+        tagVersion: $[replace(variables['Build.SourceBranch'], 'refs/tags/', '')]
       ${{ if not(startsWith(variables['Build.SourceBranch'], 'refs/tags/')) }}:
         isTag: false
         tagVersion: 0.0.0-alpha
@@ -54,3 +54,18 @@ jobs:
         includesymbols: true
         versioningScheme: 'byEnvVar'
         versionEnvVar: 'tagVersion'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Publish to NuGet'
+      condition: and(succeeded(), eq(variables.IsTag, true))
+      inputs:
+        command: 'push'
+        packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
+        nuGetFeedType: 'external'
+        publishFeedCredentials: 'NuGet push feed'
+
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: 'Packages'
+        publishLocation: 'Container'
