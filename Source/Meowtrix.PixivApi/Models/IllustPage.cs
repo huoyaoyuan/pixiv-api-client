@@ -1,5 +1,5 @@
 ﻿using System;
-using static Meowtrix.PixivApi.Json.UserIllustPreview;
+using static Meowtrix.PixivApi.Json.IllustDetail;
 
 namespace Meowtrix.PixivApi.Models
 {

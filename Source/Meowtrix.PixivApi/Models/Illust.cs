@@ -11,7 +11,7 @@ namespace Meowtrix.PixivApi.Models
     {
         private readonly PixivClient _client;
 
-        internal Illust(PixivClient client, UserIllustPreview api)
+        internal Illust(PixivClient client, IllustDetail api)
         {
             _client = client;
             Id = api.Id;

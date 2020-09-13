@@ -230,11 +230,11 @@ namespace Meowtrix.PixivApi
                 authToken: authToken);
         }
 
-        public Task<IllustDetail> GetIllustDetailAsync(
+        public Task<IllustDetailResponse> GetIllustDetailAsync(
             int illustId,
             string? authToken = null)
         {
-            return InvokeApiAsync<IllustDetail>(
+            return InvokeApiAsync<IllustDetailResponse>(
                 $"https://app-api.pixiv.net/v1/illust/detail?illust_id={illustId}",
                 HttpMethod.Get,
                 authToken: authToken);
