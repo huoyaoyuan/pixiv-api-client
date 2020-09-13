@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Net.Http;
 using System.Threading.Tasks;
 using Meowtrix.PixivApi.Json;
 
@@ -36,17 +35,17 @@ namespace Meowtrix.PixivApi.Models
         public int TotalIllustSeries => _profile.TotalIllustSeries;
         public int TotalNovelSeries => _profile.TotalNovelSeries;
 
-        public Task<HttpResponseMessage?> GetBackgroundImageAsync()
-            => (_profile.BackgroundImageUrl is null
-            ? Task.FromResult<HttpResponseMessage?>(null)!
-            : Client.Api.GetImageAsync(_profile.BackgroundImageUrl))!;
+        public ImageInfo? BackgroundImage
+            => _profile.BackgroundImageUrl is null
+            ? null
+            : new ImageInfo(_profile.BackgroundImageUrl, Client.Api);
 
         public string? TwitterAccount => _profile.TwitterAccount;
 
-        public Task<HttpResponseMessage?> GetWorkspaceImageAsync()
-            => (_workspace.WorkspaceImageUrl is null
-            ? Task.FromResult<HttpResponseMessage?>(null)!
-            : Client.Api.GetImageAsync(_workspace.WorkspaceImageUrl))!;
+        public ImageInfo? WorkspaceImage
+            => _workspace.WorkspaceImageUrl is null
+            ? null
+            : new ImageInfo(_workspace.WorkspaceImageUrl, Client.Api);
     }
 
     public enum Gender

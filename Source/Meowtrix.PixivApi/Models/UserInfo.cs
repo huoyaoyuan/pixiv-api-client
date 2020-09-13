@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net.Http;
 using System.Threading.Tasks;
 using Meowtrix.PixivApi.Json;
 
@@ -52,7 +51,7 @@ namespace Meowtrix.PixivApi.Models
             IsFollowed = false;
         }
 
-        public Task<HttpResponseMessage> GetAvatarAsync() => Client.Api.GetImageAsync(_avatarUri);
+        public ImageInfo Avatar => new ImageInfo(_avatarUri, Client.Api);
 
         public virtual ValueTask<UserDetailInfo> GetDetailAsync() => new(Client.GetUserDetailAsync(Id));
 

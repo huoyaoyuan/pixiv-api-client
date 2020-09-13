@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Net.Http;
-using System.Threading.Tasks;
 using static Meowtrix.PixivApi.Json.UserIllustPreview;
 
 namespace Meowtrix.PixivApi.Models
@@ -30,14 +28,19 @@ namespace Meowtrix.PixivApi.Models
             _large = urls.Large;
         }
 
-        public Task<HttpResponseMessage> OpenImageAsync(IllustSize size)
-            => _client.Api.GetImageAsync(size switch
+        public ImageInfo Original => new ImageInfo(_original, _client.Api);
+        public ImageInfo Medium => new ImageInfo(_medium, _client.Api);
+        public ImageInfo SquareMedium => new ImageInfo(_squareMedium, _client.Api);
+        public ImageInfo Large => new ImageInfo(_large, _client.Api);
+
+        public ImageInfo AtSize(IllustSize size)
+            => size switch
             {
-                IllustSize.Original => _original,
-                IllustSize.Medium => _medium,
-                IllustSize.SquareMedium => _squareMedium,
-                IllustSize.Large => _large,
+                IllustSize.Original => Original,
+                IllustSize.Medium => Medium,
+                IllustSize.SquareMedium => SquareMedium,
+                IllustSize.Large => Large,
                 _ => throw new ArgumentException("Unknown enum value.", nameof(size))
-            });
+            };
     }
 }
