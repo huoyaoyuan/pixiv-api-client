@@ -8,6 +8,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using Meowtrix.PixivApi.Json;
@@ -69,7 +70,10 @@ namespace Meowtrix.PixivApi
         private const string HashSecret = "28c1fdd170a5204386cb1313c7077b34f83e4aaf4aa829ce78c231e05b0bae2c";
         private const string AuthUrl = "https://oauth.secure.pixiv.net/auth/token";
 
-        public async Task<(DateTimeOffset authTime, AuthResponse authResponse)> AuthAsync(string username, string password)
+        public async Task<(DateTimeOffset authTime, AuthResponse authResponse)> AuthAsync(
+            string username,
+            string password,
+            CancellationToken cancellationToken = default)
         {
             DateTimeOffset authTime = DateTimeOffset.Now;
             string time = authTime.ToString("yyyy-MM-ddTHH:mm:ssK", null);
@@ -114,10 +118,12 @@ namespace Meowtrix.PixivApi
                 }
             };
 
-            return (authTime, await AuthAsync(request).ConfigureAwait(false));
+            return (authTime, await AuthAsync(request, cancellationToken).ConfigureAwait(false));
         }
 
-        public async Task<(DateTimeOffset authTime, AuthResponse authResponse)> AuthAsync(string refreshToken)
+        public async Task<(DateTimeOffset authTime, AuthResponse authResponse)> AuthAsync(
+            string refreshToken,
+            CancellationToken cancellation = default)
         {
             DateTimeOffset authTime = DateTimeOffset.Now;
 
@@ -137,23 +143,25 @@ namespace Meowtrix.PixivApi
                 }
             };
 
-            return (authTime, await AuthAsync(request).ConfigureAwait(false));
+            return (authTime, await AuthAsync(request, cancellation).ConfigureAwait(false));
         }
 
-        private async Task<AuthResponse> AuthAsync(HttpRequestMessage request)
+        private async Task<AuthResponse> AuthAsync(HttpRequestMessage request, CancellationToken cancellationToken = default)
         {
-            using var response = await _httpClient.SendAsync(request).ConfigureAwait(false);
+            using var response = await _httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
 
             if (response.StatusCode == HttpStatusCode.BadRequest)
             {
+#pragma warning disable CA2016 // Overload not present in net461
                 string original = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+#pragma warning restore CA2016
                 var error = JsonSerializer.Deserialize<PixivAuthErrorMessage>(original, s_serializerOptions);
                 throw new PixivAuthException(original, error, error?.Errors?.System?.Message ?? original);
             }
 
             response.EnsureSuccessStatusCode();
 
-            var json = await response.Content.ReadFromJsonAsync<AuthResponse>(s_serializerOptions).ConfigureAwait(false);
+            var json = await response.Content.ReadFromJsonAsync<AuthResponse>(s_serializerOptions, cancellationToken: cancellationToken).ConfigureAwait(false);
 
             return json ?? throw new InvalidOperationException("The api responses a null object.");
         }
@@ -171,20 +179,23 @@ namespace Meowtrix.PixivApi
             HttpMethod method,
             string? authToken = null,
             IEnumerable<KeyValuePair<string, string>>? additionalHeaders = null,
-            HttpContent? body = null)
+            HttpContent? body = null,
+            CancellationToken cancellation = default)
             => InvokeApiAsync<T>(
                 new Uri(url),
                 method,
                 authToken,
                 additionalHeaders,
-                body);
+                body,
+                cancellation);
 
         public async Task<T> InvokeApiAsync<T>(
             Uri url,
             HttpMethod method,
             string? authToken = null,
             IEnumerable<KeyValuePair<string, string>>? additionalHeaders = null,
-            HttpContent? body = null)
+            HttpContent? body = null,
+            CancellationToken cancellation = default)
         {
             using var request = new HttpRequestMessage(method, url)
             {
@@ -204,18 +215,20 @@ namespace Meowtrix.PixivApi
                 foreach (var header in additionalHeaders)
                     request.Headers.Add(header.Key, header.Value);
 
-            using var response = await _httpClient.SendAsync(request).ConfigureAwait(false);
+            using var response = await _httpClient.SendAsync(request, cancellation).ConfigureAwait(false);
 
             if (response.StatusCode == HttpStatusCode.BadRequest)
             {
+#pragma warning disable CA2016 // Overload not present in net461
                 string original = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+#pragma warning restore CA2016
                 var error = JsonSerializer.Deserialize<PixivApiErrorMessage>(original, s_serializerOptions);
                 throw new PixivApiException(original, error, error?.Error?.Message ?? original);
             }
 
             response.EnsureSuccessStatusCode();
 
-            var json = await response.Content.ReadFromJsonAsync<T>(s_serializerOptions).ConfigureAwait(false);
+            var json = await response.Content.ReadFromJsonAsync<T>(s_serializerOptions, cancellationToken: cancellation).ConfigureAwait(false);
 
             return json ?? throw new InvalidOperationException("The api responses a null object.");
         }
