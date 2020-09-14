@@ -192,6 +192,13 @@ namespace Meowtrix.PixivApi
             }
         }
 
+        public IAsyncEnumerable<Illust> GetMyFollowingIllustsAsync(Visibility visibility = Visibility.Public)
+        {
+            return ToAsyncEnumerable(auth
+                => Api.GetIllustFollowAsync(visibility,
+                authToken: auth));
+        }
+
         public IAsyncEnumerable<Illust> GetMyBookmarksAsync(Visibility visibility = Visibility.Public)
         {
             return ToAsyncEnumerable(auth
