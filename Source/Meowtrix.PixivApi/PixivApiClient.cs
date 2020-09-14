@@ -34,7 +34,11 @@ namespace Meowtrix.PixivApi
         };
 
         #region Constructors
-        public PixivApiClient(HttpMessageHandler handler) => _httpClient = new HttpClient(handler);
+        public PixivApiClient(HttpMessageHandler handler)
+            => _httpClient = new HttpClient(handler)
+            {
+                BaseAddress = s_baseUri
+            };
 
         public PixivApiClient()
             : this(false, null)
@@ -57,13 +61,18 @@ namespace Meowtrix.PixivApi
             {
                 Proxy = proxy,
                 UseProxy = useProxy
-            });
+            })
+            {
+                BaseAddress = s_baseUri
+            };
         }
         #endregion
 
         private readonly HttpClient _httpClient;
         public void Dispose() => _httpClient.Dispose();
 
+        private const string BaseUrl = "https://app-api.pixiv.net/";
+        private static readonly Uri s_baseUri = new Uri(BaseUrl);
         private const string ClientId = "MOBrBDS8blbauoSck0ZfDbtuzpyT";
         private const string ClientSecret = "lsACyCD94FhDUtGTXi3QzcFE2uU1hqtDaKeqrdwj";
         private const string UserAgent = "PixivAndroidApp/5.0.64 (Android 6.0)";
@@ -182,7 +191,7 @@ namespace Meowtrix.PixivApi
             HttpContent? body = null,
             CancellationToken cancellation = default)
             => InvokeApiAsync<T>(
-                new Uri(url),
+                new Uri(url, UriKind.RelativeOrAbsolute),
                 method,
                 authToken,
                 additionalHeaders,
@@ -238,7 +247,7 @@ namespace Meowtrix.PixivApi
             string? authToken = null)
         {
             return InvokeApiAsync<UserDetail>(
-                $"https://app-api.pixiv.net/v1/user/detail?user_id={userId}",
+                $"/v1/user/detail?user_id={userId}",
                 HttpMethod.Get,
                 authToken: authToken);
         }
@@ -248,7 +257,7 @@ namespace Meowtrix.PixivApi
             string? authToken = null)
         {
             return InvokeApiAsync<IllustDetailResponse>(
-                $"https://app-api.pixiv.net/v1/illust/detail?illust_id={illustId}",
+                $"/v1/illust/detail?illust_id={illustId}",
                 HttpMethod.Get,
                 authToken: authToken);
         }
@@ -260,7 +269,7 @@ namespace Meowtrix.PixivApi
             string? authToken = null)
         {
             return InvokeApiAsync<UserIllusts>(
-                $"https://app-api.pixiv.net/v1/user/illusts?user_id={userId}"
+                $"/v1/user/illusts?user_id={userId}"
                 + $"&type={illustType.ToQueryString()}&offset={offset}",
                 HttpMethod.Get,
                 authToken: authToken);
@@ -273,7 +282,7 @@ namespace Meowtrix.PixivApi
             string? tag = null,
             string? authToken = null)
         {
-            string url = $"https://app-api.pixiv.net/v1/user/bookmarks/illust?user_id={userId}&restrict={restrict.ToQueryString()}";
+            string url = $"/v1/user/bookmarks/illust?user_id={userId}&restrict={restrict.ToQueryString()}";
             if (maxBookmarkId != null)
                 url += $"&max_bookmark_id={maxBookmarkId}";
             if (!string.IsNullOrWhiteSpace(tag))
@@ -290,7 +299,7 @@ namespace Meowtrix.PixivApi
             string? authToken = null)
         {
             return InvokeApiAsync<UserIllusts>(
-                $"https://app-api.pixiv.net/v2/illust/follow?restrict={restrict.ToQueryString()}&offset={offset}",
+                $"/v2/illust/follow?restrict={restrict.ToQueryString()}&offset={offset}",
                 HttpMethod.Get,
                 authToken);
         }
@@ -302,7 +311,7 @@ namespace Meowtrix.PixivApi
             string? authToken = null)
         {
             return InvokeApiAsync<IllustComments>(
-                $"https://app-api.pixiv.net/v1/illust/comments?illust_id={illustId}&offset={offset}&include_total_comments={(includeTotalComments ? "true" : "false")}",
+                $"/v1/illust/comments?illust_id={illustId}&offset={offset}&include_total_comments={(includeTotalComments ? "true" : "false")}",
                 HttpMethod.Get,
                 authToken);
         }
@@ -323,7 +332,7 @@ namespace Meowtrix.PixivApi
                 data.Add("parent_comment_id", p.ToString(NumberFormatInfo.InvariantInfo));
 
             return InvokeApiAsync<PostIllustCommentResult>(
-                "https://app-api.pixiv.net/v1/illust/comment/add",
+                "/v1/illust/comment/add",
                 HttpMethod.Post,
                 authToken,
                 body: new FormUrlEncodedContent(data!));
@@ -334,7 +343,7 @@ namespace Meowtrix.PixivApi
             IEnumerable<int>? seedIllustIds = null,
             string? authToken = null)
         {
-            string url = $"https://app-api.pixiv.net/v2/illust/related?illust_id={illustId}";
+            string url = $"/v2/illust/related?illust_id={illustId}";
             if (seedIllustIds != null)
                 foreach (int seed in seedIllustIds)
                     url += $"&seed_illust_ids[]={seed}";
@@ -357,8 +366,8 @@ namespace Meowtrix.PixivApi
             string? authToken = null)
         {
             string url = authToken is null
-                ? "https://app-api.pixiv.net/v1/illust/recommended-nologin"
-                : "https://app-api.pixiv.net/v1/illust/recommended";
+                ? "/v1/illust/recommended-nologin"
+                : "/v1/illust/recommended";
             url += $"?content_type={contentType.ToQueryString()}"
                 + $"&offset={offset}"
                 + $"&include_ranking_label={(includeRankingLabel ? "true" : "false")}"
@@ -387,7 +396,7 @@ namespace Meowtrix.PixivApi
             int offset = 0,
             string? authToken = null)
         {
-            string url = $"https://app-api.pixiv.net/v1/illust/ranking?mode={mode.ToQueryString()}"
+            string url = $"/v1/illust/ranking?mode={mode.ToQueryString()}"
                 + $"&offset={offset}";
             if (date is DateTime d)
                 url += $"&date={d:yyyy-MM-dd}";
@@ -402,7 +411,7 @@ namespace Meowtrix.PixivApi
             string? authToken = null)
         {
             return InvokeApiAsync<TrendingTagsIllust>(
-                $"https://app-api.pixiv.net/v1/trending-tags/illust",
+                $"/v1/trending-tags/illust",
                 HttpMethod.Get,
                 authToken);
         }
@@ -418,7 +427,7 @@ namespace Meowtrix.PixivApi
             int offset = 0,
             string? authToken = null)
         {
-            string url = $"https://app-api.pixiv.net/v1/search/illust?word={HttpUtility.UrlEncode(word)}&search_target={searchTarget.ToQueryString()}"
+            string url = $"/v1/search/illust?word={HttpUtility.UrlEncode(word)}&search_target={searchTarget.ToQueryString()}"
                 + $"&sort={sort.ToQueryString()}&offset={offset}";
             if (maxBookmarkCount is int max)
                 url += $"&bookmark_num_max={max}";
@@ -454,7 +463,7 @@ namespace Meowtrix.PixivApi
 #endif
 
             return InvokeApiAsync<object>(
-                "https://app-api.pixiv.net/v2/illust/bookmark/add",
+                "/v2/illust/bookmark/add",
                 HttpMethod.Post,
                 authToken,
                 body: new FormUrlEncodedContent(data!));
@@ -465,7 +474,7 @@ namespace Meowtrix.PixivApi
             string? authToken = null)
         {
             return InvokeApiAsync<object>(
-                "https://app-api.pixiv.net/v1/illust/bookmark/delete",
+                "/v1/illust/bookmark/delete",
                 HttpMethod.Post,
                 authToken,
                 body: new FormUrlEncodedContent(new[]
@@ -480,7 +489,7 @@ namespace Meowtrix.PixivApi
             string? authToken = null)
         {
             return InvokeApiAsync<UserBookmarkTags>(
-                $"https://app-api.pixiv.net/v1/user/bookmark-tags/illust?restrict={restrict.ToQueryString()}&offset={offset}",
+                $"/v1/user/bookmark-tags/illust?restrict={restrict.ToQueryString()}&offset={offset}",
                 HttpMethod.Get,
                 authToken);
         }
@@ -492,7 +501,7 @@ namespace Meowtrix.PixivApi
             string? authToken = null)
         {
             return InvokeApiAsync<UserFollowList>(
-                $"https://app-api.pixiv.net/v1/user/following?user_id={userId}&restrict={restrict.ToQueryString()}&offset={offset}",
+                $"/v1/user/following?user_id={userId}&restrict={restrict.ToQueryString()}&offset={offset}",
                 HttpMethod.Get,
                 authToken);
         }
@@ -504,7 +513,7 @@ namespace Meowtrix.PixivApi
             string? authToken = null)
         {
             return InvokeApiAsync<UserFollowList>(
-                $"https://app-api.pixiv.net/v1/user/follower?user_id={userId}&restrict={restrict.ToQueryString()}&offset={offset}",
+                $"/v1/user/follower?user_id={userId}&restrict={restrict.ToQueryString()}&offset={offset}",
                 HttpMethod.Get,
                 authToken);
         }
@@ -515,7 +524,7 @@ namespace Meowtrix.PixivApi
             string? authToken = null)
         {
             return InvokeApiAsync<object>(
-                "https://app-api.pixiv.net/v1/user/follow/add",
+                "/v1/user/follow/add",
                 HttpMethod.Post,
                 authToken,
                 body: new FormUrlEncodedContent(new Dictionary<string, string>
@@ -531,7 +540,7 @@ namespace Meowtrix.PixivApi
             string? authToken = null)
         {
             return InvokeApiAsync<object>(
-                "https://app-api.pixiv.net/v1/user/follow/delete",
+                "/v1/user/follow/delete",
                 HttpMethod.Post,
                 authToken,
                 body: new FormUrlEncodedContent(new Dictionary<string, string>
@@ -547,7 +556,7 @@ namespace Meowtrix.PixivApi
             string? authToken = null)
         {
             return InvokeApiAsync<UserFollowList>(
-                $"https://app-api.pixiv.net/v1/user/mypixiv?user_id={userId}&offset={offset}",
+                $"/v1/user/mypixiv?user_id={userId}&offset={offset}",
                 HttpMethod.Get,
                 authToken);
         }
@@ -561,7 +570,7 @@ namespace Meowtrix.PixivApi
         //    string? authToken = null)
         //{
         //    return InvokeApiAsync<UserFollowList>(
-        //        $"https://app-api.pixiv.net/v2/user/list?user_id={userId}&filter={HttpUtility.UrlEncode(filter)}&offset={offset}",
+        //        $"/v2/user/list?user_id={userId}&filter={HttpUtility.UrlEncode(filter)}&offset={offset}",
         //        HttpMethod.Get,
         //        authToken);
         //}
@@ -571,7 +580,7 @@ namespace Meowtrix.PixivApi
             string? authToken = null)
         {
             return InvokeApiAsync<AnimatedPictureMetadata>(
-                $"https://app-api.pixiv.net/v1/ugoira/metadata?illust_id={illustId}",
+                $"/v1/ugoira/metadata?illust_id={illustId}",
                 HttpMethod.Get,
                 authToken);
         }
@@ -582,7 +591,7 @@ namespace Meowtrix.PixivApi
             {
                 Headers =
                 {
-                    Referrer = new Uri("https://app-api.pixiv.net/")
+                    Referrer = s_baseUri
                 }
             };
 
