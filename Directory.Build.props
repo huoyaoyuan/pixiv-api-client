@@ -6,8 +6,11 @@
     <BaseIntermediateOutputPath>$(MSBuildThisFileDirectory)Artifact\obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
     <PackageOutputPath>$(MSBuildThisFileDirectory)Artifact\Packages\$(Configuration)</PackageOutputPath>
     <AppxPackageDir>$(MSBuildThisFileDirectory)Artifacts\AppPackages\</AppxPackageDir>
-  </PropertyGroup>
 
+    <AnalysisLevel>5</AnalysisLevel>
+    <AnalysisMode>AllEnabledByDefault</AnalysisMode>
+  </PropertyGroup>
+  
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="3.3.0" PrivateAssets="All" />
   </ItemGroup>
