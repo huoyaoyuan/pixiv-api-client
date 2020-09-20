@@ -244,35 +244,41 @@ namespace Meowtrix.PixivApi
 
         public Task<UserDetail> GetUserDetailAsync(
             int userId,
-            string? authToken = null)
+            string? authToken = null,
+            CancellationToken cancellation = default)
         {
             return InvokeApiAsync<UserDetail>(
                 $"/v1/user/detail?user_id={userId}",
                 HttpMethod.Get,
-                authToken: authToken);
+                authToken: authToken,
+                cancellation: cancellation);
         }
 
         public Task<IllustDetailResponse> GetIllustDetailAsync(
             int illustId,
-            string? authToken = null)
+            string? authToken = null,
+            CancellationToken cancellation = default)
         {
             return InvokeApiAsync<IllustDetailResponse>(
                 $"/v1/illust/detail?illust_id={illustId}",
                 HttpMethod.Get,
-                authToken: authToken);
+                authToken: authToken,
+                cancellation: cancellation);
         }
 
         public Task<UserIllusts> GetUserIllustsAsync(
             int userId,
             UserIllustType illustType = UserIllustType.Illustrations,
             int offset = 0,
-            string? authToken = null)
+            string? authToken = null,
+            CancellationToken cancellation = default)
         {
             return InvokeApiAsync<UserIllusts>(
                 $"/v1/user/illusts?user_id={userId}"
                 + $"&type={illustType.ToQueryString()}&offset={offset}",
                 HttpMethod.Get,
-                authToken: authToken);
+                authToken: authToken,
+                cancellation: cancellation);
         }
 
         public Task<UserIllusts> GetUserBookmarkIllustsAsync(
@@ -280,7 +286,8 @@ namespace Meowtrix.PixivApi
             Visibility restrict = Visibility.Public,
             int? maxBookmarkId = null,
             string? tag = null,
-            string? authToken = null)
+            string? authToken = null,
+            CancellationToken cancellation = default)
         {
             string url = $"/v1/user/bookmarks/illust?user_id={userId}&restrict={restrict.ToQueryString()}";
             if (maxBookmarkId != null)
@@ -290,37 +297,43 @@ namespace Meowtrix.PixivApi
             return InvokeApiAsync<UserIllusts>(
                 url,
                 HttpMethod.Get,
-                authToken);
+                authToken,
+                cancellation: cancellation);
         }
 
         public Task<UserIllusts> GetIllustFollowAsync(
             Visibility restrict = Visibility.Public,
             int offset = 0,
-            string? authToken = null)
+            string? authToken = null,
+            CancellationToken cancellation = default)
         {
             return InvokeApiAsync<UserIllusts>(
                 $"/v2/illust/follow?restrict={restrict.ToQueryString()}&offset={offset}",
                 HttpMethod.Get,
-                authToken);
+                authToken,
+                cancellation: cancellation);
         }
 
         public Task<IllustComments> GetIllustCommentsAsync(
             int illustId,
             int offset = 0,
             bool includeTotalComments = false,
-            string? authToken = null)
+            string? authToken = null,
+            CancellationToken cancellation = default)
         {
             return InvokeApiAsync<IllustComments>(
                 $"/v1/illust/comments?illust_id={illustId}&offset={offset}&include_total_comments={(includeTotalComments ? "true" : "false")}",
                 HttpMethod.Get,
-                authToken);
+                authToken,
+                cancellation: cancellation);
         }
 
         public Task<PostIllustCommentResult> PostIllustCommentAsync(
             int illustId,
             string comment,
             int? parentCommentId = null,
-            string? authToken = null)
+            string? authToken = null,
+            CancellationToken cancellation = default)
         {
             var data = new Dictionary<string, string>
             {
@@ -335,13 +348,15 @@ namespace Meowtrix.PixivApi
                 "/v1/illust/comment/add",
                 HttpMethod.Post,
                 authToken,
-                body: new FormUrlEncodedContent(data!));
+                body: new FormUrlEncodedContent(data!),
+                cancellation: cancellation);
         }
 
         public Task<UserIllusts> GetIllustRelatedAsync(
             int illustId,
             IEnumerable<int>? seedIllustIds = null,
-            string? authToken = null)
+            string? authToken = null,
+            CancellationToken cancellation = default)
         {
             string url = $"/v2/illust/related?illust_id={illustId}";
             if (seedIllustIds != null)
@@ -351,7 +366,8 @@ namespace Meowtrix.PixivApi
             return InvokeApiAsync<UserIllusts>(
                 url,
                 HttpMethod.Get,
-                authToken);
+                authToken,
+                cancellation: cancellation);
         }
 
         public Task<RecommendedIllusts> GetRecommendedIllustsAsync(
@@ -363,7 +379,8 @@ namespace Meowtrix.PixivApi
             bool includeRankingIllusts = false,
             IEnumerable<int>? bookmarkIllustIds = null,
             bool includePrivacyPolicy = false,
-            string? authToken = null)
+            string? authToken = null,
+            CancellationToken cancellation = default)
         {
             string url = authToken is null
                 ? "/v1/illust/recommended-nologin"
@@ -387,14 +404,16 @@ namespace Meowtrix.PixivApi
             return InvokeApiAsync<RecommendedIllusts>(
                 url,
                 HttpMethod.Get,
-                authToken);
+                authToken,
+                cancellation: cancellation);
         }
 
         public Task<UserIllusts> GetIllustRankingAsync(
             IllustRankingMode mode = IllustRankingMode.Day,
             DateTime? date = null,
             int offset = 0,
-            string? authToken = null)
+            string? authToken = null,
+            CancellationToken cancellation = default)
         {
             string url = $"/v1/illust/ranking?mode={mode.ToQueryString()}"
                 + $"&offset={offset}";
@@ -404,16 +423,19 @@ namespace Meowtrix.PixivApi
             return InvokeApiAsync<UserIllusts>(
                 url,
                 HttpMethod.Get,
-                authToken);
+                authToken,
+                cancellation: cancellation);
         }
 
         public Task<TrendingTagsIllust> GetTrendingTagsIllustAsync(
-            string? authToken = null)
+            string? authToken = null,
+            CancellationToken cancellation = default)
         {
             return InvokeApiAsync<TrendingTagsIllust>(
                 $"/v1/trending-tags/illust",
                 HttpMethod.Get,
-                authToken);
+                authToken,
+                cancellation: cancellation);
         }
 
         public Task<SearchIllustResult> SearchIllustsAsync(
@@ -425,7 +447,8 @@ namespace Meowtrix.PixivApi
             DateTime? startDate = null,
             DateTime? endDate = null,
             int offset = 0,
-            string? authToken = null)
+            string? authToken = null,
+            CancellationToken cancellation = default)
         {
             string url = $"/v1/search/illust?word={HttpUtility.UrlEncode(word)}&search_target={searchTarget.ToQueryString()}"
                 + $"&sort={sort.ToQueryString()}&offset={offset}";
@@ -441,7 +464,8 @@ namespace Meowtrix.PixivApi
             return InvokeApiAsync<SearchIllustResult>(
                 url,
                 HttpMethod.Get,
-                authToken);
+                authToken,
+                cancellation: cancellation);
         }
 
         public Task AddIllustBookmarkAsync(
@@ -486,36 +510,42 @@ namespace Meowtrix.PixivApi
         public Task<UserBookmarkTags> GetUserBookmarkTagsIllustAsync(
             Visibility restrict = Visibility.Public,
             int offset = 0,
-            string? authToken = null)
+            string? authToken = null,
+            CancellationToken cancellation = default)
         {
             return InvokeApiAsync<UserBookmarkTags>(
                 $"/v1/user/bookmark-tags/illust?restrict={restrict.ToQueryString()}&offset={offset}",
                 HttpMethod.Get,
-                authToken);
+                authToken,
+                cancellation: cancellation);
         }
 
         public Task<UserFollowList> GetUserFollowingsAsync(
             int userId,
             Visibility restrict = Visibility.Public,
             int offset = 0,
-            string? authToken = null)
+            string? authToken = null,
+            CancellationToken cancellation = default)
         {
             return InvokeApiAsync<UserFollowList>(
                 $"/v1/user/following?user_id={userId}&restrict={restrict.ToQueryString()}&offset={offset}",
                 HttpMethod.Get,
-                authToken);
+                authToken,
+                cancellation: cancellation);
         }
 
         public Task<UserFollowList> GetUserFollowersAsync(
             int userId,
             Visibility restrict = Visibility.Public,
             int offset = 0,
-            string? authToken = null)
+            string? authToken = null,
+            CancellationToken cancellation = default)
         {
             return InvokeApiAsync<UserFollowList>(
                 $"/v1/user/follower?user_id={userId}&restrict={restrict.ToQueryString()}&offset={offset}",
                 HttpMethod.Get,
-                authToken);
+                authToken,
+                cancellation: cancellation);
         }
 
         public Task AddUserFollowAsync(
@@ -553,12 +583,14 @@ namespace Meowtrix.PixivApi
         public Task<UserFollowList> GetMyPixivUsersAsync(
             int userId,
             int offset = 0,
-            string? authToken = null)
+            string? authToken = null,
+            CancellationToken cancellation = default)
         {
             return InvokeApiAsync<UserFollowList>(
                 $"/v1/user/mypixiv?user_id={userId}&offset={offset}",
                 HttpMethod.Get,
-                authToken);
+                authToken,
+                cancellation: cancellation);
         }
 
         // api v2 doesn't return the same structure with v1
@@ -577,15 +609,18 @@ namespace Meowtrix.PixivApi
 
         public Task<AnimatedPictureMetadata> GetAnimatedPictureMetadataAsync(
             int illustId,
-            string? authToken = null)
+            string? authToken = null,
+            CancellationToken cancellation = default)
         {
             return InvokeApiAsync<AnimatedPictureMetadata>(
                 $"/v1/ugoira/metadata?illust_id={illustId}",
                 HttpMethod.Get,
-                authToken);
+                authToken,
+                cancellation: cancellation);
         }
 
-        public async Task<HttpResponseMessage> GetImageAsync(Uri imageUri)
+        public async Task<HttpResponseMessage> GetImageAsync(Uri imageUri,
+            CancellationToken cancellation = default)
         {
             using var request = new HttpRequestMessage(HttpMethod.Get, imageUri)
             {
@@ -595,17 +630,19 @@ namespace Meowtrix.PixivApi
                 }
             };
 
-            return (await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false))
+            return (await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellation).ConfigureAwait(false))
                 .EnsureSuccessStatusCode();
         }
 
-        public async ValueTask<T?> GetNextPageAsync<T>(T previous, string? authToken = null)
+        public async ValueTask<T?> GetNextPageAsync<T>(T previous, string? authToken = null,
+            CancellationToken cancellation = default)
             where T : class, IHasNextPage
         {
             if (previous.NextUrl is null)
                 return null;
 
-            return await InvokeApiAsync<T>(previous.NextUrl, HttpMethod.Get, authToken).ConfigureAwait(false);
+            return await InvokeApiAsync<T>(previous.NextUrl, HttpMethod.Get, authToken, cancellation: cancellation)
+                .ConfigureAwait(false);
         }
     }
 }
