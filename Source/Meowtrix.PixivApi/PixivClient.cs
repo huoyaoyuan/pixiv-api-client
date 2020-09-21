@@ -178,9 +178,10 @@ namespace Meowtrix.PixivApi
 #endif
         public int CurrentUserId => CurrentUser?.Id ?? throw new InvalidOperationException("No user login.");
 
-        internal async IAsyncEnumerable<Illust> ToAsyncEnumerable(Func<string, Task<UserIllusts>> task)
+        internal async IAsyncEnumerable<Illust> ToAsyncEnumerable(Func<string, CancellationToken, Task<UserIllusts>> task,
+            [EnumeratorCancellation] CancellationToken cancellation = default)
         {
-            var response = await task(await CheckTokenAsync()).ConfigureAwait(false);
+            var response = await task(await CheckTokenAsync(), cancellation).ConfigureAwait(false);
 
             while (response is not null)
             {
@@ -188,36 +189,47 @@ namespace Meowtrix.PixivApi
                     yield return new Illust(this, r);
 
                 response = await Api.GetNextPageAsync(response,
-                    await CheckTokenAsync()).ConfigureAwait(false);
+                    await CheckTokenAsync(),
+                    cancellation: cancellation).ConfigureAwait(false);
             }
         }
 
-        public IAsyncEnumerable<Illust> GetMyFollowingIllustsAsync(Visibility visibility = Visibility.Public)
+        public IAsyncEnumerable<Illust> GetMyFollowingIllustsAsync(Visibility visibility = Visibility.Public,
+            CancellationToken cancellation = default)
         {
-            return ToAsyncEnumerable(auth
+            return ToAsyncEnumerable((auth, c)
                 => Api.GetIllustFollowAsync(visibility,
-                authToken: auth));
+                authToken: auth,
+                cancellation: c),
+                cancellation);
         }
 
-        public IAsyncEnumerable<Illust> GetMyBookmarksAsync(Visibility visibility = Visibility.Public)
+        public IAsyncEnumerable<Illust> GetMyBookmarksAsync(Visibility visibility = Visibility.Public,
+            CancellationToken cancellation = default)
         {
-            return ToAsyncEnumerable(auth
+            return ToAsyncEnumerable((auth, c)
                 => Api.GetUserBookmarkIllustsAsync(CurrentUserId, visibility,
-                authToken: auth));
+                authToken: auth,
+                cancellation: c),
+                cancellation);
         }
 
-        public async Task<UserDetailInfo> GetUserDetailAsync(int userId)
+        public async Task<UserDetailInfo> GetUserDetailAsync(int userId,
+            CancellationToken cancellation = default)
         {
             var response = await Api.GetUserDetailAsync(userId,
-                await CheckTokenAsync()).ConfigureAwait(false);
+                await CheckTokenAsync(),
+                cancellation: cancellation).ConfigureAwait(false);
 
             return new UserDetailInfo(this, response);
         }
 
-        public async Task<Illust> GetIllustDetailAsync(int illustId)
+        public async Task<Illust> GetIllustDetailAsync(int illustId,
+            CancellationToken cancellation = default)
         {
             var response = await Api.GetIllustDetailAsync(illustId,
-                await CheckTokenAsync()).ConfigureAwait(false);
+                await CheckTokenAsync(),
+                cancellation: cancellation).ConfigureAwait(false);
 
             return new Illust(this, response.Illust);
         }

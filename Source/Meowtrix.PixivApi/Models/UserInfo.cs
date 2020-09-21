@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Meowtrix.PixivApi.Json;
 
@@ -53,18 +54,22 @@ namespace Meowtrix.PixivApi.Models
 
         public ImageInfo Avatar => new ImageInfo(_avatarUri, Client.Api);
 
-        public virtual ValueTask<UserDetailInfo> GetDetailAsync() => new(Client.GetUserDetailAsync(Id));
+        public virtual ValueTask<UserDetailInfo> GetDetailAsync(CancellationToken cancellation = default)
+            => new(Client.GetUserDetailAsync(Id, cancellation));
 
-        public IAsyncEnumerable<Illust> GetIllustsAsync(UserIllustType illustType = UserIllustType.Illustrations)
+        public IAsyncEnumerable<Illust> GetIllustsAsync(UserIllustType illustType = UserIllustType.Illustrations,
+            CancellationToken cancellation = default)
         {
-            return Client.ToAsyncEnumerable(auth
-                => Client.Api.GetUserIllustsAsync(Id, illustType, authToken: auth));
+            return Client.ToAsyncEnumerable((auth, c)
+                => Client.Api.GetUserIllustsAsync(Id, illustType, authToken: auth, cancellation: c),
+                cancellation);
         }
 
-        public IAsyncEnumerable<Illust> GetBookmarksAsync()
+        public IAsyncEnumerable<Illust> GetBookmarksAsync(CancellationToken cancellation = default)
         {
-            return Client.ToAsyncEnumerable(auth
-                => Client.Api.GetUserBookmarkIllustsAsync(Id));
+            return Client.ToAsyncEnumerable((auth, c)
+                => Client.Api.GetUserBookmarkIllustsAsync(Id, cancellation: c),
+                cancellation);
         }
     }
 }

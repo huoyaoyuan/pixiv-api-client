@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Meowtrix.PixivApi.Json;
 
@@ -16,7 +17,11 @@ namespace Meowtrix.PixivApi.Models
             _workspace = api.Workspace;
         }
 
-        public override ValueTask<UserDetailInfo> GetDetailAsync() => new(this);
+        public override ValueTask<UserDetailInfo> GetDetailAsync(CancellationToken cancellation = default)
+        {
+            cancellation.ThrowIfCancellationRequested();
+            return new(this);
+        }
 
         public Uri? WebPage => _profile.WebPage;
         public Gender Gender => _profile.Gender switch

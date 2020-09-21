@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using Meowtrix.PixivApi.Json;
 
@@ -85,10 +87,11 @@ namespace Meowtrix.PixivApi.Models
 
         public IReadOnlyList<IllustPage> Pages { get; }
 
-        public async IAsyncEnumerable<Comment> GetCommentsAsync()
+        public async IAsyncEnumerable<Comment> GetCommentsAsync([EnumeratorCancellation] CancellationToken cancellation = default)
         {
             var response = await _client.Api.GetIllustCommentsAsync(Id,
-                authToken: await _client.CheckTokenAsync()).ConfigureAwait(false);
+                authToken: await _client.CheckTokenAsync(),
+                cancellation: cancellation).ConfigureAwait(false);
 
             while (response is not null)
             {
@@ -96,7 +99,8 @@ namespace Meowtrix.PixivApi.Models
                     yield return new Comment(_client, this, c);
 
                 response = await _client.Api.GetNextPageAsync(response,
-                    await _client.CheckTokenAsync()).ConfigureAwait(false);
+                    await _client.CheckTokenAsync(),
+                    cancellation).ConfigureAwait(false);
             }
         }
 
@@ -110,7 +114,7 @@ namespace Meowtrix.PixivApi.Models
 
         public bool IsAnimated { get; }
 
-        public async Task<AnimatedPictureDetail> GetAnimatedDetail()
+        public async Task<AnimatedPictureDetail> GetAnimatedDetailAsync()
         {
             if (!IsAnimated)
                 throw new InvalidOperationException("This illust is not an animated picture.");

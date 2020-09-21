@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.IO;
 using System.IO.Compression;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Meowtrix.PixivApi.Json;
 
@@ -21,28 +22,35 @@ namespace Meowtrix.PixivApi.Models
             Frames = api.UgoiraMetadata.Frames;
         }
 
-        public Task<HttpResponseMessage> GetZipAsync()
-            => _client.Api.GetImageAsync(_zipUrl);
+        public Task<HttpResponseMessage> GetZipAsync(CancellationToken cancellation = default)
+            => _client.Api.GetImageAsync(_zipUrl, cancellation);
 
-        public async Task<ZipArchive> GetZipArchiveAsync()
+        public async Task<ZipArchive> GetZipArchiveAsync(CancellationToken cancellation = default)
         {
-            var response = (await GetZipAsync().ConfigureAwait(false))
+            var response = (await GetZipAsync(cancellation).ConfigureAwait(false))
                 .EnsureSuccessStatusCode();
+#pragma warning disable CA2016 // Overload not present in net461
             return new ZipArchive(await response.Content.ReadAsStreamAsync().ConfigureAwait(false),
+#pragma warning restore CA2016 // Overload not present in net461
                 ZipArchiveMode.Read);
         }
 
         public ImmutableArray<AnimatedPictureMetadata.Frame> Frames { get; }
 
-        public async Task<IEnumerable<(Stream stream, TimeSpan frameTime)>> ExtractFramesAsync()
+        public async Task<IEnumerable<(Stream stream, TimeSpan frameTime)>> ExtractFramesAsync(
+            CancellationToken cancellation = default)
         {
-            return Extract(await GetZipArchiveAsync().ConfigureAwait(false));
+            return Extract(await GetZipArchiveAsync(cancellation).ConfigureAwait(false),
+                cancellation);
 
-            IEnumerable<(Stream stream, TimeSpan frameTime)> Extract(ZipArchive archive)
+            IEnumerable<(Stream stream, TimeSpan frameTime)> Extract(ZipArchive archive,
+                CancellationToken cancellation = default)
             {
                 using (archive)
                     foreach (var frame in Frames)
                     {
+                        cancellation.ThrowIfCancellationRequested();
+
                         var stream = (archive.GetEntry(frame.File)
                             ?? throw new InvalidOperationException("Corrupt metadata."))
                             .Open();
