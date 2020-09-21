@@ -161,9 +161,7 @@ namespace Meowtrix.PixivApi
 
             if (response.StatusCode == HttpStatusCode.BadRequest)
             {
-#pragma warning disable CA2016 // Overload not present in net461
-                string original = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-#pragma warning restore CA2016
+                string original = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
                 var error = JsonSerializer.Deserialize<PixivAuthErrorMessage>(original, s_serializerOptions);
                 throw new PixivAuthException(original, error, error?.Errors?.System?.Message ?? original);
             }
@@ -228,9 +226,7 @@ namespace Meowtrix.PixivApi
 
             if (response.StatusCode == HttpStatusCode.BadRequest)
             {
-#pragma warning disable CA2016 // Overload not present in net461
-                string original = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-#pragma warning restore CA2016
+                string original = await response.Content.ReadAsStringAsync(cancellation).ConfigureAwait(false);
                 var error = JsonSerializer.Deserialize<PixivApiErrorMessage>(original, s_serializerOptions);
                 throw new PixivApiException(original, error, error?.Error?.Message ?? original);
             }

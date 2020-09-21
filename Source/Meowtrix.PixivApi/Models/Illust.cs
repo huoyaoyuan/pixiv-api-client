@@ -18,9 +18,11 @@ namespace Meowtrix.PixivApi.Models
             _client = client;
             Id = api.Id;
             Title = api.Title;
+#pragma warning disable IDE0079 // 请删除不必要的忽略
 #pragma warning disable CA1307 // 指定 StringComparison
             Description = api.Caption.Replace("<br/>", string.Empty);
 #pragma warning restore CA1307 // 指定 StringComparison
+#pragma warning restore IDE0079 // 请删除不必要的忽略
             IsR18 = api.XRestrict > 0;
             Tags = api.Tags.Select(t => t.Name).ToArray();
             Created = api.CreateDate;

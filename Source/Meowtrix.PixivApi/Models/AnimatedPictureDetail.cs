@@ -29,9 +29,7 @@ namespace Meowtrix.PixivApi.Models
         {
             var response = (await GetZipAsync(cancellation).ConfigureAwait(false))
                 .EnsureSuccessStatusCode();
-#pragma warning disable CA2016 // Overload not present in net461
-            return new ZipArchive(await response.Content.ReadAsStreamAsync().ConfigureAwait(false),
-#pragma warning restore CA2016 // Overload not present in net461
+            return new ZipArchive(await response.Content.ReadAsStreamAsync(cancellation).ConfigureAwait(false),
                 ZipArchiveMode.Read);
         }
 

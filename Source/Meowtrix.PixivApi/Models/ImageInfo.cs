@@ -23,11 +23,9 @@ namespace Meowtrix.PixivApi.Models
         public async Task<Stream> RequestStreamAsync(CancellationToken cancellation = default)
         {
             var response = await RequestAsync(cancellation).ConfigureAwait(false);
-#pragma warning disable CA2016 // Overload not present in net461
             return await response
                 .EnsureSuccessStatusCode()
-                .Content.ReadAsStreamAsync()
-#pragma warning restore CA2016 // Overload not present in net461
+                .Content.ReadAsStreamAsync(cancellation)
                 .ConfigureAwait(false);
         }
     }
