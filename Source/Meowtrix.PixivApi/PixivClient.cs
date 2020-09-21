@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.Http;
 using System.Runtime.CompilerServices;
@@ -69,12 +70,10 @@ namespace Meowtrix.PixivApi
         private string? _accessToken;
         private string? _refreshToken;
 
-#if NET5_0
-        [System.Diagnostics.CodeAnalysis.MemberNotNullWhen(true,
+        [MemberNotNullWhen(true,
             nameof(_accessToken),
             nameof(_refreshToken),
             nameof(CurrentUser))]
-#endif
         public bool IsLogin
         {
             get
@@ -125,9 +124,8 @@ namespace Meowtrix.PixivApi
         }
 
 
-#if NET5_0
-        [System.Diagnostics.CodeAnalysis.MemberNotNull(nameof(CurrentUser))]
-#endif
+
+        [MemberNotNull(nameof(CurrentUser))]
         private async ValueTask<string> CheckTokenAsyncCore(int epsilonTimeSeconds = 60)
         {
             if (!IsLogin)
@@ -173,9 +171,8 @@ namespace Meowtrix.PixivApi
 
         public LoginUser? CurrentUser { get; private set; }
 
-#if NET5_0
-        [System.Diagnostics.CodeAnalysis.MemberNotNull(nameof(CurrentUser))]
-#endif
+
+        [MemberNotNull(nameof(CurrentUser))]
         public int CurrentUserId => CurrentUser?.Id ?? throw new InvalidOperationException("No user login.");
 
         internal async IAsyncEnumerable<Illust> ToAsyncEnumerable(Func<string, CancellationToken, Task<UserIllusts>> task,
