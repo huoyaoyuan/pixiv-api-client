@@ -24,6 +24,14 @@ namespace Meowtrix.PixivApi.Models
             }
         }
 
+        public static IAsyncEnumerable<Illust> Age(this IAsyncEnumerable<Illust> source, AgeRestriction age)
+            => age switch
+            {
+                AgeRestriction.AllAge => source.AllAge(),
+                AgeRestriction.R18 => source.R18(),
+                _ => source
+            };
+
         public static async IAsyncEnumerable<Illust> WithTag(this IAsyncEnumerable<Illust> source, string tag)
         {
             await foreach (var i in source.ConfigureAwait(false))
