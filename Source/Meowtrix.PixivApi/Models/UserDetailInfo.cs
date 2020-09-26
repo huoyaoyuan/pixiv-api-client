@@ -34,6 +34,7 @@ namespace Meowtrix.PixivApi.Models
 
         public int TotalFollowUsers => _profile.TotalFollowUsers;
         public int TotalMyPixivUsers => _profile.TotalMyPixivUsers;
+        public int TotalIllusts => _profile.TotalIllusts;
         public int TotalManga => _profile.TotalManga;
         public int TotalNovels => _profile.TotalNovels;
         public int TotalIllustBookmarksPublic => _profile.TotalIllustBookmarksPublic;
