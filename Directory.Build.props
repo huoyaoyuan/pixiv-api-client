@@ -10,9 +10,5 @@
     <AnalysisLevel>5</AnalysisLevel>
     <AnalysisMode>AllEnabledByDefault</AnalysisMode>
   </PropertyGroup>
-  
-  <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="3.3.0" PrivateAssets="All" />
-  </ItemGroup>
 
 </Project>
