@@ -57,6 +57,7 @@ namespace Meowtrix.PixivApi
 
         private PixivApiClient(bool useProxy, IWebProxy? proxy)
         {
+#pragma warning disable CA5399 // false positive on net461
             _httpClient = new HttpClient(new HttpClientHandler
             {
                 Proxy = proxy,
@@ -66,6 +67,7 @@ namespace Meowtrix.PixivApi
                 BaseAddress = s_baseUri
             };
         }
+#pragma warning restore CA5399
         #endregion
 
         private readonly HttpClient _httpClient;

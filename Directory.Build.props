@@ -9,6 +9,9 @@
 
     <AnalysisLevel>5</AnalysisLevel>
     <AnalysisMode>AllEnabledByDefault</AnalysisMode>
+
+    <!-- Can't be disabled in editorconfig -->
+    <NoWarn>$(NoWarn);CA1014</NoWarn>
   </PropertyGroup>
 
 </Project>
