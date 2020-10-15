@@ -3,8 +3,6 @@ using System.Collections.Immutable;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-#pragma warning disable IDE1006 // Naming style
-
 namespace Meowtrix.PixivApi.Json
 {
     public sealed record AuthResponse(
