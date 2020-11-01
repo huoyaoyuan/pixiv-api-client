@@ -9,6 +9,7 @@
 
     <AnalysisLevel>5</AnalysisLevel>
     <AnalysisMode>AllEnabledByDefault</AnalysisMode>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
 
     <!-- Can't be disabled in editorconfig -->
     <NoWarn>$(NoWarn);CA1014</NoWarn>
