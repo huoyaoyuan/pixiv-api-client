@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Security.Cryptography;
 using System.Text;
@@ -80,6 +81,8 @@ namespace Meowtrix.PixivApi
         private const string UserAgent = "PixivAndroidApp/5.0.64 (Android 6.0)";
         private const string HashSecret = "28c1fdd170a5204386cb1313c7077b34f83e4aaf4aa829ce78c231e05b0bae2c";
         private const string AuthUrl = "https://oauth.secure.pixiv.net/auth/token";
+
+        public HttpRequestHeaders DefaultRequestHeaders => _httpClient.DefaultRequestHeaders;
 
         public async Task<(DateTimeOffset authTime, AuthResponse authResponse)> AuthAsync(
             string username,

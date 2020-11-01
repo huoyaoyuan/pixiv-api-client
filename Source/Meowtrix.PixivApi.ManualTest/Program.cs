@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.Net;
 using System.Threading.Tasks;
 using Meowtrix.PixivApi.Json;
@@ -19,6 +20,8 @@ namespace Meowtrix.PixivApi.ManualTest
             using var client = string.IsNullOrWhiteSpace(proxy)
                 ? new PixivApiClient()
                 : new PixivApiClient(new WebProxy($"http://{proxy}"));
+
+            client.DefaultRequestHeaders.AcceptLanguage.Add(new(CultureInfo.CurrentCulture.Name));
 
             Console.Write("Saved access token:");
             string? authToken = Console.ReadLine();

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Net;
 using System.Net.Http;
 using System.Runtime.CompilerServices;
@@ -174,6 +175,24 @@ namespace Meowtrix.PixivApi
 
         [MemberNotNull(nameof(CurrentUser))]
         public int CurrentUserId => CurrentUser?.Id ?? throw new InvalidOperationException("No user login.");
+
+        private CultureInfo? _requestLanguage;
+        public CultureInfo? RequestLanguage
+        {
+            get => _requestLanguage;
+            set
+            {
+                if (_requestLanguage != value)
+                {
+                    _requestLanguage = value;
+                    Api.DefaultRequestHeaders.AcceptLanguage.Clear();
+                    if (!string.IsNullOrEmpty(value?.Name))
+                        Api.DefaultRequestHeaders.AcceptLanguage.Add(new(value.Name));
+                }
+            }
+        }
+
+        public void UseCurrentCulture() => RequestLanguage = CultureInfo.CurrentCulture;
 
         internal async IAsyncEnumerable<Illust> ToAsyncEnumerable(Func<string, CancellationToken, Task<UserIllusts>> task,
             [EnumeratorCancellation] CancellationToken cancellation = default)
