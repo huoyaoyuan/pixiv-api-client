@@ -24,7 +24,7 @@ namespace Meowtrix.PixivApi.Models
 #pragma warning restore CA1307 // 指定 StringComparison
 #pragma warning restore IDE0079 // 请删除不必要的忽略
             IsR18 = api.XRestrict > 0;
-            Tags = api.Tags.Select(t => t.Name).ToArray();
+            Tags = api.Tags.Select(t => new Tag(client, t)).ToArray();
             Created = api.CreateDate;
             SizePixels = new Size(api.Width, api.Height);
             TotalView = api.TotalView;
@@ -54,7 +54,7 @@ namespace Meowtrix.PixivApi.Models
         public string Title { get; }
         public string Description { get; }
         public bool IsR18 { get; }
-        public IReadOnlyCollection<string> Tags { get; }
+        public IReadOnlyCollection<Tag> Tags { get; }
         public DateTimeOffset Created { get; }
         public Size SizePixels { get; }
         public int TotalView { get; }

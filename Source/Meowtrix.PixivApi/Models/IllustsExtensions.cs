@@ -38,7 +38,7 @@ namespace Meowtrix.PixivApi.Models
         {
             await foreach (var i in source.ConfigureAwait(false))
             {
-                if (i.Tags.Contains(tag))
+                if (i.Tags.Any(t => t.Name == tag))
                     yield return i;
             }
         }
@@ -47,7 +47,7 @@ namespace Meowtrix.PixivApi.Models
         {
             await foreach (var i in source.ConfigureAwait(false))
             {
-                if (!i.Tags.Contains(tag))
+                if (!i.Tags.Any(t => t.Name == tag))
                     yield return i;
             }
         }
