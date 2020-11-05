@@ -250,5 +250,22 @@ namespace Meowtrix.PixivApi
 
             return new Illust(this, response.Illust);
         }
+
+        public IAsyncEnumerable<Illust> SearchIllustsAsync(
+            string word,
+            IllustSearchTarget searchTarget = IllustSearchTarget.PartialTag,
+            IllustFilterOptions? options = null,
+            CancellationToken cancellation = default)
+        {
+            return ToAsyncEnumerable(async (auth, c)
+                => await Api.SearchIllustsAsync(
+                    word, searchTarget,
+                    options?.SortMode ?? IllustSortMode.Latest,
+                    options?.MaxBookmarkCount,
+                    options?.MinBookmarkCount,
+                    options?.StartDate,
+                    options?.EndDate,
+                    cancellation: c).ConfigureAwait(false), cancellation);
+        }
     }
 }
