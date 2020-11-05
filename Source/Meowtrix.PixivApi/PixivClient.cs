@@ -267,5 +267,17 @@ namespace Meowtrix.PixivApi
                     options?.EndDate,
                     cancellation: c).ConfigureAwait(false), cancellation);
         }
+
+        public IAsyncEnumerable<Illust> GetIllustRankingAsync(
+            IllustRankingMode rankingMode = IllustRankingMode.Day,
+            DateTime? date = null,
+            CancellationToken cancellation = default)
+        {
+            return ToAsyncEnumerable(async (auth, c)
+                => await Api.GetIllustRankingAsync(
+                    rankingMode, date,
+                    authToken: auth,
+                    cancellation: cancellation).ConfigureAwait(false), cancellation);
+        }
     }
 }
