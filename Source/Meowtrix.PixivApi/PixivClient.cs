@@ -194,14 +194,15 @@ namespace Meowtrix.PixivApi
 
         public void UseCurrentCulture() => RequestLanguage = CultureInfo.CurrentCulture;
 
-        internal async IAsyncEnumerable<Illust> ToAsyncEnumerable(Func<string, CancellationToken, Task<UserIllusts>> task,
+        internal async IAsyncEnumerable<Illust> ToAsyncEnumerable(
+            Func<string, CancellationToken, Task<IHasNextPage<IllustDetail>>> task,
             [EnumeratorCancellation] CancellationToken cancellation = default)
         {
             var response = await task(await CheckTokenAsync(), cancellation).ConfigureAwait(false);
 
             while (response is not null)
             {
-                foreach (var r in response.Illusts)
+                foreach (var r in response.Items)
                     yield return new Illust(this, r);
 
                 response = await Api.GetNextPageAsync(response,
@@ -213,20 +214,20 @@ namespace Meowtrix.PixivApi
         public IAsyncEnumerable<Illust> GetMyFollowingIllustsAsync(Visibility visibility = Visibility.Public,
             CancellationToken cancellation = default)
         {
-            return ToAsyncEnumerable((auth, c)
-                => Api.GetIllustFollowAsync(visibility,
+            return ToAsyncEnumerable(async (auth, c)
+                => await Api.GetIllustFollowAsync(visibility,
                 authToken: auth,
-                cancellation: c),
+                cancellation: c).ConfigureAwait(false),
                 cancellation);
         }
 
         public IAsyncEnumerable<Illust> GetMyBookmarksAsync(Visibility visibility = Visibility.Public,
             CancellationToken cancellation = default)
         {
-            return ToAsyncEnumerable((auth, c)
-                => Api.GetUserBookmarkIllustsAsync(CurrentUserId, visibility,
+            return ToAsyncEnumerable(async (auth, c)
+                => await Api.GetUserBookmarkIllustsAsync(CurrentUserId, visibility,
                 authToken: auth,
-                cancellation: c),
+                cancellation: c).ConfigureAwait(false),
                 cancellation);
         }
 
