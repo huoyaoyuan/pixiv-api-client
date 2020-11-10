@@ -8,8 +8,10 @@ namespace Meowtrix.PixivApi.Models
         private readonly PixivClient _client;
         private readonly Uri _original, _medium, _squareMedium, _large;
 
-        internal IllustPage(PixivClient client, MetaPageImageUrls urls)
+        internal IllustPage(Illust illust, int index, PixivClient client, MetaPageImageUrls urls)
         {
+            Illust = illust;
+            Index = index;
             _client = client;
 
             _original = urls.Original;
@@ -18,8 +20,10 @@ namespace Meowtrix.PixivApi.Models
             _large = urls.Large;
         }
 
-        internal IllustPage(PixivClient client, PreviewImageUrls urls, Uri original)
+        internal IllustPage(Illust illust, int index, PixivClient client, PreviewImageUrls urls, Uri original)
         {
+            Illust = illust;
+            Index = index;
             _client = client;
 
             _original = original;
@@ -27,6 +31,9 @@ namespace Meowtrix.PixivApi.Models
             _squareMedium = urls.SquareMedium;
             _large = urls.Large;
         }
+
+        public Illust Illust { get; }
+        public int Index { get; }
 
         public ImageInfo Original => new ImageInfo(_original, _client.Api);
         public ImageInfo Medium => new ImageInfo(_medium, _client.Api);

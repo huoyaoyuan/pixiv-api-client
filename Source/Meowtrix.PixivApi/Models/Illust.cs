@@ -36,14 +36,14 @@ namespace Meowtrix.PixivApi.Models
                 if (api.MetaSinglePage.OriginalImageUrl is null)
                     throw new InvalidOperationException("Corrupt api response");
 
-                Pages = new[] { new IllustPage(_client, api.ImageUrls, api.MetaSinglePage.OriginalImageUrl) };
+                Pages = new[] { new IllustPage(this, 0, _client, api.ImageUrls, api.MetaSinglePage.OriginalImageUrl) };
             }
             else
             {
                 if (api.MetaPages.IsDefault || api.MetaPages.Length != api.PageCount)
                     throw new InvalidOperationException("Corrupt api response");
 
-                Pages = api.MetaPages.Select(p => new IllustPage(_client, p.ImageUrls)).ToArray();
+                Pages = api.MetaPages.Select((p, i) => new IllustPage(this, i, _client, p.ImageUrls)).ToArray();
             }
 
             User = new UserInfo(client, api.User);
