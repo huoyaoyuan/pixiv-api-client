@@ -22,8 +22,6 @@ namespace Meowtrix.PixivApi
         }
     }
 
-#pragma warning disable IDE1006 // Naming style
-
     public sealed class PixivAuthErrorMessage
     {
         public bool HasError { get; init; }
