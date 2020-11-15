@@ -635,15 +635,15 @@ namespace Meowtrix.PixivApi
                 .EnsureSuccessStatusCode();
         }
 
-        public async ValueTask<T?> GetNextPageAsync<T>(T previous, string? authToken = null,
+        public ValueTask<T?> GetNextPageAsync<T>(T previous, string? authToken = null,
             CancellationToken cancellation = default)
             where T : class, IHasNextPage
         {
             if (previous.NextUrl is null)
-                return null;
+                return default;
 
-            return await InvokeApiAsync<T>(previous.NextUrl, HttpMethod.Get, authToken, cancellation: cancellation)
-                .ConfigureAwait(false);
+            // TODO: nullable convariance of task
+            return new(InvokeApiAsync<T>(previous.NextUrl, HttpMethod.Get, authToken, cancellation: cancellation)!);
         }
     }
 }
