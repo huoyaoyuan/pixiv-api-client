@@ -469,6 +469,18 @@ namespace Meowtrix.PixivApi
                 cancellation: cancellation);
         }
 
+        public Task<UsersList> SearchUsersAsync(
+            string word,
+            string? authToken = null,
+            CancellationToken cancellation = default)
+        {
+            return InvokeApiAsync<UsersList>(
+                $"/v1/search/user?word={word}",
+                HttpMethod.Get,
+                authToken,
+                cancellation: cancellation);
+        }
+
         public Task AddIllustBookmarkAsync(
             int illustId,
             Visibility restrict = Visibility.Public,
@@ -521,28 +533,28 @@ namespace Meowtrix.PixivApi
                 cancellation: cancellation);
         }
 
-        public Task<UserFollowList> GetUserFollowingsAsync(
+        public Task<UsersList> GetUserFollowingsAsync(
             int userId,
             Visibility restrict = Visibility.Public,
             int offset = 0,
             string? authToken = null,
             CancellationToken cancellation = default)
         {
-            return InvokeApiAsync<UserFollowList>(
+            return InvokeApiAsync<UsersList>(
                 $"/v1/user/following?user_id={userId}&restrict={restrict.ToQueryString()}&offset={offset}",
                 HttpMethod.Get,
                 authToken,
                 cancellation: cancellation);
         }
 
-        public Task<UserFollowList> GetUserFollowersAsync(
+        public Task<UsersList> GetUserFollowersAsync(
             int userId,
             Visibility restrict = Visibility.Public,
             int offset = 0,
             string? authToken = null,
             CancellationToken cancellation = default)
         {
-            return InvokeApiAsync<UserFollowList>(
+            return InvokeApiAsync<UsersList>(
                 $"/v1/user/follower?user_id={userId}&restrict={restrict.ToQueryString()}&offset={offset}",
                 HttpMethod.Get,
                 authToken,
@@ -581,13 +593,13 @@ namespace Meowtrix.PixivApi
                 }!));
         }
 
-        public Task<UserFollowList> GetMyPixivUsersAsync(
+        public Task<UsersList> GetMyPixivUsersAsync(
             int userId,
             int offset = 0,
             string? authToken = null,
             CancellationToken cancellation = default)
         {
-            return InvokeApiAsync<UserFollowList>(
+            return InvokeApiAsync<UsersList>(
                 $"/v1/user/mypixiv?user_id={userId}&offset={offset}",
                 HttpMethod.Get,
                 authToken,

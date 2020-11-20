@@ -190,7 +190,7 @@ namespace Meowtrix.PixivApi.Json
     public sealed record UserBookmarkTags(ImmutableArray<object> BookmarkTags, Uri? NextUrl)
         : IHasNextPage;
 
-    public sealed record UserFollowList(ImmutableArray<UserPreview> UserPreviews, Uri? NextUrl)
+    public sealed record UsersList(ImmutableArray<UserPreview> UserPreviews, Uri? NextUrl)
         : IHasNextPage<UserPreview>
     {
         ImmutableArray<UserPreview> IHasNextPage<UserPreview>.Items => UserPreviews;
