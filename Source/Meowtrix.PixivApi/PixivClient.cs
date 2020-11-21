@@ -194,9 +194,10 @@ namespace Meowtrix.PixivApi
 
         public void UseCurrentCulture() => RequestLanguage = CultureInfo.CurrentCulture;
 
-        internal async IAsyncEnumerable<Illust> ToAsyncEnumerable(
-            Func<string, CancellationToken, Task<IHasNextPage<IllustDetail>>> task,
+        internal async IAsyncEnumerable<Illust> ToAsyncEnumerable<T>(
+            Func<string, CancellationToken, Task<T>> task,
             [EnumeratorCancellation] CancellationToken cancellation = default)
+            where T : class, IHasNextPage<IllustDetail>
         {
             var response = await task(await CheckTokenAsync(), cancellation).ConfigureAwait(false);
 
