@@ -285,6 +285,7 @@ namespace Meowtrix.PixivApi
                     options?.MinBookmarkCount,
                     options?.StartDate,
                     options?.EndDate,
+                    authToken: auth,
                     cancellation: c).ConfigureAwait(false), cancellation);
         }
 
