@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading;
 using Meowtrix.PixivApi.Json;
 
 namespace Meowtrix.PixivApi.Models
@@ -17,7 +18,8 @@ namespace Meowtrix.PixivApi.Models
         public string Name { get; }
         public string? TranslatedName { get; }
 
-        public IAsyncEnumerable<Illust> GetIllustsAsync(IllustFilterOptions? options = null)
-            => _client.SearchIllustsAsync(Name, IllustSearchTarget.ExactTag, options);
+        public IAsyncEnumerable<Illust> GetIllustsAsync(IllustFilterOptions? options = null,
+            CancellationToken cancellation = default)
+            => _client.SearchIllustsAsync(Name, IllustSearchTarget.ExactTag, options, cancellation);
     }
 }

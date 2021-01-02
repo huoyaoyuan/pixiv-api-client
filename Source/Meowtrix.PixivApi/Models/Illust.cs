@@ -116,13 +116,14 @@ namespace Meowtrix.PixivApi.Models
 
         public bool IsAnimated { get; }
 
-        public async Task<AnimatedPictureDetail> GetAnimatedDetailAsync()
+        public async Task<AnimatedPictureDetail> GetAnimatedDetailAsync(CancellationToken cancellation = default)
         {
             if (!IsAnimated)
                 throw new InvalidOperationException("This illust is not an animated picture.");
 
             var response = await _client.Api.GetAnimatedPictureMetadataAsync(Id,
-                await _client.CheckTokenAsync()).ConfigureAwait(false);
+                await _client.CheckTokenAsync(),
+                cancellation: cancellation).ConfigureAwait(false);
 
             return new AnimatedPictureDetail(_client, response);
         }
