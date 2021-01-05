@@ -57,7 +57,7 @@ namespace Meowtrix.PixivApi.Models
         public virtual ValueTask<UserDetailInfo> GetDetailAsync(CancellationToken cancellation = default)
             => new(Client.GetUserDetailAsync(Id, cancellation));
 
-        public IAsyncEnumerable<Illust> GetIllustsAsync(UserIllustType illustType = UserIllustType.Illustrations,
+        public IAsyncEnumerable<Illust> GetIllustsAsync(UserIllustType? illustType = null,
             CancellationToken cancellation = default)
         {
             return Client.ToAsyncEnumerable(async (auth, c)

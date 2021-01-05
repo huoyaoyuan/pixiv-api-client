@@ -269,14 +269,16 @@ namespace Meowtrix.PixivApi
 
         public Task<UserIllusts> GetUserIllustsAsync(
             int userId,
-            UserIllustType illustType = UserIllustType.Illustrations,
+            UserIllustType? illustType = null,
             int offset = 0,
             string? authToken = null,
             CancellationToken cancellation = default)
         {
+            string url = $"/v1/user/illusts?user_id={userId}&offset={offset}";
+            if (illustType is UserIllustType type)
+                url += $"&type={type.ToQueryString()}";
             return InvokeApiAsync<UserIllusts>(
-                $"/v1/user/illusts?user_id={userId}"
-                + $"&type={illustType.ToQueryString()}&offset={offset}",
+                url,
                 HttpMethod.Get,
                 authToken: authToken,
                 cancellation: cancellation);
