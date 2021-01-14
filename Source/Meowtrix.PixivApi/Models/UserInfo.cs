@@ -68,7 +68,21 @@ namespace Meowtrix.PixivApi.Models
         public IAsyncEnumerable<Illust> GetBookmarksAsync(CancellationToken cancellation = default)
         {
             return Client.ToIllustAsyncEnumerable(async (auth, c)
-                => await Client.Api.GetUserBookmarkIllustsAsync(Id, cancellation: c).ConfigureAwait(false),
+                => await Client.Api.GetUserBookmarkIllustsAsync(Id, authToken: auth, cancellation: c).ConfigureAwait(false),
+                cancellation);
+        }
+
+        public IAsyncEnumerable<UserInfoWithPreview> GetFollowingUsersAsync(CancellationToken cancellation = default)
+        {
+            return Client.ToUserAsyncEnumerable(async (auth, c)
+                => await Client.Api.GetUserFollowingsAsync(Id, Visibility.Public, authToken: auth, cancellation: c).ConfigureAwait(false),
+                cancellation);
+        }
+
+        public IAsyncEnumerable<UserInfoWithPreview> GetFollowerUsersAsync(CancellationToken cancellation = default)
+        {
+            return Client.ToUserAsyncEnumerable(async (auth, c)
+                => await Client.Api.GetUserFollowersAsync(Id, Visibility.Public, authToken: auth, cancellation: c).ConfigureAwait(false),
                 cancellation);
         }
     }
