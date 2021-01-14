@@ -252,6 +252,26 @@ namespace Meowtrix.PixivApi
             return new Illust(this, response.Illust);
         }
 
+        public async IAsyncEnumerable<UserInfoWithPreview> GetMyFollowingUsersAsync(
+            Visibility visibility = Visibility.Public,
+            [EnumeratorCancellation] CancellationToken cancellation = default)
+        {
+            var response = await Api.GetUserFollowingsAsync(CurrentUserId,
+                visibility,
+                authToken: await CheckTokenAsync(),
+                cancellation: cancellation).ConfigureAwait(false);
+
+            while (response is not null)
+            {
+                foreach (var user in response.UserPreviews)
+                    yield return new UserInfoWithPreview(this, user);
+
+                response = await Api.GetNextPageAsync(response,
+                    await CheckTokenAsync(),
+                    cancellation).ConfigureAwait(false);
+            }
+        }
+
         public async IAsyncEnumerable<UserInfoWithPreview> SearchUsersAsync(
             string word,
             [EnumeratorCancellation] CancellationToken cancellation = default)
