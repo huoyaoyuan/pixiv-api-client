@@ -194,7 +194,7 @@ namespace Meowtrix.PixivApi
 
         public void UseCurrentCulture() => RequestLanguage = CultureInfo.CurrentCulture;
 
-        internal async IAsyncEnumerable<Illust> ToAsyncEnumerable<T>(
+        internal async IAsyncEnumerable<Illust> ToIllustAsyncEnumerable<T>(
             Func<string, CancellationToken, Task<T>> task,
             [EnumeratorCancellation] CancellationToken cancellation = default)
             where T : class, IHasNextPage<IllustDetail>
@@ -212,10 +212,28 @@ namespace Meowtrix.PixivApi
             }
         }
 
+        internal async IAsyncEnumerable<UserInfoWithPreview> ToUserAsyncEnumerable<T>(
+            Func<string, CancellationToken, Task<T>> task,
+            [EnumeratorCancellation] CancellationToken cancellation = default)
+            where T : class, IHasNextPage<UserPreview>
+        {
+            var response = await task(await CheckTokenAsync(), cancellation).ConfigureAwait(false);
+
+            while (response is not null)
+            {
+                foreach (var r in response.Items)
+                    yield return new UserInfoWithPreview(this, r);
+
+                response = await Api.GetNextPageAsync(response,
+                    await CheckTokenAsync(),
+                    cancellation: cancellation).ConfigureAwait(false);
+            }
+        }
+
         public IAsyncEnumerable<Illust> GetMyFollowingIllustsAsync(Visibility visibility = Visibility.Public,
             CancellationToken cancellation = default)
         {
-            return ToAsyncEnumerable(async (auth, c)
+            return ToIllustAsyncEnumerable(async (auth, c)
                 => await Api.GetIllustFollowAsync(visibility,
                 authToken: auth,
                 cancellation: c).ConfigureAwait(false),
@@ -225,7 +243,7 @@ namespace Meowtrix.PixivApi
         public IAsyncEnumerable<Illust> GetMyBookmarksAsync(Visibility visibility = Visibility.Public,
             CancellationToken cancellation = default)
         {
-            return ToAsyncEnumerable(async (auth, c)
+            return ToIllustAsyncEnumerable(async (auth, c)
                 => await Api.GetUserBookmarkIllustsAsync(CurrentUserId, visibility,
                 authToken: auth,
                 cancellation: c).ConfigureAwait(false),
@@ -252,43 +270,27 @@ namespace Meowtrix.PixivApi
             return new Illust(this, response.Illust);
         }
 
-        public async IAsyncEnumerable<UserInfoWithPreview> GetMyFollowingUsersAsync(
+        public IAsyncEnumerable<UserInfoWithPreview> GetMyFollowingUsersAsync(
             Visibility visibility = Visibility.Public,
-            [EnumeratorCancellation] CancellationToken cancellation = default)
+            CancellationToken cancellation = default)
         {
-            var response = await Api.GetUserFollowingsAsync(CurrentUserId,
-                visibility,
-                authToken: await CheckTokenAsync(),
-                cancellation: cancellation).ConfigureAwait(false);
-
-            while (response is not null)
-            {
-                foreach (var user in response.UserPreviews)
-                    yield return new UserInfoWithPreview(this, user);
-
-                response = await Api.GetNextPageAsync(response,
-                    await CheckTokenAsync(),
-                    cancellation).ConfigureAwait(false);
-            }
+            return ToUserAsyncEnumerable(async (auth, c)
+                => await Api.GetUserFollowingsAsync(
+                    CurrentUserId,
+                    visibility,
+                    authToken: auth,
+                    cancellation: c).ConfigureAwait(false), cancellation);
         }
 
-        public async IAsyncEnumerable<UserInfoWithPreview> SearchUsersAsync(
+        public IAsyncEnumerable<UserInfoWithPreview> SearchUsersAsync(
             string word,
-            [EnumeratorCancellation] CancellationToken cancellation = default)
+            CancellationToken cancellation = default)
         {
-            var response = await Api.SearchUsersAsync(word,
-                await CheckTokenAsync(),
-                cancellation).ConfigureAwait(false);
-
-            while (response is not null)
-            {
-                foreach (var user in response.UserPreviews)
-                    yield return new UserInfoWithPreview(this, user);
-
-                response = await Api.GetNextPageAsync(response,
-                    await CheckTokenAsync(),
-                    cancellation).ConfigureAwait(false);
-            }
+            return ToUserAsyncEnumerable(async (auth, c)
+                => await Api.SearchUsersAsync(
+                    word,
+                    authToken: auth,
+                    cancellation: c).ConfigureAwait(false), cancellation);
         }
 
         public IAsyncEnumerable<Illust> SearchIllustsAsync(
@@ -297,7 +299,7 @@ namespace Meowtrix.PixivApi
             IllustFilterOptions? options = null,
             CancellationToken cancellation = default)
         {
-            return ToAsyncEnumerable(async (auth, c)
+            return ToIllustAsyncEnumerable(async (auth, c)
                 => await Api.SearchIllustsAsync(
                     word, searchTarget,
                     options?.SortMode ?? IllustSortMode.Latest,
@@ -314,7 +316,7 @@ namespace Meowtrix.PixivApi
             DateTime? date = null,
             CancellationToken cancellation = default)
         {
-            return ToAsyncEnumerable(async (auth, c)
+            return ToIllustAsyncEnumerable(async (auth, c)
                 => await Api.GetIllustRankingAsync(
                     rankingMode, date,
                     authToken: auth,

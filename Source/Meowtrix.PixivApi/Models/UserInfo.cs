@@ -60,14 +60,14 @@ namespace Meowtrix.PixivApi.Models
         public IAsyncEnumerable<Illust> GetIllustsAsync(UserIllustType? illustType = null,
             CancellationToken cancellation = default)
         {
-            return Client.ToAsyncEnumerable(async (auth, c)
+            return Client.ToIllustAsyncEnumerable(async (auth, c)
                 => await Client.Api.GetUserIllustsAsync(Id, illustType, authToken: auth, cancellation: c).ConfigureAwait(false),
                 cancellation);
         }
 
         public IAsyncEnumerable<Illust> GetBookmarksAsync(CancellationToken cancellation = default)
         {
-            return Client.ToAsyncEnumerable(async (auth, c)
+            return Client.ToIllustAsyncEnumerable(async (auth, c)
                 => await Client.Api.GetUserBookmarkIllustsAsync(Id, cancellation: c).ConfigureAwait(false),
                 cancellation);
         }
