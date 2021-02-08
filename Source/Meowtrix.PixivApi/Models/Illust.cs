@@ -68,8 +68,8 @@ namespace Meowtrix.PixivApi.Models
             if (IsBookmarked)
                 throw new InvalidOperationException("The illust is already bookmarked.");
 
-            await _client.Api.AddIllustBookmarkAsync(Id, visibility,
-                  authToken: await _client.CheckTokenAsync())
+            await _client.Api.AddIllustBookmarkAsync(authToken: await _client.CheckTokenAsync(), illustId: Id,
+                  restrict: visibility)
               .ConfigureAwait(false);
 
             IsBookmarked = true;
@@ -80,8 +80,8 @@ namespace Meowtrix.PixivApi.Models
             if (!IsBookmarked)
                 throw new InvalidOperationException("There's no bookmark on this illust.");
 
-            await _client.Api.DeleteIllustBookmarkAsync(Id,
-                  authToken: await _client.CheckTokenAsync())
+            await _client.Api.DeleteIllustBookmarkAsync(authToken: await _client.CheckTokenAsync(),
+                  illustId: Id)
               .ConfigureAwait(false);
 
             IsBookmarked = false;
@@ -91,8 +91,8 @@ namespace Meowtrix.PixivApi.Models
 
         public async IAsyncEnumerable<Comment> GetCommentsAsync([EnumeratorCancellation] CancellationToken cancellation = default)
         {
-            var response = await _client.Api.GetIllustCommentsAsync(Id,
-                authToken: await _client.CheckTokenAsync(),
+            var response = await _client.Api.GetIllustCommentsAsync(authToken: await _client.CheckTokenAsync(),
+                illustId: Id,
                 cancellation: cancellation).ConfigureAwait(false);
 
             while (response is not null)
@@ -100,16 +100,16 @@ namespace Meowtrix.PixivApi.Models
                 foreach (var c in response.Comments)
                     yield return new Comment(_client, this, c);
 
-                response = await _client.Api.GetNextPageAsync(response,
-                    await _client.CheckTokenAsync(),
+                response = await _client.Api.GetNextPageAsync(await _client.CheckTokenAsync(),
+                    response,
                     cancellation).ConfigureAwait(false);
             }
         }
 
         public async Task<Comment> PostCommentAsync(string content, Comment? parent = null)
         {
-            var response = await _client.Api.PostIllustCommentAsync(Id, content, parent?.Id,
-                await _client.CheckTokenAsync()).ConfigureAwait(false);
+            var response = await _client.Api.PostIllustCommentAsync(await _client.CheckTokenAsync(), Id, content,
+                parent?.Id).ConfigureAwait(false);
 
             return new Comment(_client, this, response.Comment);
         }
@@ -121,8 +121,8 @@ namespace Meowtrix.PixivApi.Models
             if (!IsAnimated)
                 throw new InvalidOperationException("This illust is not an animated picture.");
 
-            var response = await _client.Api.GetAnimatedPictureMetadataAsync(Id,
-                await _client.CheckTokenAsync(),
+            var response = await _client.Api.GetAnimatedPictureMetadataAsync(await _client.CheckTokenAsync(),
+                Id,
                 cancellation: cancellation).ConfigureAwait(false);
 
             return new AnimatedPictureDetail(_client, response);

@@ -212,8 +212,8 @@ namespace Meowtrix.PixivApi
                 foreach (var r in response.Items)
                     yield return new Illust(this, r);
 
-                response = await Api.GetNextPageAsync(response,
-                    await CheckTokenAsync(),
+                response = await Api.GetNextPageAsync(await CheckTokenAsync(),
+                    response,
                     cancellation: cancellation).ConfigureAwait(false);
             }
         }
@@ -230,8 +230,8 @@ namespace Meowtrix.PixivApi
                 foreach (var r in response.Items)
                     yield return new UserInfoWithPreview(this, r);
 
-                response = await Api.GetNextPageAsync(response,
-                    await CheckTokenAsync(),
+                response = await Api.GetNextPageAsync(await CheckTokenAsync(),
+                    response,
                     cancellation: cancellation).ConfigureAwait(false);
             }
         }
@@ -240,8 +240,8 @@ namespace Meowtrix.PixivApi
             CancellationToken cancellation = default)
         {
             return ToIllustAsyncEnumerable(async (auth, c)
-                => await Api.GetIllustFollowAsync(visibility,
-                authToken: auth,
+                => await Api.GetIllustFollowAsync(authToken: auth,
+                restrict: visibility,
                 cancellation: c).ConfigureAwait(false),
                 cancellation);
         }
@@ -250,8 +250,8 @@ namespace Meowtrix.PixivApi
             CancellationToken cancellation = default)
         {
             return ToIllustAsyncEnumerable(async (auth, c)
-                => await Api.GetUserBookmarkIllustsAsync(CurrentUserId, visibility,
-                authToken: auth,
+                => await Api.GetUserBookmarkIllustsAsync(authToken: auth, userId: CurrentUserId,
+                restrict: visibility,
                 cancellation: c).ConfigureAwait(false),
                 cancellation);
         }
@@ -259,8 +259,8 @@ namespace Meowtrix.PixivApi
         public async Task<UserDetailInfo> GetUserDetailAsync(int userId,
             CancellationToken cancellation = default)
         {
-            var response = await Api.GetUserDetailAsync(userId,
-                await CheckTokenAsync(),
+            var response = await Api.GetUserDetailAsync(await CheckTokenAsync(),
+                userId,
                 cancellation: cancellation).ConfigureAwait(false);
 
             return new UserDetailInfo(this, response);
@@ -269,8 +269,8 @@ namespace Meowtrix.PixivApi
         public async Task<Illust> GetIllustDetailAsync(int illustId,
             CancellationToken cancellation = default)
         {
-            var response = await Api.GetIllustDetailAsync(illustId,
-                await CheckTokenAsync(),
+            var response = await Api.GetIllustDetailAsync(await CheckTokenAsync(),
+                illustId,
                 cancellation: cancellation).ConfigureAwait(false);
 
             return new Illust(this, response.Illust);
@@ -282,9 +282,9 @@ namespace Meowtrix.PixivApi
         {
             return ToUserAsyncEnumerable(async (auth, c)
                 => await Api.GetUserFollowingsAsync(
-                    CurrentUserId,
-                    visibility,
                     authToken: auth,
+                    userId: CurrentUserId,
+                    restrict: visibility,
                     cancellation: c).ConfigureAwait(false), cancellation);
         }
 
@@ -294,8 +294,8 @@ namespace Meowtrix.PixivApi
         {
             return ToUserAsyncEnumerable(async (auth, c)
                 => await Api.SearchUsersAsync(
-                    word,
                     authToken: auth,
+                    word: word,
                     cancellation: c).ConfigureAwait(false), cancellation);
         }
 
@@ -307,13 +307,13 @@ namespace Meowtrix.PixivApi
         {
             return ToIllustAsyncEnumerable(async (auth, c)
                 => await Api.SearchIllustsAsync(
-                    word, searchTarget,
-                    options?.SortMode ?? IllustSortMode.Latest,
-                    options?.MaxBookmarkCount,
-                    options?.MinBookmarkCount,
-                    options?.StartDate,
-                    options?.EndDate,
-                    authToken: auth,
+                    authToken: auth, word: word,
+                    searchTarget: searchTarget,
+                    sort: options?.SortMode ?? IllustSortMode.Latest,
+                    maxBookmarkCount: options?.MaxBookmarkCount,
+                    minBookmarkCount: options?.MinBookmarkCount,
+                    startDate: options?.StartDate,
+                    endDate: options?.EndDate,
                     cancellation: c).ConfigureAwait(false), cancellation);
         }
 
@@ -324,8 +324,8 @@ namespace Meowtrix.PixivApi
         {
             return ToIllustAsyncEnumerable(async (auth, c)
                 => await Api.GetIllustRankingAsync(
-                    rankingMode, date,
-                    authToken: auth,
+                    authToken: auth, mode: rankingMode,
+                    date: date,
                     cancellation: cancellation).ConfigureAwait(false), cancellation);
         }
     }

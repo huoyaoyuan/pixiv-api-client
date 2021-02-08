@@ -35,8 +35,8 @@ namespace Meowtrix.PixivApi.Models
             if (IsFollowed)
                 throw new InvalidOperationException("The user has already been followed!");
 
-            await Client.Api.AddUserFollowAsync(Id, visibility,
-                await Client.CheckTokenAsync()).ConfigureAwait(false);
+            await Client.Api.AddUserFollowAsync(await Client.CheckTokenAsync(), Id,
+                visibility).ConfigureAwait(false);
 
             IsFollowed = true;
         }
@@ -46,8 +46,8 @@ namespace Meowtrix.PixivApi.Models
             if (!IsFollowed)
                 throw new InvalidOperationException("The user has not been followed!");
 
-            await Client.Api.DeleteUserFollowAsync(Id, visibility,
-                await Client.CheckTokenAsync()).ConfigureAwait(false);
+            await Client.Api.DeleteUserFollowAsync(await Client.CheckTokenAsync(), Id,
+                visibility).ConfigureAwait(false);
 
             IsFollowed = false;
         }
@@ -61,28 +61,28 @@ namespace Meowtrix.PixivApi.Models
             CancellationToken cancellation = default)
         {
             return Client.ToIllustAsyncEnumerable(async (auth, c)
-                => await Client.Api.GetUserIllustsAsync(Id, illustType, authToken: auth, cancellation: c).ConfigureAwait(false),
+                => await Client.Api.GetUserIllustsAsync(authToken: auth, userId: Id, illustType: illustType, cancellation: c).ConfigureAwait(false),
                 cancellation);
         }
 
         public IAsyncEnumerable<Illust> GetBookmarksAsync(CancellationToken cancellation = default)
         {
             return Client.ToIllustAsyncEnumerable(async (auth, c)
-                => await Client.Api.GetUserBookmarkIllustsAsync(Id, authToken: auth, cancellation: c).ConfigureAwait(false),
+                => await Client.Api.GetUserBookmarkIllustsAsync(authToken: auth, userId: Id, cancellation: c).ConfigureAwait(false),
                 cancellation);
         }
 
         public IAsyncEnumerable<UserInfoWithPreview> GetFollowingUsersAsync(CancellationToken cancellation = default)
         {
             return Client.ToUserAsyncEnumerable(async (auth, c)
-                => await Client.Api.GetUserFollowingsAsync(Id, Visibility.Public, authToken: auth, cancellation: c).ConfigureAwait(false),
+                => await Client.Api.GetUserFollowingsAsync(authToken: auth, userId: Id, restrict: Visibility.Public, cancellation: c).ConfigureAwait(false),
                 cancellation);
         }
 
         public IAsyncEnumerable<UserInfoWithPreview> GetFollowerUsersAsync(CancellationToken cancellation = default)
         {
             return Client.ToUserAsyncEnumerable(async (auth, c)
-                => await Client.Api.GetUserFollowersAsync(Id, Visibility.Public, authToken: auth, cancellation: c).ConfigureAwait(false),
+                => await Client.Api.GetUserFollowersAsync(authToken: auth, userId: Id, restrict: Visibility.Public, cancellation: c).ConfigureAwait(false),
                 cancellation);
         }
     }
