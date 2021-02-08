@@ -44,14 +44,14 @@ namespace Meowtrix.PixivApi.Models
         public ImageInfo? BackgroundImage
             => _profile.BackgroundImageUrl is null
             ? null
-            : new ImageInfo(_profile.BackgroundImageUrl, Client.Api);
+            : new ImageInfo(_profile.BackgroundImageUrl, Client);
 
         public string? TwitterAccount => _profile.TwitterAccount;
 
         public ImageInfo? WorkspaceImage
             => _workspace.WorkspaceImageUrl is null
             ? null
-            : new ImageInfo(_workspace.WorkspaceImageUrl, Client.Api);
+            : new ImageInfo(_workspace.WorkspaceImageUrl, Client);
     }
 
     public enum Gender

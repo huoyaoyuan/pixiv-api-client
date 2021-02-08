@@ -9,16 +9,16 @@ namespace Meowtrix.PixivApi.Models
     public readonly struct ImageInfo
     {
         public Uri Uri { get; }
-        private readonly PixivApiClient _api;
+        private readonly PixivClient _client;
 
-        public ImageInfo(Uri uri, PixivApiClient api)
+        public ImageInfo(Uri uri, PixivClient client)
         {
             Uri = uri;
-            _api = api;
+            _client = client;
         }
 
         public Task<HttpResponseMessage> RequestAsync(CancellationToken cancellation = default)
-            => _api.GetImageAsync(Uri, cancellation);
+            => _client.Api.GetImageAsync(Uri, cancellation);
 
         public async Task<Stream> RequestStreamAsync(CancellationToken cancellation = default)
         {
