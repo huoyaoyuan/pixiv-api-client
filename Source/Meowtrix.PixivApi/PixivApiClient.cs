@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Security.Cryptography;
 using System.Text;
@@ -23,7 +22,7 @@ namespace Meowtrix.PixivApi
     /// This type is stateless. Every call must be performed with access token.
     /// For stateful usage, please use <see cref="PixivClient"/> instead.
     /// </remarks>
-    public sealed class PixivApiClient : IDisposable
+    public sealed class PixivApiClient : HttpClient
     {
         private static readonly JsonSerializerOptions s_serializerOptions = new JsonSerializerOptions
         {
@@ -36,10 +35,8 @@ namespace Meowtrix.PixivApi
 
         #region Constructors
         public PixivApiClient(HttpMessageHandler handler)
-            => _httpClient = new HttpClient(handler)
-            {
-                BaseAddress = s_baseUri
-            };
+            : base(handler)
+            => BaseAddress = s_baseUri;
 
         public PixivApiClient()
             : this(false, null)
@@ -57,22 +54,13 @@ namespace Meowtrix.PixivApi
         }
 
         private PixivApiClient(bool useProxy, IWebProxy? proxy)
-        {
-#pragma warning disable CA5399 // false positive on net461
-            _httpClient = new HttpClient(new HttpClientHandler
+            : base(new HttpClientHandler
             {
                 Proxy = proxy,
                 UseProxy = useProxy
-            })
-            {
-                BaseAddress = s_baseUri
-            };
-        }
-#pragma warning restore CA5399
+            }) =>
+            BaseAddress = s_baseUri;
         #endregion
-
-        private readonly HttpClient _httpClient;
-        public void Dispose() => _httpClient.Dispose();
 
         private const string BaseUrl = "https://app-api.pixiv.net/";
         private static readonly Uri s_baseUri = new Uri(BaseUrl);
@@ -81,8 +69,6 @@ namespace Meowtrix.PixivApi
         private const string UserAgent = "PixivAndroidApp/5.0.64 (Android 6.0)";
         private const string HashSecret = "28c1fdd170a5204386cb1313c7077b34f83e4aaf4aa829ce78c231e05b0bae2c";
         private const string AuthUrl = "https://oauth.secure.pixiv.net/auth/token";
-
-        public HttpRequestHeaders DefaultRequestHeaders => _httpClient.DefaultRequestHeaders;
 
         public async Task<(DateTimeOffset authTime, AuthResponse authResponse)> AuthAsync(
             string username,
@@ -162,7 +148,7 @@ namespace Meowtrix.PixivApi
 
         private async Task<AuthResponse> AuthAsync(HttpRequestMessage request, CancellationToken cancellationToken = default)
         {
-            using var response = await _httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
+            using var response = await SendAsync(request, cancellationToken).ConfigureAwait(false);
 
             if (response.StatusCode == HttpStatusCode.BadRequest)
             {
@@ -227,7 +213,7 @@ namespace Meowtrix.PixivApi
                 foreach (var header in additionalHeaders)
                     request.Headers.Add(header.Key, header.Value);
 
-            using var response = await _httpClient.SendAsync(request, cancellation).ConfigureAwait(false);
+            using var response = await SendAsync(request, cancellation).ConfigureAwait(false);
 
             if (response.StatusCode == HttpStatusCode.BadRequest)
             {
@@ -645,7 +631,7 @@ namespace Meowtrix.PixivApi
                 }
             };
 
-            return (await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellation).ConfigureAwait(false))
+            return (await SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellation).ConfigureAwait(false))
                 .EnsureSuccessStatusCode();
         }
 
