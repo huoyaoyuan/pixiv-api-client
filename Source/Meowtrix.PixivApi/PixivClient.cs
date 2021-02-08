@@ -53,6 +53,7 @@ namespace Meowtrix.PixivApi
 
         private void ChangeApiClient(PixivApiClient api)
         {
+            SetRequestHeader(api, RequestLanguage);
             Api.Dispose();
             Api = api;
         }
@@ -185,11 +186,16 @@ namespace Meowtrix.PixivApi
                 if (_requestLanguage != value)
                 {
                     _requestLanguage = value;
-                    Api.DefaultRequestHeaders.AcceptLanguage.Clear();
-                    if (!string.IsNullOrEmpty(value?.Name))
-                        Api.DefaultRequestHeaders.AcceptLanguage.Add(new(value.Name));
+                    SetRequestHeader(Api, value);
                 }
             }
+        }
+
+        private static void SetRequestHeader(PixivApiClient apiClient, CultureInfo? cultureInfo)
+        {
+            apiClient.DefaultRequestHeaders.AcceptLanguage.Clear();
+            if (!string.IsNullOrEmpty(cultureInfo?.Name))
+                apiClient.DefaultRequestHeaders.AcceptLanguage.Add(new(cultureInfo.Name));
         }
 
         public void UseCurrentCulture() => RequestLanguage = CultureInfo.CurrentCulture;
