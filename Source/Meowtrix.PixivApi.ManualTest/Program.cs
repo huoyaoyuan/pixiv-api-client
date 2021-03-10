@@ -37,11 +37,12 @@ namespace Meowtrix.PixivApi.ManualTest
                 }
                 else
                 {
-                    Console.Write("Username:");
-                    string username = Console.ReadLine()!;
-                    Console.Write("Password:");
-                    string password = Console.ReadLine()!;
-                    response = (await client.AuthAsync(username, password)).authResponse;
+                    var (codeVerify, url) = client.BeginAuth();
+                    Console.Write("Access this url in browser: ");
+                    Console.WriteLine(url);
+                    Console.Write("Paste the xxx part of pixiv://....?code=xxx (Use browser F12 to inspect it):");
+                    string code = Console.ReadLine()!;
+                    response = (await client.CompleteAuthAsync(code, codeVerify)).authResponse;
                 }
                 authToken = response.AccessToken;
                 Console.WriteLine($"Access token: {response.AccessToken}");

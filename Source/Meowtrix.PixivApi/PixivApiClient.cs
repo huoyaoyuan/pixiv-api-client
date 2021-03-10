@@ -121,6 +121,93 @@ namespace Meowtrix.PixivApi
             return (authTime, await AuthAsync(request, cancellationToken).ConfigureAwait(false));
         }
 
+        /// <summary>
+        /// Generate authentication request for OAuth PKCE. See remarks for usage.
+        /// </summary>
+        /// <returns>
+        /// Code verify and login url.
+        /// </returns>
+        /// <remarks>
+        /// To perform login, call this method first. Invoke the LoginUrl in some browser view.
+        /// Then listen for jump request to pixiv://....?code=.... , extract the code query,
+        /// pass the code with CodeVerify into <see cref="CompleteAuthAsync"/>.
+        /// The code is very short-live and should be passed immediately.
+        /// </remarks>
+#pragma warning disable CA1822
+        public (string CodeVerify, string LoginUrl) BeginAuth()
+#pragma warning restore CA1822
+        {
+#if NETCOREAPP
+            Span<byte> bytes = stackalloc byte[36];
+            RandomNumberGenerator.Fill(bytes);
+#else
+            byte[] bytes = new byte[36];
+            using (var rng = RandomNumberGenerator.Create())
+                rng.GetNonZeroBytes(bytes);
+#endif
+
+            string codeVerifyString = Convert.ToBase64String(bytes);
+
+#if NETCOREAPP
+            Span<byte> codeVerify = stackalloc byte[48];
+            Encoding.UTF8.GetBytes(codeVerifyString, codeVerify);
+#else
+            byte[] codeVerify = Encoding.UTF8.GetBytes(codeVerifyString);
+#endif
+
+#if NET5_0
+            Span<byte> sha = stackalloc byte[32];
+            SHA256.HashData(codeVerify, sha);
+#elif NETCOREAPP3_1
+            Span<byte> sha = stackalloc byte[32];
+            using (var sha256 = SHA256.Create())
+                sha256.TryComputeHash(codeVerify, sha, out _);
+#else
+            byte[] sha;
+            using (var sha256 = SHA256.Create())
+                sha = sha256.ComputeHash(codeVerify);
+#endif
+            string urlSafeCodeChallenge = Convert.ToBase64String(sha)
+                .TrimEnd('=')
+                .Replace('+', '-')
+                .Replace('/', '_');
+            string loginUrl = $"https://app-api.pixiv.net/web/v1/login?code_challenge={urlSafeCodeChallenge}&code_challenge_method=S256&client=pixiv-android";
+
+            return (codeVerifyString, loginUrl);
+        }
+
+        /// <summary>
+        /// Complete OAuth PKCE authentication. Used together with <see cref="BeginAuth"/>.
+        /// </summary>
+        /// <param name="code">Auth code invoked from login url.</param>
+        /// <param name="codeVerify">Code verify returned from <see cref="BeginAuth"/>.</param>
+        /// <param name="cancellationToken">Optional cancellation token.</param>
+        /// <returns>Authentication response.</returns>
+        public async Task<(DateTimeOffset authTime, AuthResponse authResponse)> CompleteAuthAsync(string code, string codeVerify, CancellationToken cancellationToken = default)
+        {
+            DateTimeOffset authTime = DateTimeOffset.Now;
+
+            using var request = new HttpRequestMessage(HttpMethod.Post, AuthUrl)
+            {
+                Content = new FormUrlEncodedContent(new KeyValuePair<string?, string?>[]
+                {
+                    new("code", code),
+                    new("redirect_uri", "https://app-api.pixiv.net/web/v1/users/auth/pixiv/callback"),
+                    new("grant_type", "authorization_code"),
+                    new("include_policy", "true"),
+                    new("client_id", ClientId),
+                    new("client_secret", ClientSecret),
+                    new("code_verifier", codeVerify)
+                }),
+                Headers =
+                {
+                    { "User-Agent", UserAgent }
+                }
+            };
+
+            return (authTime, await AuthAsync(request, cancellationToken).ConfigureAwait(false));
+        }
+
         public async Task<(DateTimeOffset authTime, AuthResponse authResponse)> AuthAsync(
             string refreshToken,
             CancellationToken cancellation = default)
@@ -131,11 +218,11 @@ namespace Meowtrix.PixivApi
             {
                 Content = new FormUrlEncodedContent(new KeyValuePair<string?, string?>[]
                 {
-                    new ("get_secure_url", "1"),
-                    new ("client_id", ClientId),
-                    new ("client_secret", ClientSecret),
-                    new ("grant_type", "refresh_token"),
-                    new ("refresh_token", refreshToken),
+                    new("get_secure_url", "1"),
+                    new("client_id", ClientId),
+                    new("client_secret", ClientSecret),
+                    new("grant_type", "refresh_token"),
+                    new("refresh_token", refreshToken),
                 }),
                 Headers =
                 {
