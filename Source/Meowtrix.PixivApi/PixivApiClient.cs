@@ -70,6 +70,7 @@ namespace Meowtrix.PixivApi
         private const string HashSecret = "28c1fdd170a5204386cb1313c7077b34f83e4aaf4aa829ce78c231e05b0bae2c";
         private const string AuthUrl = "https://oauth.secure.pixiv.net/auth/token";
 
+        [Obsolete("Authentication with username and password has been abandoned by Pixiv.")]
         public async Task<(DateTimeOffset authTime, AuthResponse authResponse)> AuthAsync(
             string username,
             string password,

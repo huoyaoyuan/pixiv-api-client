@@ -122,6 +122,7 @@ namespace Meowtrix.PixivApi
             }
         }
 
+        [Obsolete("Login with username and password has been abandoned by Pixiv.")]
         public async Task<string> LoginAsync(string username, string password)
         {
             try
