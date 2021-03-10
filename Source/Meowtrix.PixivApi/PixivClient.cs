@@ -8,6 +8,7 @@ using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
 using Meowtrix.PixivApi.Json;
 using Meowtrix.PixivApi.Models;
 
@@ -88,6 +89,36 @@ namespace Meowtrix.PixivApi
                 }
 
                 return false;
+            }
+        }
+
+        /// <summary>
+        /// Perform login with OAuth PKCE.
+        /// </summary>
+        /// <param name="requestFunc">Accesses the url parameter in browser,
+        /// listens and returns for pixiv:// request.</param>
+        /// <returns>The refresh token.</returns>
+        public async Task<string> LoginAsync(Func<string, Task<Uri>> requestFunc)
+        {
+            try
+            {
+                await _semaphore.WaitAsync().ConfigureAwait(false);
+
+                var (codeVerify, loginUrl) = Api.BeginAuth();
+                var uri = await requestFunc(loginUrl).ConfigureAwait(false);
+
+                if (uri.Scheme != "pixiv")
+                    throw new InvalidOperationException("Bad login request.");
+                var query = HttpUtility.ParseQueryString(uri.Query);
+                string code = query["code"] ?? throw new InvalidOperationException("The login request doesn't contain code.");
+                var (time, response) = await Api.CompleteAuthAsync(code, codeVerify).ConfigureAwait(false);
+                SetLogin(time, response);
+
+                return response.RefreshToken;
+            }
+            finally
+            {
+                _semaphore.Release();
             }
         }
 
