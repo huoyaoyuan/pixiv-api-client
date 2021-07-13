@@ -36,7 +36,12 @@ namespace Meowtrix.PixivApi
         #region Constructors
         public PixivApiClient(HttpMessageHandler handler)
             : base(handler)
-            => BaseAddress = s_baseUri;
+        {
+            BaseAddress = s_baseUri;
+#if NET5_0_OR_GREATER
+            DefaultVersionPolicy = HttpVersionPolicy.RequestVersionOrHigher;
+#endif
+        }
 
         public PixivApiClient()
             : this(false, null)
@@ -58,8 +63,13 @@ namespace Meowtrix.PixivApi
             {
                 Proxy = proxy,
                 UseProxy = useProxy
-            }) =>
+            })
+        {
             BaseAddress = s_baseUri;
+#if NET5_0_OR_GREATER
+            DefaultVersionPolicy = HttpVersionPolicy.RequestVersionOrHigher;
+#endif
+        }
         #endregion
 
         private const string BaseUrl = "https://app-api.pixiv.net/";
@@ -116,7 +126,10 @@ namespace Meowtrix.PixivApi
                     { "User-Agent", UserAgent },
                     { "X-Client-Time", time },
                     { "X-Client-Hash", MD5Hash(time + HashSecret) }
-                }
+                },
+#if NET5_0_OR_GREATER
+                VersionPolicy = HttpVersionPolicy.RequestVersionOrHigher
+#endif
             };
 
             return (authTime, await AuthAsync(request, cancellationToken).ConfigureAwait(false));
@@ -203,7 +216,10 @@ namespace Meowtrix.PixivApi
                 Headers =
                 {
                     { "User-Agent", UserAgent }
-                }
+                },
+#if NET5_0_OR_GREATER
+                VersionPolicy = HttpVersionPolicy.RequestVersionOrHigher
+#endif
             };
 
             return (authTime, await AuthAsync(request, cancellationToken).ConfigureAwait(false));
@@ -228,7 +244,10 @@ namespace Meowtrix.PixivApi
                 Headers =
                 {
                     { "User-Agent", UserAgent }
-                }
+                },
+#if NET5_0_OR_GREATER
+                VersionPolicy = HttpVersionPolicy.RequestVersionOrHigher
+#endif
             };
 
             return (authTime, await AuthAsync(request, cancellation).ConfigureAwait(false));
@@ -292,7 +311,10 @@ namespace Meowtrix.PixivApi
                     { "App-OS-Version", "10.3.1" },
                     { "App-Version", "6.7.1" },
                     { "User-Agent", "PixivIOSApp/6.7.1 (iOS 10.3.1; iPhone8,1)" }
-                }
+                },
+#if NET5_0_OR_GREATER
+                VersionPolicy = HttpVersionPolicy.RequestVersionOrHigher
+#endif
             };
 
             if (authToken is not null)
@@ -716,7 +738,10 @@ namespace Meowtrix.PixivApi
                 Headers =
                 {
                     Referrer = s_baseUri
-                }
+                },
+#if NET5_0_OR_GREATER
+                VersionPolicy = HttpVersionPolicy.RequestVersionOrHigher
+#endif
             };
 
             return (await SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellation).ConfigureAwait(false))
