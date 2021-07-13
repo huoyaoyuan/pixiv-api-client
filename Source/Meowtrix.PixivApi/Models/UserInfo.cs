@@ -52,7 +52,7 @@ namespace Meowtrix.PixivApi.Models
             IsFollowed = false;
         }
 
-        public ImageInfo Avatar => new ImageInfo(_avatarUri, Client);
+        public ImageInfo Avatar => new(_avatarUri, Client);
 
         public virtual ValueTask<UserDetailInfo> GetDetailAsync(CancellationToken cancellation = default)
             => new(Client.GetUserDetailAsync(Id, cancellation));

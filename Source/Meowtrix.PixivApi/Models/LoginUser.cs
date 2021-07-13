@@ -28,6 +28,6 @@ namespace Meowtrix.PixivApi.Models
         private readonly Uri _avatarUri;
         private readonly PixivClient _client;
 
-        public ImageInfo Avatar => new ImageInfo(_avatarUri, _client);
+        public ImageInfo Avatar => new(_avatarUri, _client);
     }
 }

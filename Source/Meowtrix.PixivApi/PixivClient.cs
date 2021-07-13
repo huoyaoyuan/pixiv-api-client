@@ -67,7 +67,7 @@ namespace Meowtrix.PixivApi
         #endregion
 
         #region Lock and token refresh
-        private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1);
+        private readonly SemaphoreSlim _semaphore = new(1);
         private DateTimeOffset _authValidateUntil;
 
         private string? _accessToken;

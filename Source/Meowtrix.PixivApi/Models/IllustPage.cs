@@ -35,10 +35,10 @@ namespace Meowtrix.PixivApi.Models
         public Illust Illust { get; }
         public int Index { get; }
 
-        public ImageInfo Original => new ImageInfo(_original, _client);
-        public ImageInfo Medium => new ImageInfo(_medium, _client);
-        public ImageInfo SquareMedium => new ImageInfo(_squareMedium, _client);
-        public ImageInfo Large => new ImageInfo(_large, _client);
+        public ImageInfo Original => new(_original, _client);
+        public ImageInfo Medium => new(_medium, _client);
+        public ImageInfo SquareMedium => new(_squareMedium, _client);
+        public ImageInfo Large => new(_large, _client);
 
         public ImageInfo AtSize(IllustSize size)
             => size switch

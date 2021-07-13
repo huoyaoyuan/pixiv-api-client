@@ -24,7 +24,7 @@ namespace Meowtrix.PixivApi
     /// </remarks>
     public sealed class PixivApiClient : HttpClient
     {
-        private static readonly JsonSerializerOptions s_serializerOptions = new JsonSerializerOptions
+        private static readonly JsonSerializerOptions s_serializerOptions = new()
         {
             PropertyNamingPolicy = new UnderscoreCaseNamingPolicy(),
             Converters =
@@ -73,7 +73,7 @@ namespace Meowtrix.PixivApi
         #endregion
 
         private const string BaseUrl = "https://app-api.pixiv.net/";
-        private static readonly Uri s_baseUri = new Uri(BaseUrl);
+        private static readonly Uri s_baseUri = new(BaseUrl);
         private const string ClientId = "MOBrBDS8blbauoSck0ZfDbtuzpyT";
         private const string ClientSecret = "lsACyCD94FhDUtGTXi3QzcFE2uU1hqtDaKeqrdwj";
         private const string UserAgent = "PixivAndroidApp/5.0.64 (Android 6.0)";
