@@ -169,7 +169,7 @@ namespace Meowtrix.PixivApi
             byte[] codeVerify = Encoding.UTF8.GetBytes(codeVerifyString);
 #endif
 
-#if NET5_0
+#if NET5_0_OR_GREATER
             Span<byte> sha = stackalloc byte[32];
             SHA256.HashData(codeVerify, sha);
 #elif NETCOREAPP3_1
