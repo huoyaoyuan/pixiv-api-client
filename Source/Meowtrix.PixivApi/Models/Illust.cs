@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -48,6 +49,12 @@ namespace Meowtrix.PixivApi.Models
 
             User = new UserInfo(client, api.User);
             IsAnimated = api.Type == "ugoira";
+
+            SeriesId = api.Series?.Id switch
+            {
+                0 or null => null,
+                var other => other
+            };
         }
 
         public int Id { get; }
@@ -102,6 +109,16 @@ namespace Meowtrix.PixivApi.Models
                 cancellation: cancellation).ConfigureAwait(false);
 
             return new AnimatedPictureDetail(_client, response);
+        }
+
+        public int? SeriesId { get; }
+
+        [MemberNotNull(nameof(SeriesId))]
+        public async Task<IllustSeries> GetSeriesAsync(CancellationToken cancellation = default)
+        {
+            return await _client.GetIllustSeriesAsync(
+                SeriesId ?? throw new InvalidOperationException("The illust doesn't belongs to a series."),
+                cancellation).ConfigureAwait(false);
         }
     }
 }

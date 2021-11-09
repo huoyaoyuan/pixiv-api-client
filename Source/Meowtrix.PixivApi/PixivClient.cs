@@ -268,6 +268,24 @@ namespace Meowtrix.PixivApi
             }
         }
 
+        internal async IAsyncEnumerable<TResult> ToAsyncEnumerable<TRequest, TResult>(
+            Func<string, CancellationToken, Task<TRequest>> task,
+            [EnumeratorCancellation] CancellationToken cancellation = default)
+            where TRequest : class, IHasNextPage<TResult>
+        {
+            var response = await task(await CheckTokenAsync(), cancellation).ConfigureAwait(false);
+
+            while (response is not null)
+            {
+                foreach (var r in response.Items)
+                    yield return r;
+
+                response = await Api.GetNextPageAsync(await CheckTokenAsync(),
+                    response,
+                    cancellation: cancellation).ConfigureAwait(false);
+            }
+        }
+
         public IAsyncEnumerable<Illust> GetMyFollowingIllustsAsync(Visibility visibility = Visibility.Public,
             CancellationToken cancellation = default)
         {
@@ -403,6 +421,17 @@ namespace Meowtrix.PixivApi
             await Api.DeleteIllustBookmarkAsync(await CheckTokenAsync(),
                 illust.Id,
                 cancellation).ConfigureAwait(false);
+        }
+
+        public async Task<IllustSeries> GetIllustSeriesAsync(
+            int illustSeriesId,
+            CancellationToken cancellation = default)
+        {
+            var response = await Api.GetIllustSeriesAsync(await CheckTokenAsync(),
+                illustSeriesId,
+                cancellation).ConfigureAwait(false);
+
+            return new(this, response.IllustSeriesDetail);
         }
     }
 }

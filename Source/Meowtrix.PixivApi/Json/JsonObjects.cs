@@ -121,7 +121,7 @@ namespace Meowtrix.PixivApi.Json
         int Height,
         int SanityLevel,
         int XRestrict,
-        IllustDetail.IllustSeries Series,
+        IllustDetail.IllustSeries? Series,
         IllustDetail.MetaSingle MetaSinglePage,
         ImmutableArray<IllustDetail.MetaPage> MetaPages,
         int TotalView,

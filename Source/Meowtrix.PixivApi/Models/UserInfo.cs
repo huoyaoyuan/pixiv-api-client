@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Meowtrix.PixivApi.Json;
@@ -62,6 +63,16 @@ namespace Meowtrix.PixivApi.Models
             return Client.ToUserAsyncEnumerable(async (auth, c)
                 => await Client.Api.GetUserFollowersAsync(authToken: auth, userId: Id, restrict: Visibility.Public, cancellation: c).ConfigureAwait(false),
                 cancellation);
+        }
+
+        public async IAsyncEnumerable<IllustSeries> GetIllustSeriesAsync([EnumeratorCancellation] CancellationToken cancellation = default)
+        {
+            var rawEnumerable = Client.ToAsyncEnumerable<UserIllustSeries, IllustSeriesDetails>(async (auth, c)
+                => await Client.Api.GetUserIllustSeriesAsync(auth, Id, c).ConfigureAwait(false),
+                cancellation);
+
+            await foreach (var raw in rawEnumerable)
+                yield return new(Client, raw);
         }
     }
 }
