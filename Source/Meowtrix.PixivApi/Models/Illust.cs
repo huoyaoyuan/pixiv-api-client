@@ -59,33 +59,9 @@ namespace Meowtrix.PixivApi.Models
         public Size SizePixels { get; }
         public int TotalView { get; }
         public int TotalBookmarks { get; }
-        public bool IsBookmarked { get; private set; }
+        public bool IsBookmarked { get; }
 
         public UserInfo User { get; }
-
-        public async Task AddBookmarkAsync(Visibility visibility = Visibility.Public)
-        {
-            if (IsBookmarked)
-                throw new InvalidOperationException("The illust is already bookmarked.");
-
-            await _client.Api.AddIllustBookmarkAsync(authToken: await _client.CheckTokenAsync(), illustId: Id,
-                  restrict: visibility)
-              .ConfigureAwait(false);
-
-            IsBookmarked = true;
-        }
-
-        public async Task DeleteBookmarkAsync()
-        {
-            if (!IsBookmarked)
-                throw new InvalidOperationException("There's no bookmark on this illust.");
-
-            await _client.Api.DeleteIllustBookmarkAsync(authToken: await _client.CheckTokenAsync(),
-                  illustId: Id)
-              .ConfigureAwait(false);
-
-            IsBookmarked = false;
-        }
 
         public IReadOnlyList<IllustPage> Pages { get; }
 

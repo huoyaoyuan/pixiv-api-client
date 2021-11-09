@@ -382,5 +382,27 @@ namespace Meowtrix.PixivApi
                 visibility,
                 cancellation).ConfigureAwait(false);
         }
+
+        public async Task AddIllustBookmarkAsync(
+            Illust illust,
+            Visibility visibility = Visibility.Public,
+            IEnumerable<string>? tags = null,
+            CancellationToken cancellation = default)
+        {
+            await Api.AddIllustBookmarkAsync(await CheckTokenAsync(),
+                illust.Id,
+                visibility,
+                tags,
+                cancellation).ConfigureAwait(false);
+        }
+
+        public async Task DeleteIllustBookmarkAsync(
+            Illust illust,
+            CancellationToken cancellation = default)
+        {
+            await Api.DeleteIllustBookmarkAsync(await CheckTokenAsync(),
+                illust.Id,
+                cancellation).ConfigureAwait(false);
+        }
     }
 }

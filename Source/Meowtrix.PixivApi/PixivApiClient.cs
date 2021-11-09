@@ -583,7 +583,8 @@ namespace Meowtrix.PixivApi
             string? authToken,
             int illustId,
             Visibility restrict = Visibility.Public,
-            IEnumerable<string>? tags = null)
+            IEnumerable<string>? tags = null,
+            CancellationToken cancellation = default)
         {
             var data = new Dictionary<string, string>
             {
@@ -601,12 +602,14 @@ namespace Meowtrix.PixivApi
                 authToken,
                 "/v2/illust/bookmark/add",
                 HttpMethod.Post,
-                body: new FormUrlEncodedContent(data!));
+                body: new FormUrlEncodedContent(data!),
+                cancellation: cancellation);
         }
 
         public Task DeleteIllustBookmarkAsync(
             string? authToken,
-            int illustId)
+            int illustId,
+            CancellationToken cancellation = default)
         {
             return InvokeApiAsync<object>(
                 authToken,
@@ -615,7 +618,8 @@ namespace Meowtrix.PixivApi
                 body: new FormUrlEncodedContent(new[]
                 {
                     new KeyValuePair<string?, string?>("illust_id", illustId.ToString(NumberFormatInfo.InvariantInfo))
-                }));
+                }),
+                cancellation: cancellation);
         }
 
         public Task<UserBookmarkTags> GetUserBookmarkTagsIllustAsync(
