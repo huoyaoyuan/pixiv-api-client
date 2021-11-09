@@ -209,24 +209,32 @@ namespace Meowtrix.PixivApi.Json
         public sealed record Frame(string File, int Delay);
     }
 
+    public sealed record IllustSeriesDetails(
+        int Id,
+        string Title,
+        string Caption,
+        UserSummary.ImageUrls CoverImageUrls,
+        int SeriesWorkCount,
+        DateTimeOffset CreateDate,
+        int Width,
+        int Height,
+        UserSummary User);
+
     public sealed record IllustSeriesInfo(
-        IllustSeriesInfo.IllustSeriesDetails IllustSeriesDetail,
+        IllustSeriesDetails IllustSeriesDetail,
         IllustDetail IllustSeriesFirstIllust,
         ImmutableArray<IllustDetail> Illusts,
         Uri? NextUrl)
         : IHasNextPage<IllustDetail>
     {
-        public sealed record IllustSeriesDetails(
-            int Id,
-            string Title,
-            string Caption,
-            UserSummary.ImageUrls CoverImageUrls,
-            int SeriesWorkCount,
-            DateTimeOffset CreateDate,
-            int Width,
-            int Height,
-            UserSummary User);
-
         ImmutableArray<IllustDetail> IHasNextPage<IllustDetail>.Items => Illusts;
+    }
+
+    public sealed record UserIllustSeries(
+        ImmutableArray<IllustSeriesDetails> IllustSeriesDetails,
+        Uri? NextUrl)
+        : IHasNextPage<IllustSeriesDetails>
+    {
+        ImmutableArray<IllustSeriesDetails> IHasNextPage<IllustSeriesDetails>.Items => IllustSeriesDetails;
     }
 }

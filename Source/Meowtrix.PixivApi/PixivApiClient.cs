@@ -778,5 +778,17 @@ namespace Meowtrix.PixivApi
                 HttpMethod.Get,
                 cancellation: cancellation);
         }
+
+        public Task<UserIllustSeries> GetUserIllustSeriesAsync(
+            string? authToken,
+            int userId,
+            CancellationToken cancellation = default)
+        {
+            return InvokeApiAsync<UserIllustSeries>(
+                authToken,
+                $"/v1/user/illust-series?user_id={userId}",
+                HttpMethod.Get,
+                cancellation: cancellation);
+        }
     }
 }
