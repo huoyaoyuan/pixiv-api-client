@@ -23,7 +23,6 @@ namespace Meowtrix.PixivApi.Json
         int XRestrict,
         bool IsMailAuthorized);
 
-#pragma warning disable CA1801, IDE0060 // false positive
     public sealed record AuthProfileImageUrls(
         [property: JsonPropertyName("px_16x16")]
         Uri PixelSize16,
@@ -31,7 +30,6 @@ namespace Meowtrix.PixivApi.Json
         Uri PixelSize50,
         [property: JsonPropertyName("px_170x170")]
         Uri PixelSize170);
-#pragma warning restore CA1801
 
     public sealed record UserDetail(
         UserSummary User,

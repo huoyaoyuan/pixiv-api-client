@@ -2,8 +2,6 @@
 using System.Linq;
 using System.Threading.Tasks;
 
-#pragma warning disable CA1508 // false positive
-
 namespace Meowtrix.PixivApi.Models
 {
     public static class IllustsExtensions
