@@ -11,4 +11,8 @@
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.1020.30" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Meowtrix.PixivApi\Meowtrix.PixivApi.csproj" />
+  </ItemGroup>
+
 </Project>
