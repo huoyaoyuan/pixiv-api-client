@@ -27,30 +27,8 @@ namespace Meowtrix.PixivApi.Models
         public int Id { get; }
         public string Name { get; }
         public string Account { get; }
-        public bool IsFollowed { get; private set; }
+        public bool IsFollowed { get; }
         public string? Comment { get; }
-
-        public async Task FollowAsync(Visibility visibility = Visibility.Public)
-        {
-            if (IsFollowed)
-                throw new InvalidOperationException("The user has already been followed!");
-
-            await Client.Api.AddUserFollowAsync(await Client.CheckTokenAsync(), Id,
-                visibility).ConfigureAwait(false);
-
-            IsFollowed = true;
-        }
-
-        public async Task UnfollowAsync(Visibility visibility = Visibility.Public)
-        {
-            if (!IsFollowed)
-                throw new InvalidOperationException("The user has not been followed!");
-
-            await Client.Api.DeleteUserFollowAsync(await Client.CheckTokenAsync(), Id,
-                visibility).ConfigureAwait(false);
-
-            IsFollowed = false;
-        }
 
         public ImageInfo Avatar => new(_avatarUri, Client);
 

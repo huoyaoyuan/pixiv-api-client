@@ -360,5 +360,27 @@ namespace Meowtrix.PixivApi
                     date: date,
                     cancellation: cancellation).ConfigureAwait(false), cancellation);
         }
+
+        public async Task FollowUserAsync(
+            UserInfo userInfo,
+            Visibility visibility = Visibility.Public,
+            CancellationToken cancellation = default)
+        {
+            await Api.AddUserFollowAsync(await CheckTokenAsync(),
+                userInfo.Id,
+                visibility,
+                cancellation).ConfigureAwait(false);
+        }
+
+        public async Task UnfollowUserAsync(
+            UserInfo userInfo,
+            Visibility visibility = Visibility.Public,
+            CancellationToken cancellation = default)
+        {
+            await Api.DeleteUserFollowAsync(await CheckTokenAsync(),
+                userInfo.Id,
+                visibility,
+                cancellation).ConfigureAwait(false);
+        }
     }
 }

@@ -662,7 +662,8 @@ namespace Meowtrix.PixivApi
         public Task AddUserFollowAsync(
             string? authToken,
             int userId,
-            Visibility restrict = Visibility.Public)
+            Visibility restrict = Visibility.Public,
+            CancellationToken cancellation = default)
         {
             return InvokeApiAsync<object>(
                 authToken,
@@ -672,13 +673,15 @@ namespace Meowtrix.PixivApi
                 {
                     ["user_id"] = userId.ToString(NumberFormatInfo.InvariantInfo),
                     ["restrict"] = restrict.ToQueryString()
-                }!));
+                }!),
+                cancellation: cancellation);
         }
 
         public Task DeleteUserFollowAsync(
             string? authToken,
             int userId,
-            Visibility restrict = Visibility.Public)
+            Visibility restrict = Visibility.Public,
+            CancellationToken cancellation = default)
         {
             return InvokeApiAsync<object>(
                 authToken,
@@ -688,7 +691,8 @@ namespace Meowtrix.PixivApi
                 {
                     ["user_id"] = userId.ToString(NumberFormatInfo.InvariantInfo),
                     ["restrict"] = restrict.ToQueryString()
-                }!));
+                }!),
+                cancellation: cancellation);
         }
 
         public Task<UsersList> GetMyPixivUsersAsync(
