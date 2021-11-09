@@ -5,6 +5,7 @@
     <TargetFrameworks>net6.0-windows;net472</TargetFrameworks>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
+    <RollForward>Major</RollForward>
   </PropertyGroup>
 
   <ItemGroup>
