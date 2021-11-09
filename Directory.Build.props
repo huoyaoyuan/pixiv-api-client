@@ -7,7 +7,7 @@
     <PackageOutputPath>$(MSBuildThisFileDirectory)Artifact\Packages\$(Configuration)</PackageOutputPath>
     <AppxPackageDir>$(MSBuildThisFileDirectory)Artifacts\AppPackages\</AppxPackageDir>
 
-    <AnalysisLevel>5</AnalysisLevel>
+    <AnalysisLevel>6.0</AnalysisLevel>
     <AnalysisMode>AllEnabledByDefault</AnalysisMode>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
 
