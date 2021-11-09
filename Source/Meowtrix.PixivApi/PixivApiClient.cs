@@ -447,7 +447,7 @@ namespace Meowtrix.PixivApi
                 authToken,
                 "/v1/illust/comment/add",
                 HttpMethod.Post,
-                body: new FormUrlEncodedContent(data!),
+                body: new FormUrlEncodedContent(data),
                 cancellation: cancellation);
         }
 
@@ -602,7 +602,7 @@ namespace Meowtrix.PixivApi
                 authToken,
                 "/v2/illust/bookmark/add",
                 HttpMethod.Post,
-                body: new FormUrlEncodedContent(data!),
+                body: new FormUrlEncodedContent(data),
                 cancellation: cancellation);
         }
 
@@ -617,7 +617,7 @@ namespace Meowtrix.PixivApi
                 HttpMethod.Post,
                 body: new FormUrlEncodedContent(new[]
                 {
-                    new KeyValuePair<string?, string?>("illust_id", illustId.ToString(NumberFormatInfo.InvariantInfo))
+                    new KeyValuePair<string, string>("illust_id", illustId.ToString(NumberFormatInfo.InvariantInfo))
                 }),
                 cancellation: cancellation);
         }
@@ -677,7 +677,7 @@ namespace Meowtrix.PixivApi
                 {
                     ["user_id"] = userId.ToString(NumberFormatInfo.InvariantInfo),
                     ["restrict"] = restrict.ToQueryString()
-                }!),
+                }),
                 cancellation: cancellation);
         }
 
@@ -695,7 +695,7 @@ namespace Meowtrix.PixivApi
                 {
                     ["user_id"] = userId.ToString(NumberFormatInfo.InvariantInfo),
                     ["restrict"] = restrict.ToQueryString()
-                }!),
+                }),
                 cancellation: cancellation);
         }
 
