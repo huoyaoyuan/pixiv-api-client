@@ -766,5 +766,17 @@ namespace Meowtrix.PixivApi
             // TODO: nullable convariance of task
             return new(InvokeApiAsync<T>(authToken, previous.NextUrl, HttpMethod.Get, cancellation: cancellation)!);
         }
+
+        public Task<IllustSeriesInfo> GetIllustSeriesAsync(
+            string? authToken,
+            int illustSeriesId,
+            CancellationToken cancellation = default)
+        {
+            return InvokeApiAsync<IllustSeriesInfo>(
+                authToken,
+                $"/v1/illust/series?illust_series_id={illustSeriesId}",
+                HttpMethod.Get,
+                cancellation: cancellation);
+        }
     }
 }
