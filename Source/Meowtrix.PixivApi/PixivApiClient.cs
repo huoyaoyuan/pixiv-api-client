@@ -516,8 +516,8 @@ namespace Meowtrix.PixivApi
         {
             string url = $"/v1/illust/ranking?mode={mode.ToQueryString()}"
                 + $"&offset={offset}";
-            if (date is DateTime d)
-                url += $"&date={d:yyyy-MM-dd}";
+            if (date is not null)
+                url += $"&date={date:yyyy-MM-dd}";
 
             return InvokeApiAsync<UserIllusts>(
                 authToken,
@@ -525,6 +525,27 @@ namespace Meowtrix.PixivApi
                 HttpMethod.Get,
                 cancellation: cancellation);
         }
+
+#if NET6_0_OR_GREATER
+        public Task<UserIllusts> GetIllustRankingAsync(
+            string? authToken,
+            IllustRankingMode mode = IllustRankingMode.Day,
+            DateOnly? date = null,
+            int offset = 0,
+            CancellationToken cancellation = default)
+        {
+            string url = $"/v1/illust/ranking?mode={mode.ToQueryString()}"
+                + $"&offset={offset}";
+            if (date is not null)
+                url += $"&date={date:yyyy-MM-dd}";
+
+            return InvokeApiAsync<UserIllusts>(
+                authToken,
+                url,
+                HttpMethod.Get,
+                cancellation: cancellation);
+        }
+#endif
 
         public Task<TrendingTagsIllust> GetTrendingTagsIllustAsync(
             string? authToken,
@@ -566,6 +587,38 @@ namespace Meowtrix.PixivApi
                 HttpMethod.Get,
                 cancellation: cancellation);
         }
+
+#if NET6_0_OR_GREATER
+        public Task<SearchIllustResult> SearchIllustsAsync(
+            string? authToken,
+            string word,
+            IllustSearchTarget searchTarget = IllustSearchTarget.ExactTag,
+            IllustSortMode sort = IllustSortMode.Latest,
+            int? maxBookmarkCount = null,
+            int? minBookmarkCount = null,
+            DateOnly? startDate = null,
+            DateOnly? endDate = null,
+            int offset = 0,
+            CancellationToken cancellation = default)
+        {
+            string url = $"/v1/search/illust?word={HttpUtility.UrlEncode(word)}&search_target={searchTarget.ToQueryString()}"
+                + $"&sort={sort.ToQueryString()}&offset={offset}";
+            if (maxBookmarkCount is int max)
+                url += $"&bookmark_num_max={max}";
+            if (minBookmarkCount is int min)
+                url += $"&bookmark_num_min={min}";
+            if (startDate is not null)
+                url += $"&start_date={startDate:yyyy-MM-dd}";
+            if (endDate is not null)
+                url += $"&end_date={endDate:yyyy-MM-dd}";
+
+            return InvokeApiAsync<SearchIllustResult>(
+                authToken,
+                url,
+                HttpMethod.Get,
+                cancellation: cancellation);
+        }
+#endif
 
         public Task<UsersList> SearchUsersAsync(
             string? authToken,
