@@ -355,6 +355,18 @@ namespace Meowtrix.PixivApi
             IllustFilterOptions? options = null,
             CancellationToken cancellation = default)
         {
+#if NET6_0_OR_GREATER
+            return ToIllustAsyncEnumerable(async (auth, c)
+                => await Api.SearchIllustsAsync(
+                    authToken: auth, word: word,
+                    searchTarget: searchTarget,
+                    sort: options?.SortMode ?? IllustSortMode.Latest,
+                    maxBookmarkCount: options?.MaxBookmarkCount,
+                    minBookmarkCount: options?.MinBookmarkCount,
+                    startDate: options?.StartDateOnly,
+                    endDate: options?.EndDateOnly,
+                    cancellation: c).ConfigureAwait(false), cancellation);
+#else
             return ToIllustAsyncEnumerable(async (auth, c)
                 => await Api.SearchIllustsAsync(
                     authToken: auth, word: word,
@@ -365,6 +377,7 @@ namespace Meowtrix.PixivApi
                     startDate: options?.StartDate,
                     endDate: options?.EndDate,
                     cancellation: c).ConfigureAwait(false), cancellation);
+#endif
         }
 
         public IAsyncEnumerable<Illust> GetIllustRankingAsync(
@@ -378,6 +391,20 @@ namespace Meowtrix.PixivApi
                     date: date,
                     cancellation: cancellation).ConfigureAwait(false), cancellation);
         }
+
+#if NET6_0_OR_GREATER
+        public IAsyncEnumerable<Illust> GetIllustRankingAsync(
+            IllustRankingMode rankingMode = IllustRankingMode.Day,
+            DateOnly? date = null,
+            CancellationToken cancellation = default)
+        {
+            return ToIllustAsyncEnumerable(async (auth, c)
+                => await Api.GetIllustRankingAsync(
+                    authToken: auth, mode: rankingMode,
+                    date: date,
+                    cancellation: cancellation).ConfigureAwait(false), cancellation);
+        }
+#endif
 
         public async Task FollowUserAsync(
             UserInfo userInfo,
