@@ -7,8 +7,10 @@
     <PackageOutputPath>$(MSBuildThisFileDirectory)Artifact\Packages\$(Configuration)</PackageOutputPath>
     <AppxPackageDir>$(MSBuildThisFileDirectory)Artifacts\AppPackages\</AppxPackageDir>
 
-    <AnalysisLevel>6.0</AnalysisLevel>
-    <AnalysisMode>AllEnabledByDefault</AnalysisMode>
+    <!-- Analyzer config docs: https://docs.microsoft.com/dotnet/core/project-sdk/msbuild-props#code-analysis-properties -->
+    <AnalysisMode>Recommended</AnalysisMode>
+    <AnalysisModeDesign>All</AnalysisModeDesign>
+    <AnalysisModeNaming>All</AnalysisModeNaming>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
 
     <!-- Can't be disabled in editorconfig -->
