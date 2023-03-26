@@ -109,7 +109,7 @@ namespace Meowtrix.PixivApi.Json
         int Id,
         string Title,
         string Type,
-        IllustDetail.PreviewImageUrls ImageUrls,
+        PreviewImageUrls ImageUrls,
         string Caption,
         int Restrict,
         UserSummary User,
@@ -135,19 +135,19 @@ namespace Meowtrix.PixivApi.Json
 
         public sealed record MetaSingle(Uri? OriginalImageUrl);
 
-        public sealed record MetaPage(MetaPageImageUrls ImageUrls);
-
-        public record PreviewImageUrls(
-            Uri SquareMedium,
-            Uri Medium,
-            Uri Large);
-
-        public record MetaPageImageUrls(
-            Uri SquareMedium,
-            Uri Medium,
-            Uri Large,
-            Uri Original);
+        public sealed record MetaPage(OriginalImageUrls ImageUrls);
     }
+
+    public record PreviewImageUrls(
+        Uri SquareMedium,
+        Uri Medium,
+        Uri Large);
+
+    public record OriginalImageUrls(
+        Uri SquareMedium,
+        Uri Medium,
+        Uri Large,
+        Uri Original);
 
     public sealed record IllustTag(string Name, string? TranslatedName);
 
@@ -236,5 +236,39 @@ namespace Meowtrix.PixivApi.Json
         : IHasNextPage<IllustSeriesDetails>
     {
         ImmutableArray<IllustSeriesDetails> IHasNextPage<IllustSeriesDetails>.Items => IllustSeriesDetails;
+    }
+
+    public sealed record UserNovels(ImmutableArray<NovelDetail> Novels, Uri? NextUrl)
+        : IHasNextPage<NovelDetail>
+    {
+        ImmutableArray<NovelDetail> IHasNextPage<NovelDetail>.Items => Novels;
+    }
+
+    public sealed record NovelDetail(
+        int Id,
+        string Title,
+        string Caption,
+        int Restrict,
+        int XRestrict,
+        bool IsOriginal,
+        PreviewImageUrls ImageUrls,
+        DateTimeOffset CreateDate,
+        ImmutableArray<NovelDetail.NovelTag> Tags,
+        int PageCount,
+        int TextLength,
+        UserSummary User,
+        NovelDetail.NovelSeries? Series,
+        bool IsBookmarked,
+        int TotalBookmarks,
+        int TotalView,
+        bool Visible,
+        int TotalComments,
+        bool IsMuted,
+        bool IsMyPixivOnly,
+        bool IsXRestricted,
+        int NovelAiType)
+    {
+        public sealed record NovelTag(string Name, string? TranslatedName, bool AddedByUploadedUser);
+        public sealed record NovelSeries(int Id, string Title);
     }
 }
