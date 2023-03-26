@@ -45,6 +45,10 @@
     <Reference Include="System.Web" />
   </ItemGroup>
 
+  <ItemGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible($(TargetFramework), 'net6.0')) != 'true'">
+    <PackageReference Include="Portable.System.DateTimeOnly" Version="7.0.1" />
+  </ItemGroup>
+
   <ItemGroup Condition="'$(TargetFramework)' != 'net7.0'">
     <PackageReference Include="System.Net.Http.Json" Version="7.0.1" />
     <PackageReference Include="System.Text.Json" Version="7.0.2" />
