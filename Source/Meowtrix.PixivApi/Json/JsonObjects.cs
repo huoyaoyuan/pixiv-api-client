@@ -273,4 +273,6 @@ namespace Meowtrix.PixivApi.Json
     }
 
     public sealed record NovelDetailResponse(NovelDetail Novel);
+
+    public sealed record NovelTextResponse(object NovelMarker, string NovelText);
 }
