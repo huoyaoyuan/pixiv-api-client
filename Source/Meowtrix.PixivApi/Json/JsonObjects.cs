@@ -271,4 +271,6 @@ namespace Meowtrix.PixivApi.Json
         public sealed record NovelTag(string Name, string? TranslatedName, bool AddedByUploadedUser);
         public sealed record NovelSeries(int Id, string Title);
     }
+
+    public sealed record NovelDetailResponse(NovelDetail Novel);
 }

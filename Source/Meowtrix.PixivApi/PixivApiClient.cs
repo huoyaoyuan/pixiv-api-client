@@ -802,5 +802,17 @@ namespace Meowtrix.PixivApi
                 HttpMethod.Get,
                 cancellation: cancellation);
         }
+
+        public Task<NovelDetailResponse> GetNovelDetailAsync(
+            string? authToken,
+            int novelId,
+            CancellationToken cancellation = default)
+        {
+            return InvokeApiAsync<NovelDetailResponse>(
+                authToken,
+                $"/v2/novel/detail?novel_id={novelId}",
+                HttpMethod.Get,
+                cancellation: cancellation);
+        }
     }
 }
