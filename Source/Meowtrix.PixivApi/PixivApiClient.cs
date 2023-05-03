@@ -92,16 +92,16 @@ namespace Meowtrix.PixivApi
             static string MD5Hash(string input)
             {
 #pragma warning disable CA5351 // 不要使用损坏的加密算法
+#if NET5_0_OR_GREATER
+                byte[] bytes = MD5.HashData(Encoding.UTF8.GetBytes(input));
+#else
                 using var md5 = MD5.Create();
-#pragma warning restore CA5351 // 不要使用损坏的加密算法
                 byte[] bytes = md5.ComputeHash(Encoding.UTF8.GetBytes(input));
+#endif
+#pragma warning restore CA5351 // 不要使用损坏的加密算法
 
 #if NETCOREAPP
-                return string.Create(bytes.Length * 2, bytes, (span, b) =>
-                {
-                    for (int i = 0; i < b.Length; i++)
-                        _ = b[i].TryFormat(span[(i * 2)..], out _, "x2");
-                });
+                return Convert.ToHexString(bytes).ToLowerInvariant();
 #else
                 var sb = new StringBuilder(bytes.Length * 2);
                 foreach (byte b in bytes)
@@ -510,26 +510,6 @@ namespace Meowtrix.PixivApi
         public Task<UserIllusts> GetIllustRankingAsync(
             string? authToken,
             IllustRankingMode mode = IllustRankingMode.Day,
-            DateTime? date = null,
-            int offset = 0,
-            CancellationToken cancellation = default)
-        {
-            string url = $"/v1/illust/ranking?mode={mode.ToQueryString()}"
-                + $"&offset={offset}";
-            if (date is not null)
-                url += $"&date={date:yyyy-MM-dd}";
-
-            return InvokeApiAsync<UserIllusts>(
-                authToken,
-                url,
-                HttpMethod.Get,
-                cancellation: cancellation);
-        }
-
-#if NET6_0_OR_GREATER
-        public Task<UserIllusts> GetIllustRankingAsync(
-            string? authToken,
-            IllustRankingMode mode = IllustRankingMode.Day,
             DateOnly? date = null,
             int offset = 0,
             CancellationToken cancellation = default)
@@ -545,7 +525,6 @@ namespace Meowtrix.PixivApi
                 HttpMethod.Get,
                 cancellation: cancellation);
         }
-#endif
 
         public Task<TrendingTagsIllust> GetTrendingTagsIllustAsync(
             string? authToken,
@@ -558,37 +537,6 @@ namespace Meowtrix.PixivApi
                 cancellation: cancellation);
         }
 
-        public Task<SearchIllustResult> SearchIllustsAsync(
-            string? authToken,
-            string word,
-            IllustSearchTarget searchTarget = IllustSearchTarget.ExactTag,
-            IllustSortMode sort = IllustSortMode.Latest,
-            int? maxBookmarkCount = null,
-            int? minBookmarkCount = null,
-            DateTime? startDate = null,
-            DateTime? endDate = null,
-            int offset = 0,
-            CancellationToken cancellation = default)
-        {
-            string url = $"/v1/search/illust?word={HttpUtility.UrlEncode(word)}&search_target={searchTarget.ToQueryString()}"
-                + $"&sort={sort.ToQueryString()}&offset={offset}";
-            if (maxBookmarkCount is int max)
-                url += $"&bookmark_num_max={max}";
-            if (minBookmarkCount is int min)
-                url += $"&bookmark_num_min={min}";
-            if (startDate is not null)
-                url += $"&start_date={startDate:yyyy-MM-dd}";
-            if (endDate is not null)
-                url += $"&end_date={endDate:yyyy-MM-dd}";
-
-            return InvokeApiAsync<SearchIllustResult>(
-                authToken,
-                url,
-                HttpMethod.Get,
-                cancellation: cancellation);
-        }
-
-#if NET6_0_OR_GREATER
         public Task<SearchIllustResult> SearchIllustsAsync(
             string? authToken,
             string word,
@@ -618,7 +566,6 @@ namespace Meowtrix.PixivApi
                 HttpMethod.Get,
                 cancellation: cancellation);
         }
-#endif
 
         public Task<UsersList> SearchUsersAsync(
             string? authToken,
