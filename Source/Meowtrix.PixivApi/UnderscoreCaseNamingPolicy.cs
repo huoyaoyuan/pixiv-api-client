@@ -4,7 +4,7 @@ using System.Text.Json;
 
 namespace Meowtrix.PixivApi
 {
-    internal class UnderscoreCaseNamingPolicy : JsonNamingPolicy
+    internal sealed class UnderscoreCaseNamingPolicy : JsonNamingPolicy
     {
         public override string ConvertName(string name)
         {

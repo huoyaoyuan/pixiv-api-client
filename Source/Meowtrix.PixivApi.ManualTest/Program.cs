@@ -9,7 +9,7 @@ using Meowtrix.PixivApi.Json;
 
 namespace Meowtrix.PixivApi.ManualTest
 {
-    internal class Program
+    internal sealed class Program
     {
         public static async Task Main()
         {
