@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Runtime.Serialization;
 
 namespace Meowtrix.PixivApi
 {
-    [Serializable]
     public class PixivApiException : Exception
     {
         public string? OriginalMessage { get; }
@@ -14,11 +12,6 @@ namespace Meowtrix.PixivApi
         {
             OriginalMessage = originalMessage;
             Error = error;
-        }
-
-        protected PixivApiException(SerializationInfo serializationInfo, StreamingContext streamingContext)
-            : base(serializationInfo, streamingContext)
-        {
         }
     }
 
