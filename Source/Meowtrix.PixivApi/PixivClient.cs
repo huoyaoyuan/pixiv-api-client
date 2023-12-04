@@ -433,5 +433,16 @@ namespace Meowtrix.PixivApi
 
             return new(this, response.IllustSeriesDetail);
         }
+
+        public async Task<Novel> GetNovelAsync(
+            int novelId,
+            CancellationToken cancellation = default)
+        {
+            var response = await Api.GetNovelDetailAsync(await CheckTokenAsync(),
+                novelId,
+                cancellation).ConfigureAwait(false);
+
+            return new(this, response.Novel);
+        }
     }
 }

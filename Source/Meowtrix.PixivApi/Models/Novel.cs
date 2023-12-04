@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Meowtrix.PixivApi.Json;
@@ -51,5 +53,48 @@ namespace Meowtrix.PixivApi.Models
                 await _client.CheckTokenAsync(),
                 Id,
                 cancellation).ConfigureAwait(false)).NovelText;
+
+        /// <remarks>Chapters are parsed by inline markups and can be unreliable.</remarks>
+        public async Task<IEnumerable<NovelChapter>> GetChaptersAsync(CancellationToken cancellation = default)
+        {
+            string text = await GetTextAsync(cancellation).ConfigureAwait(false);
+            return text
+#if NETCOREAPP
+                .Split("[newpage]")
+#else
+                .Split(new[] { "[newpage]" }, StringSplitOptions.None)
+#endif
+                .Select(ParseChapter);
+
+            static NovelChapter ParseChapter(string page)
+            {
+                int chapterIndex = page.AsSpan().IndexOf("[chapter:".AsSpan());
+                if (chapterIndex != -1)
+                {
+                    ReadOnlySpan<char> titleAndBody = page.AsSpan(chapterIndex + 9);
+                    int endIndex = titleAndBody.IndexOf(']');
+                    if (endIndex != -1)
+                    {
+                        string title = titleAndBody[..endIndex].ToString();
+                        string body = titleAndBody[(endIndex + 1)..].ToString();
+                        return new(title, body);
+                    }
+                }
+
+                return new(null, page.ToString());
+            }
+        }
+    }
+
+    public class NovelChapter
+    {
+        internal NovelChapter(string? title, string text)
+        {
+            Title = title;
+            Text = text;
+        }
+
+        public string? Title { get; }
+        public string Text { get; }
     }
 }
