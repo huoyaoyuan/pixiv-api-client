@@ -39,6 +39,9 @@ namespace Meowtrix.PixivApi
         public PixivClient(HttpMessageHandler handler)
             => Api = new PixivApiClient(handler);
 
+        public PixivClient(PixivApiClient lowLevelClient)
+            => Api = lowLevelClient;
+
         public void SetProxy(IWebProxy? proxy)
         {
             ChangeApiClient(proxy is null

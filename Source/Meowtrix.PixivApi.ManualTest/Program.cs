@@ -23,32 +23,34 @@ namespace Meowtrix.PixivApi.ManualTest
 
             client.DefaultRequestHeaders.AcceptLanguage.Add(new(CultureInfo.CurrentCulture.Name));
 
-            Console.Write("Saved access token:");
-            string? authToken = Console.ReadLine();
-            if (string.IsNullOrWhiteSpace(authToken))
+            Console.Write("Saved refresh token:");
+            string? refreshToken = Console.ReadLine();
+
+            AuthResponse response;
+            if (!string.IsNullOrWhiteSpace(refreshToken))
             {
-                Console.Write("Saved refresh token:");
-                string? refreshToken = Console.ReadLine();
+                response = (await client.AuthAsync(refreshToken)).authResponse;
+            }
+            else
+            {
+                var (codeVerify, url) = client.BeginAuth();
+                Console.Write("Access this url in browser: ");
+                Console.WriteLine(url);
+                Console.Write("Paste the xxx part of pixiv://....?code=xxx (Use browser F12 to inspect it):");
+                string code = Console.ReadLine()!;
+                response = (await client.CompleteAuthAsync(code, codeVerify)).authResponse;
+                refreshToken = response.RefreshToken;
+            }
+            string authToken = response.AccessToken;
+            Console.WriteLine($"Access token: {response.AccessToken}");
+            Console.WriteLine($"Refresh token: {response.RefreshToken}");
 
-                AuthResponse response;
-                if (!string.IsNullOrWhiteSpace(refreshToken))
-                {
-                    response = (await client.AuthAsync(refreshToken)).authResponse;
-                }
-                else
-                {
-                    var (codeVerify, url) = client.BeginAuth();
-                    Console.Write("Access this url in browser: ");
-                    Console.WriteLine(url);
-                    Console.Write("Paste the xxx part of pixiv://....?code=xxx (Use browser F12 to inspect it):");
-                    string code = Console.ReadLine()!;
-                    response = (await client.CompleteAuthAsync(code, codeVerify)).authResponse;
-                }
-                authToken = response.AccessToken;
-                Console.WriteLine($"Access token: {response.AccessToken}");
-                Console.WriteLine($"Refresh token: {response.RefreshToken}");
+            Debugger.Break();
 
-                Debugger.Break();
+            {
+                var hClient = new PixivClient(client);
+                await hClient.LoginAsync(refreshToken);
+
             }
 
             Console.WriteLine("Begin user/detail");
