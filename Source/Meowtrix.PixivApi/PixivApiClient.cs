@@ -790,5 +790,41 @@ namespace Meowtrix.PixivApi
                 HttpMethod.Get,
                 cancellation: cancellation);
         }
+
+        public Task<UserNovels> GetUserNovelsAsync(
+            string? authToken,
+            int userId,
+            CancellationToken cancellation = default)
+        {
+            return InvokeApiAsync<UserNovels>(
+                authToken,
+                $"/v1/user/novels?user_id={userId}",
+                HttpMethod.Get,
+                cancellation: cancellation);
+        }
+
+        public Task<NovelDetailResponse> GetNovelDetailAsync(
+            string? authToken,
+            int novelId,
+            CancellationToken cancellation = default)
+        {
+            return InvokeApiAsync<NovelDetailResponse>(
+                authToken,
+                $"/v2/novel/detail?novel_id={novelId}",
+                HttpMethod.Get,
+                cancellation: cancellation);
+        }
+
+        public Task<NovelTextResponse> GetNovelTextAsync(
+            string? authToken,
+            int novelId,
+            CancellationToken cancellation = default)
+        {
+            return InvokeApiAsync<NovelTextResponse>(
+                authToken,
+                $"/v1/novel/text?novel_id={novelId}",
+                HttpMethod.Get,
+                cancellation: cancellation);
+        }
     }
 }

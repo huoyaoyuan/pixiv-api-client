@@ -1,5 +1,5 @@
 ﻿using System;
-using static Meowtrix.PixivApi.Json.IllustDetail;
+using Meowtrix.PixivApi.Json;
 
 namespace Meowtrix.PixivApi.Models
 {
@@ -8,7 +8,7 @@ namespace Meowtrix.PixivApi.Models
         private readonly PixivClient _client;
         private readonly Uri _original, _medium, _squareMedium, _large;
 
-        internal IllustPage(Illust illust, int index, PixivClient client, MetaPageImageUrls urls)
+        internal IllustPage(Illust illust, int index, PixivClient client, OriginalImageUrls urls)
         {
             Illust = illust;
             Index = index;

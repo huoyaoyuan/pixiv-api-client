@@ -74,5 +74,15 @@ namespace Meowtrix.PixivApi.Models
             await foreach (var raw in rawEnumerable)
                 yield return new(Client, raw);
         }
+
+        public async IAsyncEnumerable<Novel> GetNovelsAsync([EnumeratorCancellation] CancellationToken cancellation = default)
+        {
+            var rawEnumerable = Client.ToAsyncEnumerable<UserNovels, NovelDetail>(async (auth, c)
+                => await Client.Api.GetUserNovelsAsync(auth, Id, c).ConfigureAwait(false),
+                cancellation);
+
+            await foreach (var raw in rawEnumerable)
+                yield return new(Client, raw);
+        }
     }
 }
