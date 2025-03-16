@@ -26,10 +26,10 @@ namespace Meowtrix.PixivApi
     {
         private static readonly JsonSerializerOptions s_serializerOptions = new()
         {
-            PropertyNamingPolicy = new UnderscoreCaseNamingPolicy(),
+            PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
             Converters =
             {
-                new JsonStringEnumConverter(new UnderscoreCaseNamingPolicy())
+                new JsonStringEnumConverter(JsonNamingPolicy.SnakeCaseLower)
             }
         };
 
