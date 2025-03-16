@@ -7,6 +7,10 @@ A pixiv api client with the power of latest .NET concepts
 
 ⚠ This package is developed with personal usage in mind. No API compatibility guaranteed, but SemVer will be followed.
 
+⚠ This project is not actively maintained. As of March 2025, only refresh token-based authorization is functional.
+
+The author is actively exploring the design pattern of API client and can't reflect every exploration into NuGet package.
+
 # License
 MIT License.
 
