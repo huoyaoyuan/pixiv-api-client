@@ -11,6 +11,7 @@ using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
+using IdentityModel.Client;
 using Meowtrix.PixivApi.Json;
 
 namespace Meowtrix.PixivApi
@@ -76,9 +77,30 @@ namespace Meowtrix.PixivApi
         private static readonly Uri s_baseUri = new(BaseUrl);
         private const string ClientId = "MOBrBDS8blbauoSck0ZfDbtuzpyT";
         private const string ClientSecret = "lsACyCD94FhDUtGTXi3QzcFE2uU1hqtDaKeqrdwj";
-        private const string UserAgent = "PixivAndroidApp/5.0.64 (Android 6.0)";
+        private const string UserAgent = "PixivAndroidApp/5.0.166 (Android 12.0)";
         private const string HashSecret = "28c1fdd170a5204386cb1313c7077b34f83e4aaf4aa829ce78c231e05b0bae2c";
         private const string AuthUrl = "https://oauth.secure.pixiv.net/auth/token";
+
+
+        private static string MD5Hash(string input)
+        {
+#if NET5_0_OR_GREATER
+            byte[] bytes = MD5.HashData(Encoding.UTF8.GetBytes(input));
+#else
+            using var md5 = MD5.Create();
+            byte[] bytes = md5.ComputeHash(Encoding.UTF8.GetBytes(input));
+#endif
+
+#if NETCOREAPP
+            return Convert.ToHexString(bytes).ToLowerInvariant();
+#else
+            var sb = new StringBuilder(bytes.Length * 2);
+            foreach (byte b in bytes)
+                sb.Append(b.ToString("x2", null));
+            return sb.ToString();
+#endif
+        }
+
 
         [Obsolete("Authentication with username and password has been abandoned by Pixiv.")]
         public async Task<(DateTimeOffset authTime, AuthResponse authResponse)> AuthAsync(
@@ -228,27 +250,26 @@ namespace Meowtrix.PixivApi
             CancellationToken cancellation = default)
         {
             DateTimeOffset authTime = DateTimeOffset.Now;
+            string requestTime = authTime.ToString(@"yyyy-MM-dd\THH\:mm\:ssK");
 
-            using var request = new HttpRequestMessage(HttpMethod.Post, AuthUrl)
+            using var request = new RefreshTokenRequest
             {
-                Content = new FormUrlEncodedContent(
-                [
-                    new("get_secure_url", "1"),
-                    new("client_id", ClientId),
-                    new("client_secret", ClientSecret),
-                    new("grant_type", "refresh_token"),
-                    new("refresh_token", refreshToken),
-                ]),
+                Address = AuthUrl,
+                ClientId = ClientId,
+                ClientSecret = ClientSecret,
+                RefreshToken = refreshToken,
                 Headers =
                 {
-                    { "User-Agent", UserAgent }
-                },
-#if NET5_0_OR_GREATER
-                VersionPolicy = HttpVersionPolicy.RequestVersionOrHigher
-#endif
+                    { "User-Agent", UserAgent },
+                    { "X-Client-Time", requestTime },
+                    { "X-Client-Hash", MD5Hash(requestTime + HashSecret) },
+                }
             };
 
-            return (authTime, await AuthAsync(request, cancellation).ConfigureAwait(false));
+            var response = await this.RequestRefreshTokenAsync(request, cancellation).ConfigureAwait(false);
+
+            return (authTime, new AuthResponse(response.AccessToken!, response.ExpiresIn, response.TokenType!,
+                response.Scope!, response.RefreshToken!, response.Json!.Value.GetProperty("user").Deserialize<AuthUser>(s_serializerOptions)!));
         }
 
         private async Task<AuthResponse> AuthAsync(HttpRequestMessage request, CancellationToken cancellationToken = default)
