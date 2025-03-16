@@ -110,15 +110,15 @@ namespace Meowtrix.PixivApi
 
             using var request = new HttpRequestMessage(HttpMethod.Post, AuthUrl)
             {
-                Content = new FormUrlEncodedContent(new KeyValuePair<string?, string?>[]
-                {
+                Content = new FormUrlEncodedContent(
+                [
                     new ("get_secure_url", "1"),
                     new ("client_id", ClientId),
                     new ("client_secret", ClientSecret),
                     new ("grant_type", "password"),
                     new ("username", username),
                     new ("password", password),
-                }),
+                ]),
                 Headers =
                 {
                     { "User-Agent", UserAgent },
@@ -201,8 +201,8 @@ namespace Meowtrix.PixivApi
 
             using var request = new HttpRequestMessage(HttpMethod.Post, AuthUrl)
             {
-                Content = new FormUrlEncodedContent(new KeyValuePair<string?, string?>[]
-                {
+                Content = new FormUrlEncodedContent(
+                [
                     new("code", code),
                     new("redirect_uri", "https://app-api.pixiv.net/web/v1/users/auth/pixiv/callback"),
                     new("grant_type", "authorization_code"),
@@ -210,7 +210,7 @@ namespace Meowtrix.PixivApi
                     new("client_id", ClientId),
                     new("client_secret", ClientSecret),
                     new("code_verifier", codeVerify)
-                }),
+                ]),
                 Headers =
                 {
                     { "User-Agent", UserAgent }
@@ -231,14 +231,14 @@ namespace Meowtrix.PixivApi
 
             using var request = new HttpRequestMessage(HttpMethod.Post, AuthUrl)
             {
-                Content = new FormUrlEncodedContent(new KeyValuePair<string?, string?>[]
-                {
+                Content = new FormUrlEncodedContent(
+                [
                     new("get_secure_url", "1"),
                     new("client_id", ClientId),
                     new("client_secret", ClientSecret),
                     new("grant_type", "refresh_token"),
                     new("refresh_token", refreshToken),
-                }),
+                ]),
                 Headers =
                 {
                     { "User-Agent", UserAgent }
@@ -613,10 +613,10 @@ namespace Meowtrix.PixivApi
                 authToken,
                 "/v1/illust/bookmark/delete",
                 HttpMethod.Post,
-                body: new FormUrlEncodedContent(new[]
-                {
-                    new KeyValuePair<string, string>("illust_id", illustId.ToString(NumberFormatInfo.InvariantInfo))
-                }),
+                body: new FormUrlEncodedContent(
+                [
+                    new("illust_id", illustId.ToString(NumberFormatInfo.InvariantInfo))
+                ]),
                 cancellation: cancellation);
         }
 
