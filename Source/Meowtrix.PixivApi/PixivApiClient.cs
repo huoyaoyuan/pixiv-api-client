@@ -91,14 +91,12 @@ namespace Meowtrix.PixivApi
 
             static string MD5Hash(string input)
             {
-#pragma warning disable CA5351 // 不要使用损坏的加密算法
 #if NET5_0_OR_GREATER
                 byte[] bytes = MD5.HashData(Encoding.UTF8.GetBytes(input));
 #else
                 using var md5 = MD5.Create();
                 byte[] bytes = md5.ComputeHash(Encoding.UTF8.GetBytes(input));
 #endif
-#pragma warning restore CA5351 // 不要使用损坏的加密算法
 
 #if NETCOREAPP
                 return Convert.ToHexString(bytes).ToLowerInvariant();

@@ -76,7 +76,7 @@ namespace Meowtrix.PixivApi.ManualTest
             Console.WriteLine("Begin illust/related");
             var illustRelated = await client.GetIllustRelatedAsync(authToken: authToken,
                 illustId: 76995599,
-                seedIllustIds: new[] { 83492606, 82693472 });
+                seedIllustIds: [83492606, 82693472]);
             Debugger.Break();
 
             Console.WriteLine("Begin illust/ranking");
