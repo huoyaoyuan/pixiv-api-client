@@ -7,6 +7,10 @@ namespace Meowtrix.PixivApi.Authentication
 {
     public record struct AccessToken(string Token, DateTimeOffset ValidUntil);
 
+    /// <summary>
+    /// A base class for authentication credentials. In case of authentication failure,
+    /// you can replace with your own implementation.
+    /// </summary>
     public abstract class PixivCredentials
     {
         public abstract Task<AccessToken> GetAccessTokenAsync(
