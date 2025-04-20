@@ -17,6 +17,8 @@ public class AccessTokenManager(
 
     public void Authenticate(PixivAuthenticationResult authResult) => _authResult = authResult;
 
+    public bool IsAuthenticated => _authResult != null;
+
     public async ValueTask<string> GetAccessTokenAsync(HttpMessageHandler handler, CancellationToken cancellationToken = default)
     {
         var authResult = _authResult ?? throw new InvalidOperationException("No authentication has been performed.");
