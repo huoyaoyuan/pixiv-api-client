@@ -1,6 +1,8 @@
 ﻿using System;
-using System.Threading.Tasks;
+using System.Net.Http;
+using System.Web;
 using System.Windows;
+using Meowtrix.PixivApi.Authentication;
 
 namespace Meowtrix.PixivApi.ManualLogin
 {
@@ -9,29 +11,34 @@ namespace Meowtrix.PixivApi.ManualLogin
     /// </summary>
     public partial class MainWindow : Window
     {
-        private readonly PixivClient _client = new();
-
         public MainWindow() => InitializeComponent();
 
-        private async void Window_Loaded(object sender, RoutedEventArgs e)
+        private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            string refreshToken = await _client.LoginAsync(uri =>
+            (string codeVerify, string loginUrl) = PixivAuthentication.PrepareWebLogin();
+            WebView.Source = new(loginUrl);
+            WebView.NavigationStarting += async (s, e) =>
             {
-                var tcs = new TaskCompletionSource<Uri>();
-                WebView.Source = new(uri);
-                WebView.NavigationStarting += (s, e) =>
+                if (e.Uri.StartsWith("pixiv:", StringComparison.Ordinal))
                 {
-                    if (e.Uri.StartsWith("pixiv:", StringComparison.Ordinal))
+                    e.Cancel = true;
+                    try
                     {
-                        e.Cancel = true;
-                        tcs.SetResult(new(e.Uri));
+                        var uri = new Uri(e.Uri);
+                        var query = HttpUtility.ParseQueryString(uri.Query);
+                        var loginResult = await PixivAuthentication.CompleteWebLoginAsync(
+                            new HttpClient(),
+                            query["code"]!,
+                            codeVerify)
+                            .ConfigureAwait(true);
+                        Text.Text = $"Your refresh token is: \n\n{loginResult.RefreshToken}\n\nDO NOT share it -- it's valid for a long term.";
                     }
-                };
-
-                return tcs.Task;
-            }).ConfigureAwait(true);
-
-            Text.Text = $"Your refresh token is: \n\n{refreshToken}\n\nDO NOT share it -- it's valid for a long term.";
+                    catch (Exception ex)
+                    {
+                        Text.Text = ex.ToString();
+                    }
+                }
+            };
         }
     }
 }
