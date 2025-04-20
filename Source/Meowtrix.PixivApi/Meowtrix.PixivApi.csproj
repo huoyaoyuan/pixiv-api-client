@@ -35,12 +35,14 @@
     </PackageReference>
   </ItemGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)' != 'net8.0'">
+  <PropertyGroup Condition="'$(TargetFramework)' != 'net9.0'">
     <Nullable>annotations</Nullable>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETCoreApp'">
+    <PackageReference Include="Portable.System.DateTimeOnly" Version="9.0.0" />
     <PackageReference Include="System.Collections.Immutable" Version="9.0.3" />
+    <PackageReference Include="System.Net.Http.Json" Version="9.0.3" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
@@ -49,14 +51,12 @@
     <Reference Include="System.Web" />
   </ItemGroup>
 
-  <ItemGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible($(TargetFramework), 'net6.0')) != 'true'">
-    <PackageReference Include="Portable.System.DateTimeOnly" Version="9.0.0" />
-    <PackageReference Include="System.Net.Http.Json" Version="9.0.3" />
-    <PackageReference Include="System.Text.Json" Version="9.0.3" />
-  </ItemGroup>
-
   <ItemGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible($(TargetFramework), 'net8.0')) != 'true'">
     <PackageReference Include="Microsoft.Bcl.TimeProvider" Version="9.0.3" />
+  </ItemGroup>
+  
+  <ItemGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible($(TargetFramework), 'net9.0')) != 'true'">
+    <PackageReference Include="System.Text.Json" Version="9.0.3" />
   </ItemGroup>
 
 </Project>

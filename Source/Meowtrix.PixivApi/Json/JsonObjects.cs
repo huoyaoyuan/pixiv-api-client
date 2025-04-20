@@ -275,4 +275,11 @@ namespace Meowtrix.PixivApi.Json
     public sealed record NovelDetailResponse(NovelDetail Novel);
 
     public sealed record NovelTextResponse(object NovelMarker, string NovelText);
+
+    [JsonSerializable(typeof(AuthUser))]
+    [JsonSourceGenerationOptions(
+        PropertyNamingPolicy = JsonKnownNamingPolicy.SnakeCaseLower,
+        RespectNullableAnnotations = true,
+        RespectRequiredConstructorParameters = true)]
+    internal partial class PixivJsonContext : JsonSerializerContext { }
 }
