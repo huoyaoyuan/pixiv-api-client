@@ -496,6 +496,23 @@ public class PixivApiClient : IDisposable
             cancellationToken);
     }
 
+    public Task<NovelSeriesResponse> GetNovelSeriesAsync(
+        int seriesId,
+        CancellationToken cancellationToken = default)
+    {
+        return InvokeGetAsync(
+            $"/v2/novel/series?series_id={seriesId}",
+            PixivJsonContext.Default.NovelSeriesResponse,
+            cancellationToken);
+    }
+
+    public Task<string> GetNovelHtmlAsync(
+        int novelId,
+        CancellationToken cancellationToken = default)
+    {
+        return HttpClient.GetStringAsync($"/webview/v2/novel?id={novelId}", cancellationToken);
+    }
+
     public async Task<HttpResponseMessage> GetImageAsync(Uri imageUri,
         CancellationToken cancellation = default)
     {

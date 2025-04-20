@@ -268,6 +268,30 @@ namespace Meowtrix.PixivApi.Json
 
     public sealed record NovelTextResponse(object NovelMarker, string NovelText);
 
+    public record class NovelSeriesDetail(
+        int Id,
+        string Title,
+        string Caption,
+        bool IsOriginal,
+        bool IsConcluded,
+        int ContentCount,
+        int TotalCharacterCount,
+        // UserSummary User,
+        string DisplayText,
+        int NovelAiType,
+        bool WatchlistAdded);
+
+    public record class NovelSeriesResponse(
+        NovelSeriesDetail NovelSeriesDetail,
+        NovelDetail NovelSeriesFirstNovel,
+        NovelDetail NovelSeriesLatestNovel,
+        ImmutableArray<NovelDetail> Novels,
+        Uri? NextUrl)
+        : IHasNextPage<NovelDetail>
+    {
+        public ImmutableArray<NovelDetail> Items => Novels;
+    }
+
     [JsonSerializable(typeof(AuthUser))]
     [JsonSerializable(typeof(UserDetail))]
     [JsonSerializable(typeof(IllustDetailResponse))]
@@ -285,6 +309,7 @@ namespace Meowtrix.PixivApi.Json
     [JsonSerializable(typeof(UserNovels))]
     [JsonSerializable(typeof(NovelDetailResponse))]
     [JsonSerializable(typeof(NovelTextResponse))]
+    [JsonSerializable(typeof(NovelSeriesResponse))]
     [JsonSourceGenerationOptions(
         PropertyNamingPolicy = JsonKnownNamingPolicy.SnakeCaseLower,
         RespectNullableAnnotations = true,
