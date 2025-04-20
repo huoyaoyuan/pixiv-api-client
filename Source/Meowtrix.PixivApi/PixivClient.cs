@@ -24,41 +24,41 @@ namespace Meowtrix.PixivApi
     public sealed class PixivClient : IDisposable
     {
         private readonly AccessTokenManager _tokenManager = new(null);
-        private PixivApiClient2 _apiClient;
+        private PixivApiClient _apiClient;
 
-        internal PixivApiClient2 Api => _apiClient;
+        internal PixivApiClient Api => _apiClient;
 
         #region Construction and disposal
         public PixivClient(bool useDefaultProxy = true)
-            => _apiClient = new PixivApiClient2(_tokenManager, new HttpClientHandler { UseProxy = useDefaultProxy });
+            => _apiClient = new PixivApiClient(_tokenManager, new HttpClientHandler { UseProxy = useDefaultProxy });
 
         public PixivClient(IWebProxy? proxy)
-            => _apiClient = new PixivApiClient2(_tokenManager,
+            => _apiClient = new PixivApiClient(_tokenManager,
                 proxy is null
                 ? new HttpClientHandler { UseProxy = false }
                 : new HttpClientHandler { Proxy = proxy });
 
         public PixivClient(HttpMessageHandler handler)
-            => _apiClient = new PixivApiClient2(_tokenManager, handler);
+            => _apiClient = new PixivApiClient(_tokenManager, handler);
 
-        public PixivClient(PixivApiClient2 lowLevelClient)
+        public PixivClient(PixivApiClient lowLevelClient)
             => _apiClient = lowLevelClient;
 
         public void SetProxy(IWebProxy? proxy)
         {
-            ChangeApiClient(new PixivApiClient2(_tokenManager,
+            ChangeApiClient(new PixivApiClient(_tokenManager,
                 proxy is null
                 ? new HttpClientHandler { UseProxy = false }
                 : new HttpClientHandler { Proxy = proxy }));
         }
 
         public void SetDefaultProxy()
-            => ChangeApiClient(new PixivApiClient2(_tokenManager, new HttpClientHandler { UseProxy = true }));
+            => ChangeApiClient(new PixivApiClient(_tokenManager, new HttpClientHandler { UseProxy = true }));
 
         public void SetHandler(HttpMessageHandler handler)
-            => ChangeApiClient(new PixivApiClient2(_tokenManager, handler));
+            => ChangeApiClient(new PixivApiClient(_tokenManager, handler));
 
-        private void ChangeApiClient(PixivApiClient2 newApiClient)
+        private void ChangeApiClient(PixivApiClient newApiClient)
         {
             SetRequestHeader(newApiClient.HttpClient, RequestLanguage);
             var old = Interlocked.Exchange(ref _apiClient, newApiClient);
@@ -78,7 +78,7 @@ namespace Meowtrix.PixivApi
         /// listens and returns for pixiv:// request.</param>
         /// <param name="cancellationToken">A cancellation token.</param>
         /// <returns>The returned refresh token.</returns>
-        public async Task<string> LoginAsync(Func<string, CancellationToken, Task<Uri>> requestFunc, CancellationToken cancellationToken)
+        public async Task<string> LoginAsync(Func<string, CancellationToken, Task<Uri>> requestFunc, CancellationToken cancellationToken = default)
         {
             var (codeVerify, loginUrl) = PixivAuthentication.PrepareWebLogin();
             var uri = await requestFunc(loginUrl, cancellationToken).ConfigureAwait(false);
@@ -105,7 +105,7 @@ namespace Meowtrix.PixivApi
         /// <param name="refreshToken">The stored refresh token.</param>
         /// <param name="cancellationToken">A cancellation token.</param>
         /// <returns>The returned refresh token.</returns>
-        public async Task<string> LoginAsync(string refreshToken, CancellationToken cancellationToken)
+        public async Task<string> LoginAsync(string refreshToken, CancellationToken cancellationToken = default)
         {
             var authResult = await PixivAuthentication.AuthWithRefreshTokenAsync(
                 new HttpMessageInvoker(Api.InnerHandler, false),

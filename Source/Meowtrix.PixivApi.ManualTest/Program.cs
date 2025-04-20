@@ -2,10 +2,9 @@
 using System.Diagnostics;
 using System.Globalization;
 using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
-using Meowtrix.PixivApi.Json;
-
-#pragma warning disable CA2007
+using Meowtrix.PixivApi.Authentication;
 
 namespace Meowtrix.PixivApi.ManualTest
 {
@@ -17,31 +16,34 @@ namespace Meowtrix.PixivApi.ManualTest
             Console.Write("Proxy:");
             string? proxy = Console.ReadLine();
 
-            using var client = string.IsNullOrWhiteSpace(proxy)
-                ? new PixivApiClient()
-                : new PixivApiClient(new WebProxy($"http://{proxy}"));
+            var tokenManager = new AccessTokenManager(null);
+            using var client = new PixivApiClient(
+                tokenManager,
+                string.IsNullOrWhiteSpace(proxy)
+                    ? null
+                    : new HttpClientHandler { Proxy = new WebProxy($"http://{proxy}") });
 
-            client.DefaultRequestHeaders.AcceptLanguage.Add(new(CultureInfo.CurrentCulture.Name));
+            client.HttpClient.DefaultRequestHeaders.AcceptLanguage.Add(new(CultureInfo.CurrentCulture.Name));
 
             Console.Write("Saved refresh token:");
             string? refreshToken = Console.ReadLine();
 
-            AuthResponse response;
+            PixivAuthenticationResult response;
             if (!string.IsNullOrWhiteSpace(refreshToken))
             {
-                response = (await client.AuthAsync(refreshToken)).authResponse;
+                response = await PixivAuthentication.AuthWithRefreshTokenAsync(new HttpMessageInvoker(client.InnerHandler, false), refreshToken);
             }
             else
             {
-                var (codeVerify, url) = client.BeginAuth();
+                var (codeVerify, url) = PixivAuthentication.PrepareWebLogin();
                 Console.Write("Access this url in browser: ");
                 Console.WriteLine(url);
                 Console.Write("Paste the xxx part of pixiv://....?code=xxx (Use browser F12 to inspect it):");
                 string code = Console.ReadLine()!;
-                response = (await client.CompleteAuthAsync(code, codeVerify)).authResponse;
+                response = await PixivAuthentication.CompleteWebLoginAsync(new HttpMessageInvoker(client.InnerHandler, false), code, codeVerify);
                 refreshToken = response.RefreshToken;
             }
-            string authToken = response.AccessToken;
+            tokenManager.Authenticate(response);
             Console.WriteLine($"Access token: {response.AccessToken}");
             Console.WriteLine($"Refresh token: {response.RefreshToken}");
 
@@ -50,77 +52,76 @@ namespace Meowtrix.PixivApi.ManualTest
             {
                 var hClient = new PixivClient(client);
                 await hClient.LoginAsync(refreshToken);
-
             }
 
             Console.WriteLine("Begin user/detail");
-            var userDetail = await client.GetUserDetailAsync(authToken: authToken, userId: 1113943);
+            var userDetail = await client.GetUserDetailAsync(userId: 1113943);
             Debugger.Break();
 
             Console.WriteLine("Begin user/illusts");
-            var userIllusts = await client.GetUserIllustsAsync(authToken: authToken, userId: 1113943);
+            var userIllusts = await client.GetUserIllustsAsync(userId: 1113943);
             Debugger.Break();
 
             Console.WriteLine("Begin user/bookmarks/illust");
-            var userBookmarksIllust = await client.GetUserBookmarkIllustsAsync(authToken: authToken, userId: 1113943);
+            var userBookmarksIllust = await client.GetUserBookmarkIllustsAsync(userId: 1113943);
             Debugger.Break();
 
             Console.WriteLine("Begin illust/follow");
-            var illustFollow = await client.GetIllustFollowAsync(authToken: authToken);
+            var illustFollow = await client.GetIllustFollowAsync();
             Debugger.Break();
 
             Console.WriteLine("Begin illust/comments");
-            var illustComments = await client.GetIllustCommentsAsync(authToken: authToken, illustId: 76995599);
+            var illustComments = await client.GetIllustCommentsAsync(illustId: 76995599);
             Debugger.Break();
 
             Console.WriteLine("Begin illust/related");
-            var illustRelated = await client.GetIllustRelatedAsync(authToken: authToken,
+            var illustRelated = await client.GetIllustRelatedAsync(
                 illustId: 76995599,
                 seedIllustIds: [83492606, 82693472]);
             Debugger.Break();
 
             Console.WriteLine("Begin illust/ranking");
-            var illustRanking = await client.GetIllustRankingAsync(authToken: authToken);
+            var illustRanking = await client.GetIllustRankingAsync();
             Debugger.Break();
 
             Console.WriteLine("Begin trending-tags/illust");
-            var trendingTags = await client.GetTrendingTagsIllustAsync(authToken: authToken);
+            var trendingTags = await client.GetTrendingTagsIllustAsync();
             Debugger.Break();
 
             //Console.WriteLine("Adding bookmark");
-            //await client.AddIllustBookmarkAsync(83492606, authToken: authToken);
+            //await client.AddIllustBookmarkAsync(83492606);
             //Debugger.Break();
 
             //Console.WriteLine("Deleting bookmark");
-            //await client.DeleteIllustBookmarkAsync(83492606, authToken: authToken);
+            //await client.DeleteIllustBookmarkAsync(83492606);
             //Debugger.Break();
 
             Console.WriteLine("Begin search");
-            var search = await client.SearchIllustsAsync(authToken: authToken, word: "女の子");
+            var search = await client.SearchIllustsAsync(word: "女の子");
             Debugger.Break();
 
             Console.WriteLine("Begin user/bookmark-tags/illust");
-            var bookmarkTags = await client.GetUserBookmarkTagsIllustAsync(authToken: authToken);
+            var bookmarkTags = await client.GetUserBookmarkTagsIllustAsync();
             Debugger.Break();
 
             Console.WriteLine("Begin user/following");
-            var following = await client.GetUserFollowingsAsync(authToken: authToken, userId: 1113943);
+            var following = await client.GetUserFollowingsAsync(userId: 1113943);
             Debugger.Break();
 
             Console.WriteLine("Begin user/follower");
-            var follower = await client.GetUserFollowersAsync(authToken: authToken, userId: 1113943);
+            var follower = await client.GetUserFollowersAsync(userId: 1113943);
             Debugger.Break();
 
             Console.WriteLine("Begin mypixiv");
-            var mypixiv = await client.GetMyPixivUsersAsync(authToken: authToken, userId: 1113943);
+            var mypixiv = await client.GetMyPixivUsersAsync(userId: 1113943);
             Debugger.Break();
 
             Console.WriteLine("Begin illust/detail");
-            var illustDetail = await client.GetIllustDetailAsync(authToken: authToken, illustId: 44340318);
+            var illustDetail = await client.GetIllustDetailAsync(illustId: 44340318);
             Debugger.Break();
 
             Console.WriteLine("Begin motion pic metadata");
-            var motionMetadata = await client.GetAnimatedPictureMetadataAsync(authToken: authToken, illustId: 84137005);
+            var motionMetadata = await client.GetAnimatedPictureMetadataAsync(illustId: 84137005);
             Debugger.Break();
         }
     }

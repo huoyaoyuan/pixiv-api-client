@@ -5,14 +5,6 @@ using System.Text.Json.Serialization;
 
 namespace Meowtrix.PixivApi.Json
 {
-    public sealed record AuthResponse(
-        string AccessToken,
-        int ExpiresIn,
-        string TokenType,
-        string Scope,
-        string RefreshToken,
-        AuthUser User);
-
     public sealed record AuthUser(
         AuthProfileImageUrls ProfileImageUrls,
         string Id,
