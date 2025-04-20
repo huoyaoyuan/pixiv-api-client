@@ -9,6 +9,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
+using Meowtrix.PixivApi.Authentication;
 using Meowtrix.PixivApi.Json;
 using Meowtrix.PixivApi.Models;
 
@@ -23,191 +24,101 @@ namespace Meowtrix.PixivApi
     /// </remarks>
     public sealed class PixivClient : IDisposable
     {
-        internal PixivApiClient Api { get; private set; }
+        private readonly AccessTokenManager _tokenManager = new(null);
+        private PixivApiClient2 _apiClient;
+
+        internal PixivApiClient2 Api => _apiClient;
 
         #region Construction and disposal
         public PixivClient(bool useDefaultProxy = true)
-            => Api = new PixivApiClient(useDefaultProxy);
+            => _apiClient = new PixivApiClient2(_tokenManager, new HttpClientHandler { UseProxy = useDefaultProxy });
 
         public PixivClient(IWebProxy? proxy)
-        {
-            Api = proxy is null
-                ? new PixivApiClient(false)
-                : new PixivApiClient(proxy);
-        }
+            => _apiClient = new PixivApiClient2(_tokenManager,
+                proxy is null
+                ? new HttpClientHandler { UseProxy = false }
+                : new HttpClientHandler { Proxy = proxy });
 
         public PixivClient(HttpMessageHandler handler)
-            => Api = new PixivApiClient(handler);
+            => _apiClient = new PixivApiClient2(_tokenManager, handler);
 
-        public PixivClient(PixivApiClient lowLevelClient)
-            => Api = lowLevelClient;
+        public PixivClient(PixivApiClient2 lowLevelClient)
+            => _apiClient = lowLevelClient;
 
         public void SetProxy(IWebProxy? proxy)
         {
-            ChangeApiClient(proxy is null
-                ? new PixivApiClient(false)
-                : new PixivApiClient(proxy));
+            ChangeApiClient(new PixivApiClient2(_tokenManager,
+                proxy is null
+                ? new HttpClientHandler { UseProxy = false }
+                : new HttpClientHandler { Proxy = proxy }));
         }
 
         public void SetDefaultProxy()
-            => ChangeApiClient(new PixivApiClient(true));
+            => ChangeApiClient(new PixivApiClient2(_tokenManager, new HttpClientHandler { UseProxy = true }));
 
         public void SetHandler(HttpMessageHandler handler)
-            => ChangeApiClient(new PixivApiClient(handler));
+            => ChangeApiClient(new PixivApiClient2(_tokenManager, handler));
 
-        private void ChangeApiClient(PixivApiClient api)
+        private void ChangeApiClient(PixivApiClient2 newApiClient)
         {
-            SetRequestHeader(api, RequestLanguage);
-            Api.Dispose();
-            Api = api;
+            SetRequestHeader(newApiClient.HttpClient, RequestLanguage);
+            var old = Interlocked.Exchange(ref _apiClient, newApiClient);
+            old.Dispose();
         }
 
-        public void Dispose()
-        {
-            Api.Dispose();
-            _semaphore.Dispose();
-        }
+        public void Dispose() => Api.Dispose();
         #endregion
 
-        #region Lock and token refresh
-        private readonly SemaphoreSlim _semaphore = new(1);
-        private DateTimeOffset _authValidateUntil;
-
-        private string? _accessToken;
-        private string? _refreshToken;
-
-        [MemberNotNullWhen(true,
-            nameof(_accessToken),
-            nameof(_refreshToken),
-            nameof(CurrentUser))]
-        public bool IsLogin
-        {
-            get
-            {
-                if (_accessToken is not null)
-                {
-                    Debug.Assert(CurrentUser is not null);
-                    Debug.Assert(_refreshToken is not null);
-                    return true;
-                }
-
-                return false;
-            }
-        }
+        [MemberNotNullWhen(true, nameof(CurrentUser))]
+        public bool IsLogin => _tokenManager.IsAuthenticated;
 
         /// <summary>
         /// Perform login with OAuth PKCE.
         /// </summary>
         /// <param name="requestFunc">Accesses the url parameter in browser,
         /// listens and returns for pixiv:// request.</param>
-        /// <returns>The refresh token.</returns>
-        public async Task<string> LoginAsync(Func<string, Task<Uri>> requestFunc)
+        /// <param name="cancellationToken">A cancellation token.</param>
+        /// <returns>The returned refresh token.</returns>
+        public async Task<string> LoginAsync(Func<string, CancellationToken, Task<Uri>> requestFunc, CancellationToken cancellationToken)
         {
-            try
-            {
-                await _semaphore.WaitAsync().ConfigureAwait(false);
+            var (codeVerify, loginUrl) = PixivAuthentication.PrepareWebLogin();
+            var uri = await requestFunc(loginUrl, cancellationToken).ConfigureAwait(false);
 
-                var (codeVerify, loginUrl) = Api.BeginAuth();
-                var uri = await requestFunc(loginUrl).ConfigureAwait(false);
+            if (uri.Scheme != "pixiv")
+                throw new InvalidOperationException("The returned uri isn't for pixiv authentication.");
 
-                if (uri.Scheme != "pixiv")
-                    throw new InvalidOperationException("Bad login request.");
-                var query = HttpUtility.ParseQueryString(uri.Query);
-                string code = query["code"] ?? throw new InvalidOperationException("The login request doesn't contain code.");
-                var (time, response) = await Api.CompleteAuthAsync(code, codeVerify).ConfigureAwait(false);
-                SetLogin(time, response);
+            var query = HttpUtility.ParseQueryString(uri.Query);
+            string code = query["code"] ?? throw new InvalidOperationException("The login request doesn't contain code.");
 
-                return response.RefreshToken;
-            }
-            finally
-            {
-                _semaphore.Release();
-            }
+            var authResult = await PixivAuthentication.CompleteWebLoginAsync(
+                new HttpMessageInvoker(Api.InnerHandler, false),
+                code, codeVerify,
+                cancellationToken: cancellationToken)
+                .ConfigureAwait(false);
+            _tokenManager.Authenticate(authResult);
+            CurrentUser = new(this, authResult.UserInfo);
+            return authResult.RefreshToken;
         }
 
-        [Obsolete("Login with username and password has been abandoned by Pixiv.")]
-        public async Task<string> LoginAsync(string username, string password)
+        /// <summary>
+        /// Perform login with refresh token.
+        /// </summary>
+        /// <param name="refreshToken">The stored refresh token.</param>
+        /// <param name="cancellationToken">A cancellation token.</param>
+        /// <returns>The returned refresh token.</returns>
+        public async Task<string> LoginAsync(string refreshToken, CancellationToken cancellationToken)
         {
-            try
-            {
-                await _semaphore.WaitAsync().ConfigureAwait(false);
-
-                var (time, response) = await Api.AuthAsync(username, password).ConfigureAwait(false);
-                SetLogin(time, response);
-
-                return response.RefreshToken;
-            }
-            finally
-            {
-                _semaphore.Release();
-            }
+            var authResult = await PixivAuthentication.AuthWithRefreshTokenAsync(
+                new HttpMessageInvoker(Api.InnerHandler, false),
+                refreshToken,
+                cancellationToken: cancellationToken)
+                .ConfigureAwait(false);
+            _tokenManager.Authenticate(authResult);
+            CurrentUser = new(this, authResult.UserInfo);
+            return authResult.RefreshToken;
         }
-
-        public async Task<string> LoginAsync(string refreshToken)
-        {
-            try
-            {
-                await _semaphore.WaitAsync().ConfigureAwait(false);
-
-                var (time, response) = await Api.AuthAsync(refreshToken).ConfigureAwait(false);
-                SetLogin(time, response);
-
-                return response.RefreshToken;
-            }
-            finally
-            {
-                _semaphore.Release();
-            }
-        }
-
-
-
-        [MemberNotNull(nameof(CurrentUser))]
-        private async ValueTask<string> CheckTokenAsyncCore(int epsilonTimeSeconds = 60)
-        {
-            if (!IsLogin)
-            {
-                throw new InvalidOperationException("The client isn't logged in.");
-            }
-
-            if ((_authValidateUntil - DateTimeOffset.Now).TotalSeconds < epsilonTimeSeconds)
-            {
-                try
-                {
-                    await _semaphore.WaitAsync().ConfigureAwait(false);
-
-                    if ((_authValidateUntil - DateTimeOffset.Now).TotalSeconds < epsilonTimeSeconds)
-                    {
-                        var (time, response) = await Api.AuthAsync(_refreshToken).ConfigureAwait(false);
-                        SetLogin(time, response);
-
-                        return response.AccessToken;
-                    }
-                }
-                finally
-                {
-                    _semaphore.Release();
-                }
-            }
-
-            return _accessToken;
-        }
-
-        internal ConfiguredValueTaskAwaitable<string> CheckTokenAsync(int epsilonTimeSeconds = 60)
-            => CheckTokenAsyncCore(epsilonTimeSeconds).ConfigureAwait(false);
-
-        private void SetLogin(DateTimeOffset authTime, AuthResponse response)
-        {
-            _accessToken = response.AccessToken;
-            _refreshToken = response.RefreshToken;
-            _authValidateUntil = authTime.AddSeconds(response.ExpiresIn);
-
-            CurrentUser = new LoginUser(this, response.User);
-        }
-        #endregion
 
         public LoginUser? CurrentUser { get; private set; }
-
 
         [MemberNotNull(nameof(CurrentUser))]
         public int CurrentUserId => CurrentUser?.Id ?? throw new InvalidOperationException("No user login.");
@@ -221,12 +132,12 @@ namespace Meowtrix.PixivApi
                 if (_requestLanguage != value)
                 {
                     _requestLanguage = value;
-                    SetRequestHeader(Api, value);
+                    SetRequestHeader(Api.HttpClient, value);
                 }
             }
         }
 
-        private static void SetRequestHeader(PixivApiClient apiClient, CultureInfo? cultureInfo)
+        private static void SetRequestHeader(HttpClient apiClient, CultureInfo? cultureInfo)
         {
             apiClient.DefaultRequestHeaders.AcceptLanguage.Clear();
             if (!string.IsNullOrEmpty(cultureInfo?.Name))
@@ -236,85 +147,77 @@ namespace Meowtrix.PixivApi
         public void UseCurrentCulture() => RequestLanguage = CultureInfo.CurrentCulture;
 
         internal async IAsyncEnumerable<Illust> ToIllustAsyncEnumerable<T>(
-            Func<string, CancellationToken, Task<T>> task,
+            Func<CancellationToken, Task<T>> task,
             [EnumeratorCancellation] CancellationToken cancellation = default)
             where T : class, IHasNextPage<IllustDetail>
         {
-            var response = await task(await CheckTokenAsync(), cancellation).ConfigureAwait(false);
+            var response = await task(cancellation).ConfigureAwait(false);
 
             while (response is not null)
             {
                 foreach (var r in response.Items)
                     yield return new Illust(this, r);
 
-                response = await Api.GetNextPageAsync(await CheckTokenAsync(),
-                    response,
-                    cancellation: cancellation).ConfigureAwait(false);
+                response = await Api.GetNextPageAsync(response, cancellation).ConfigureAwait(false);
             }
         }
 
         internal async IAsyncEnumerable<UserInfoWithPreview> ToUserAsyncEnumerable<T>(
-            Func<string, CancellationToken, Task<T>> task,
+            Func<CancellationToken, Task<T>> task,
             [EnumeratorCancellation] CancellationToken cancellation = default)
             where T : class, IHasNextPage<UserPreview>
         {
-            var response = await task(await CheckTokenAsync(), cancellation).ConfigureAwait(false);
+            var response = await task(cancellation).ConfigureAwait(false);
 
             while (response is not null)
             {
                 foreach (var r in response.Items)
                     yield return new UserInfoWithPreview(this, r);
 
-                response = await Api.GetNextPageAsync(await CheckTokenAsync(),
-                    response,
-                    cancellation: cancellation).ConfigureAwait(false);
+                response = await Api.GetNextPageAsync(response, cancellation).ConfigureAwait(false);
             }
         }
 
         internal async IAsyncEnumerable<TResult> ToAsyncEnumerable<TRequest, TResult>(
-            Func<string, CancellationToken, Task<TRequest>> task,
+            Func<CancellationToken, Task<TRequest>> task,
             [EnumeratorCancellation] CancellationToken cancellation = default)
             where TRequest : class, IHasNextPage<TResult>
         {
-            var response = await task(await CheckTokenAsync(), cancellation).ConfigureAwait(false);
+            var response = await task(cancellation).ConfigureAwait(false);
 
             while (response is not null)
             {
                 foreach (var r in response.Items)
                     yield return r;
 
-                response = await Api.GetNextPageAsync(await CheckTokenAsync(),
-                    response,
-                    cancellation: cancellation).ConfigureAwait(false);
+                response = await Api.GetNextPageAsync(response, cancellation).ConfigureAwait(false);
             }
         }
 
         public IAsyncEnumerable<Illust> GetMyFollowingIllustsAsync(Visibility visibility = Visibility.Public,
             CancellationToken cancellation = default)
         {
-            return ToIllustAsyncEnumerable(async (auth, c)
-                => await Api.GetIllustFollowAsync(authToken: auth,
+            return ToIllustAsyncEnumerable(c
+                => Api.GetIllustFollowAsync(
                 restrict: visibility,
-                cancellation: c).ConfigureAwait(false),
-                cancellation);
+                cancellationToken: c), cancellation);
         }
 
         public IAsyncEnumerable<Illust> GetMyBookmarksAsync(Visibility visibility = Visibility.Public,
             CancellationToken cancellation = default)
         {
-            return ToIllustAsyncEnumerable(async (auth, c)
-                => await Api.GetUserBookmarkIllustsAsync(authToken: auth, userId: CurrentUserId,
+            return ToIllustAsyncEnumerable(c
+                => Api.GetUserBookmarkIllustsAsync(userId: CurrentUserId,
                 restrict: visibility,
-                cancellation: c).ConfigureAwait(false),
-                cancellation);
+                cancellationToken: c), cancellation);
         }
 
         public async Task<UserDetailInfo> GetUserDetailAsync(int userId,
             CancellationToken cancellation = default)
         {
-            var response = await Api.GetUserDetailAsync(await CheckTokenAsync(),
+            var response = await Api.GetUserDetailAsync(
                 userId,
-                cancellation: cancellation).ConfigureAwait(false);
+                cancellationToken: cancellation).ConfigureAwait(false);
 
             return new UserDetailInfo(this, response);
         }
@@ -322,9 +225,9 @@ namespace Meowtrix.PixivApi
         public async Task<Illust> GetIllustDetailAsync(int illustId,
             CancellationToken cancellation = default)
         {
-            var response = await Api.GetIllustDetailAsync(await CheckTokenAsync(),
+            var response = await Api.GetIllustDetailAsync(
                 illustId,
-                cancellation: cancellation).ConfigureAwait(false);
+                cancellationToken: cancellation).ConfigureAwait(false);
 
             return new Illust(this, response.Illust);
         }
@@ -333,23 +236,21 @@ namespace Meowtrix.PixivApi
             Visibility visibility = Visibility.Public,
             CancellationToken cancellation = default)
         {
-            return ToUserAsyncEnumerable(async (auth, c)
-                => await Api.GetUserFollowingsAsync(
-                    authToken: auth,
+            return ToUserAsyncEnumerable(c
+                => Api.GetUserFollowingsAsync(
                     userId: CurrentUserId,
                     restrict: visibility,
-                    cancellation: c).ConfigureAwait(false), cancellation);
+                    cancellationToken: c), cancellation);
         }
 
         public IAsyncEnumerable<UserInfoWithPreview> SearchUsersAsync(
             string word,
             CancellationToken cancellation = default)
         {
-            return ToUserAsyncEnumerable(async (auth, c)
-                => await Api.SearchUsersAsync(
-                    authToken: auth,
+            return ToUserAsyncEnumerable(c
+                => Api.SearchUsersAsync(
                     word: word,
-                    cancellation: c).ConfigureAwait(false), cancellation);
+                    cancellationToken: c), cancellation);
         }
 
         public IAsyncEnumerable<Illust> SearchIllustsAsync(
@@ -358,16 +259,16 @@ namespace Meowtrix.PixivApi
             IllustFilterOptions? options = null,
             CancellationToken cancellation = default)
         {
-            return ToIllustAsyncEnumerable(async (auth, c)
-                => await Api.SearchIllustsAsync(
-                    authToken: auth, word: word,
+            return ToIllustAsyncEnumerable(c
+                => Api.SearchIllustsAsync(
+                    word: word,
                     searchTarget: searchTarget,
                     sort: options?.SortMode ?? IllustSortMode.Latest,
                     maxBookmarkCount: options?.MaxBookmarkCount,
                     minBookmarkCount: options?.MinBookmarkCount,
                     startDate: options?.StartDate,
                     endDate: options?.EndDate,
-                    cancellation: c).ConfigureAwait(false), cancellation);
+                    cancellationToken: c), cancellation);
         }
 
         public IAsyncEnumerable<Illust> GetIllustRankingAsync(
@@ -375,11 +276,11 @@ namespace Meowtrix.PixivApi
             DateOnly? date = null,
             CancellationToken cancellation = default)
         {
-            return ToIllustAsyncEnumerable(async (auth, c)
-                => await Api.GetIllustRankingAsync(
-                    authToken: auth, mode: rankingMode,
-                    date: date,
-                    cancellation: cancellation).ConfigureAwait(false), cancellation);
+            return ToIllustAsyncEnumerable(c
+                => Api.GetIllustRankingAsync(
+                    rankingMode,
+                    date,
+                    cancellationToken: cancellation), cancellation);
         }
 
         public async Task FollowUserAsync(
@@ -387,7 +288,7 @@ namespace Meowtrix.PixivApi
             Visibility visibility = Visibility.Public,
             CancellationToken cancellation = default)
         {
-            await Api.AddUserFollowAsync(await CheckTokenAsync(),
+            await Api.AddUserFollowAsync(
                 userInfo.Id,
                 visibility,
                 cancellation).ConfigureAwait(false);
@@ -395,12 +296,10 @@ namespace Meowtrix.PixivApi
 
         public async Task UnfollowUserAsync(
             UserInfo userInfo,
-            Visibility visibility = Visibility.Public,
             CancellationToken cancellation = default)
         {
-            await Api.DeleteUserFollowAsync(await CheckTokenAsync(),
+            await Api.DeleteUserFollowAsync(
                 userInfo.Id,
-                visibility,
                 cancellation).ConfigureAwait(false);
         }
 
@@ -410,7 +309,7 @@ namespace Meowtrix.PixivApi
             IEnumerable<string>? tags = null,
             CancellationToken cancellation = default)
         {
-            await Api.AddIllustBookmarkAsync(await CheckTokenAsync(),
+            await Api.AddIllustBookmarkAsync(
                 illust.Id,
                 visibility,
                 tags,
@@ -421,7 +320,7 @@ namespace Meowtrix.PixivApi
             Illust illust,
             CancellationToken cancellation = default)
         {
-            await Api.DeleteIllustBookmarkAsync(await CheckTokenAsync(),
+            await Api.DeleteIllustBookmarkAsync(
                 illust.Id,
                 cancellation).ConfigureAwait(false);
         }
@@ -430,7 +329,7 @@ namespace Meowtrix.PixivApi
             int illustSeriesId,
             CancellationToken cancellation = default)
         {
-            var response = await Api.GetIllustSeriesAsync(await CheckTokenAsync(),
+            var response = await Api.GetIllustSeriesAsync(
                 illustSeriesId,
                 cancellation).ConfigureAwait(false);
 
@@ -441,7 +340,7 @@ namespace Meowtrix.PixivApi
             int novelId,
             CancellationToken cancellation = default)
         {
-            var response = await Api.GetNovelDetailAsync(await CheckTokenAsync(),
+            var response = await Api.GetNovelDetailAsync(
                 novelId,
                 cancellation).ConfigureAwait(false);
 
