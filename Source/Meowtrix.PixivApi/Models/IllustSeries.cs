@@ -35,8 +35,7 @@ namespace Meowtrix.PixivApi.Models
 
         public IAsyncEnumerable<Illust> GetIllustsAsync(CancellationToken cancellation)
         {
-            return _client.ToIllustAsyncEnumerable(async (auth, c)
-                => await _client.Api.GetIllustSeriesAsync(auth, Id, cancellation).ConfigureAwait(false),
+            return _client.ToIllustAsyncEnumerable(c => _client.Api.GetIllustSeriesAsync(Id, cancellation),
                 cancellation);
         }
     }

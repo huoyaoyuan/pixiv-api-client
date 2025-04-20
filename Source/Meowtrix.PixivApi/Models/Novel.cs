@@ -49,10 +49,7 @@ namespace Meowtrix.PixivApi.Models
         public bool IsBookmarked { get; }
 
         public async Task<string> GetTextAsync(CancellationToken cancellation = default)
-            => (await _client.Api.GetNovelTextAsync(
-                await _client.CheckTokenAsync(),
-                Id,
-                cancellation).ConfigureAwait(false)).NovelText;
+            => (await _client.Api.GetNovelTextAsync(Id, cancellation).ConfigureAwait(false)).NovelText;
 
         /// <remarks>Chapters are parsed by inline markups and can be unreliable.</remarks>
         public async Task<IEnumerable<NovelChapter>> GetChaptersAsync(CancellationToken cancellation = default)
