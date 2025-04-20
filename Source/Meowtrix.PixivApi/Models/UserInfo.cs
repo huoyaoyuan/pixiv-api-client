@@ -39,50 +39,44 @@ namespace Meowtrix.PixivApi.Models
         public IAsyncEnumerable<Illust> GetIllustsAsync(UserIllustType? illustType = null,
             CancellationToken cancellation = default)
         {
-            return Client.ToIllustAsyncEnumerable(c
-                => Client.Api.GetUserIllustsAsync(userId: Id, illustType: illustType, cancellationToken: c),
+            return Client.ToAsyncEnumerable<IllustList, IllustDetail, Illust>(
+                c => Client.Api.GetUserIllustsAsync(userId: Id, illustType: illustType, cancellationToken: c),
                 cancellation);
         }
 
         public IAsyncEnumerable<Illust> GetBookmarksAsync(CancellationToken cancellation = default)
         {
-            return Client.ToIllustAsyncEnumerable(c
-                => Client.Api.GetUserBookmarkIllustsAsync(userId: Id, cancellationToken: c),
+            return Client.ToAsyncEnumerable<IllustList, IllustDetail, Illust>(
+                c => Client.Api.GetUserBookmarkIllustsAsync(userId: Id, cancellationToken: c),
                 cancellation);
         }
 
         public IAsyncEnumerable<UserInfoWithPreview> GetFollowingUsersAsync(CancellationToken cancellation = default)
         {
-            return Client.ToUserAsyncEnumerable(c
-                => Client.Api.GetUserFollowingsAsync(userId: Id, restrict: Visibility.Public, cancellationToken: c),
+            return Client.ToAsyncEnumerable<UsersList, UserPreview, UserInfoWithPreview>(
+                c => Client.Api.GetUserFollowingsAsync(userId: Id, restrict: Visibility.Public, cancellationToken: c),
                 cancellation);
         }
 
         public IAsyncEnumerable<UserInfoWithPreview> GetFollowerUsersAsync(CancellationToken cancellation = default)
         {
-            return Client.ToUserAsyncEnumerable(c
-                => Client.Api.GetUserFollowersAsync(userId: Id, restrict: Visibility.Public, cancellationToken: c),
+            return Client.ToAsyncEnumerable<UsersList, UserPreview, UserInfoWithPreview>(
+                c => Client.Api.GetUserFollowersAsync(userId: Id, restrict: Visibility.Public, cancellationToken: c),
                 cancellation);
         }
 
-        public async IAsyncEnumerable<IllustSeries> GetIllustSeriesAsync([EnumeratorCancellation] CancellationToken cancellation = default)
+        public IAsyncEnumerable<IllustSeries> GetIllustSeriesAsync(CancellationToken cancellation = default)
         {
-            var rawEnumerable = Client.ToAsyncEnumerable<UserIllustSeries, IllustSeriesDetails>(c
-                => Client.Api.GetUserIllustSeriesAsync(Id, c),
+            return Client.ToAsyncEnumerable<UserIllustSeries, IllustSeriesDetails, IllustSeries>(
+                c => Client.Api.GetUserIllustSeriesAsync(Id, c),
                 cancellation);
-
-            await foreach (var raw in rawEnumerable)
-                yield return new(Client, raw);
         }
 
-        public async IAsyncEnumerable<Novel> GetNovelsAsync([EnumeratorCancellation] CancellationToken cancellation = default)
+        public IAsyncEnumerable<Novel> GetNovelsAsync(CancellationToken cancellation = default)
         {
-            var rawEnumerable = Client.ToAsyncEnumerable<UserNovels, NovelDetail>(c
-                => Client.Api.GetUserNovelsAsync(Id, c),
+            return Client.ToAsyncEnumerable<UserNovels, NovelDetail, Novel>(
+                c => Client.Api.GetUserNovelsAsync(Id, c),
                 cancellation);
-
-            await foreach (var raw in rawEnumerable)
-                yield return new(Client, raw);
         }
     }
 }
