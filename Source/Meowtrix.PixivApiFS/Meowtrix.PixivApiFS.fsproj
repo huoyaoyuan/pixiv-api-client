@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+    
+  <ItemGroup>
+    <Compile Include="PixivJson.fs" />
+    <Compile Include="PixivAuthentication.fs" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="IdentityModel" Version="7.0.0" />
+  </ItemGroup>
+
+</Project>
