@@ -2,20 +2,24 @@
 
   <PropertyGroup>
     <RootNamespace>$(MSBuildProjectName)</RootNamespace>
-    <BaseOutputPath>$(MSBuildThisFileDirectory)Artifact\bin\$(MSBuildProjectName)\</BaseOutputPath>
-    <BaseIntermediateOutputPath>$(MSBuildThisFileDirectory)Artifact\obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
-    <PackageOutputPath>$(MSBuildThisFileDirectory)Artifact\Packages\$(Configuration)</PackageOutputPath>
-    <AppxPackageDir>$(MSBuildThisFileDirectory)Artifacts\AppPackages\</AppxPackageDir>
+    <UseArtifactsOutput>true</UseArtifactsOutput>
+    <ArtifactsPath>$(MSBuildThisFileDirectory)Artifact</ArtifactsPath>
 
     <!-- Analyzer config docs: https://docs.microsoft.com/dotnet/core/project-sdk/msbuild-props#code-analysis-properties -->
-    <AnalysisMode>Default</AnalysisMode>
+    <AnalysisModeDesign>HighlyRecommended</AnalysisModeDesign>
+    <AnalysisModeDocumentation>Recommended</AnalysisModeDocumentation>
+    <AnalysisModeGlobalization>HighlyRecommended</AnalysisModeGlobalization>
+    <AnalysisModeInteroperability>Recommended</AnalysisModeInteroperability>
+    <AnalysisModeMaintainability>Recommended</AnalysisModeMaintainability>
     <AnalysisModeNaming>Recommended</AnalysisModeNaming>
     <AnalysisModePerformance>Recommended</AnalysisModePerformance>
+    <AnalysisModeSingleFile>Recommended</AnalysisModeSingleFile>
     <AnalysisModeReliability>Recommended</AnalysisModeReliability>
-    <!--<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>-->
+    <AnalysisModeSecurity>HighlyRecommended</AnalysisModeSecurity>
+    <AnalysisModeStyle>Default</AnalysisModeStyle>
+    <AnalysisModeUsage>Recommended</AnalysisModeUsage>
 
-    <!-- Can't be disabled in editorconfig -->
-    <NoWarn>$(NoWarn);CA1014</NoWarn>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
   </PropertyGroup>
 
 </Project>

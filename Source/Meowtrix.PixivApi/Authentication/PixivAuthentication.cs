@@ -1,5 +1,7 @@
 ﻿using System;
+#if NET9_0_OR_GREATER
 using System.Buffers.Text;
+#endif
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
