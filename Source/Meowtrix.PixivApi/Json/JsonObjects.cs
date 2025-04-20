@@ -97,7 +97,7 @@ namespace Meowtrix.PixivApi.Json
         string Comment,
         Uri? WorkspaceImageUrl);
 
-    public sealed record UserIllusts(ImmutableArray<IllustDetail> Illusts, Uri? NextUrl)
+    public sealed record IllustList(ImmutableArray<IllustDetail> Illusts, Uri? NextUrl)
         : IHasNextPage<IllustDetail>
     {
         ImmutableArray<IllustDetail> IHasNextPage<IllustDetail>.Items => Illusts;
@@ -278,6 +278,21 @@ namespace Meowtrix.PixivApi.Json
 
     [JsonSerializable(typeof(AuthUser))]
     [JsonSerializable(typeof(UserDetail))]
+    [JsonSerializable(typeof(IllustDetailResponse))]
+    [JsonSerializable(typeof(IllustList))]
+    [JsonSerializable(typeof(IllustComments))]
+    [JsonSerializable(typeof(PostIllustCommentResult))]
+    [JsonSerializable(typeof(RecommendedIllusts))]
+    [JsonSerializable(typeof(TrendingTagsIllust))]
+    [JsonSerializable(typeof(SearchIllustResult))]
+    [JsonSerializable(typeof(UsersList))]
+    [JsonSerializable(typeof(UserBookmarkTags))]
+    [JsonSerializable(typeof(AnimatedPictureMetadata))]
+    [JsonSerializable(typeof(IllustSeriesInfo))]
+    [JsonSerializable(typeof(UserIllustSeries))]
+    [JsonSerializable(typeof(UserNovels))]
+    [JsonSerializable(typeof(NovelDetailResponse))]
+    [JsonSerializable(typeof(NovelTextResponse))]
     [JsonSourceGenerationOptions(
         PropertyNamingPolicy = JsonKnownNamingPolicy.SnakeCaseLower,
         RespectNullableAnnotations = true,
