@@ -12,24 +12,44 @@ using Meowtrix.PixivApi.Json;
 
 namespace Meowtrix.PixivApi;
 
-public class PixivApiClient2 : HttpClient
+public class PixivApiClient2 : IDisposable
 {
     private const string BaseUrl = "https://app-api.pixiv.net/";
     private static readonly Uri s_baseUri = new(BaseUrl);
 
-    public PixivApiClient2(AccessTokenManager accessTokenManager, HttpMessageHandler? httpMessageHandler = null, bool disposeHandler = true)
-        : base(new PixivAccessTokenHandler(accessTokenManager, httpMessageHandler ?? new HttpClientHandler()), disposeHandler)
+    /// <summary>
+    /// The http client for sending requests.
+    /// </summary>
+    public HttpClient HttpClient { get; }
+
+    /// <summary>
+    /// The inner <see cref="HttpMessageHandler"/> that doesn't perform authentication.
+    /// </summary>
+    public HttpMessageHandler InnerHandler { get; }
+
+    public PixivApiClient2(AccessTokenManager accessTokenManager, HttpMessageHandler? innerHandler = null, bool disposeHandler = true)
     {
-        BaseAddress = s_baseUri;
-        DefaultRequestHeaders.Add("User-Agent", "PixivAndroidApp/5.0.166 (Android 12.0)");
+        InnerHandler = innerHandler ?? new HttpClientHandler();
+        HttpClient = new HttpClient(new PixivAccessTokenHandler(accessTokenManager, InnerHandler), disposeHandler)
+        {
+
+            BaseAddress = s_baseUri,
+            DefaultRequestHeaders =
+            {
+                { "User-Agent", "PixivAndroidApp/5.0.166 (Android 12.0)" },
+            },
 #if NET
-        DefaultVersionPolicy = HttpVersionPolicy.RequestVersionOrHigher;
+            DefaultVersionPolicy = HttpVersionPolicy.RequestVersionOrHigher,
 #endif
+        };
+
     }
+
+    public void Dispose() => HttpClient.Dispose();
 
     private async Task<T> InvokeGetAsync<T>(string relativeUri, JsonTypeInfo<T> jsonTypeInfo, CancellationToken cancellationToken)
     {
-        var result = await this.GetFromJsonAsync(new Uri(relativeUri, UriKind.RelativeOrAbsolute), jsonTypeInfo, cancellationToken).ConfigureAwait(false);
+        var result = await HttpClient.GetFromJsonAsync(new Uri(relativeUri, UriKind.RelativeOrAbsolute), jsonTypeInfo, cancellationToken).ConfigureAwait(false);
         return result ?? throw new InvalidOperationException("The api returns top-level null.");
     }
 
@@ -42,7 +62,7 @@ public class PixivApiClient2 : HttpClient
             VersionPolicy = HttpVersionPolicy.RequestVersionOrHigher,
 #endif
         };
-        using var response = await SendAsync(request, cancellationToken).ConfigureAwait(false);
+        using var response = await HttpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
         response.EnsureSuccessStatusCode();
 
         var result = await response.Content.ReadFromJsonAsync(jsonTypeInfo, cancellationToken).ConfigureAwait(false);
@@ -449,7 +469,7 @@ public class PixivApiClient2 : HttpClient
 #endif
         };
 
-        return (await SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellation).ConfigureAwait(false))
+        return (await HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellation).ConfigureAwait(false))
             .EnsureSuccessStatusCode();
     }
 
@@ -461,7 +481,7 @@ public class PixivApiClient2 : HttpClient
         if (previous.NextUrl is null)
             return null;
 
-        var result = await this.GetFromJsonAsync(
+        var result = await HttpClient.GetFromJsonAsync(
             previous.NextUrl,
             (JsonTypeInfo<T>)PixivJsonContext.Default.GetTypeInfo(typeof(T))!,
             cancellationToken)

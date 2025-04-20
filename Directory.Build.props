@@ -17,7 +17,7 @@
     <AnalysisModeReliability>Recommended</AnalysisModeReliability>
     <AnalysisModeSecurity>HighlyRecommended</AnalysisModeSecurity>
     <AnalysisModeStyle>Default</AnalysisModeStyle>
-    <AnalysisModeUsage>Recommended</AnalysisModeUsage>
+    <AnalysisModeUsage>HighlyRecommended</AnalysisModeUsage>
 
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
   </PropertyGroup>
