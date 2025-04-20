@@ -11,6 +11,9 @@ using Meowtrix.PixivApi.Json;
 
 namespace Meowtrix.PixivApi.Authentication;
 
+/// <summary>
+/// Provide OAuth-based authentication for Pixiv.
+/// </summary>
 public static class PixivAuthentication
 {
     private const string ClientId = "MOBrBDS8blbauoSck0ZfDbtuzpyT";
@@ -44,6 +47,15 @@ public static class PixivAuthentication
 #endif
     }
 
+    /// <summary>
+    /// Get authentication infomation with refresh token.
+    /// </summary>
+    /// <param name="httpMessageInvoker">The http client to send authentication request.</param>
+    /// <param name="refreshToken">The refresh token.</param>
+    /// <param name="timeProvider">The time provider to verify client time.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The authentication result.</returns>
+    /// <exception cref="AuthenticationFailedException">When authentication failed.</exception>
     public static async Task<PixivAuthenticationResult> AuthWithRefreshTokenAsync(
         HttpMessageInvoker httpMessageInvoker,
         string refreshToken,
@@ -74,6 +86,14 @@ public static class PixivAuthentication
         return response.CheckAuthenticationResult(timeProvider);
     }
 
+    /// <summary>
+    /// Prepare the parameters for doing browser-based login.
+    /// </summary>
+    /// <returns>The parameters for login.</returns>
+    /// <remarks>
+    /// To complete the login process, navigate to <c>LoginUrl</c> in browser, listen to <c>pixiv://....?code=....</c> ,
+    /// get authentication code from the <c>code</c> query parameter, and invoke <see cref="CompleteWebLoginAsync"/>.
+    /// </remarks>
     public static (string CodeVerify, string LoginUrl) PrepareWebLogin()
     {
 #if NET
@@ -115,6 +135,16 @@ public static class PixivAuthentication
         return (codeVerifyString, loginUrl);
     }
 
+    /// <summary>
+    /// Complete browser-based authentication.
+    /// </summary>
+    /// <param name="httpMessageInvoker">The http client to send authentication request.</param>
+    /// <param name="authorizationCode">The authentication code acquired from browser.</param>
+    /// <param name="codeVerify">The verification code returned from <see cref="PrepareWebLogin"/>.</param>
+    /// <param name="timeProvider">The time provider to verify client time.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The authentication result.</returns>
+    /// <exception cref="AuthenticationFailedException">When authentication failed.</exception>
     public static async Task<PixivAuthenticationResult> CompleteWebLoginAsync(
         HttpMessageInvoker httpMessageInvoker,
         string authorizationCode,
@@ -148,6 +178,13 @@ public static class PixivAuthentication
         return response.CheckAuthenticationResult(timeProvider);
     }
 
+    /// <summary>
+    /// Gets authentication result from <see cref="IdentityModel"/> response.
+    /// </summary>
+    /// <param name="response">A response message from <see cref="IdentityModel"/>.</param>
+    /// <param name="timeProvider">The time provide to calculate <see cref="PixivAuthenticationResult.ValidUntil"/>.</param>
+    /// <returns>The authentication result.</returns>
+    /// <exception cref="AuthenticationFailedException">When authentication failed.</exception>
     public static PixivAuthenticationResult CheckAuthenticationResult(this TokenResponse response, TimeProvider? timeProvider = null)
     {
         if (response.IsError)
