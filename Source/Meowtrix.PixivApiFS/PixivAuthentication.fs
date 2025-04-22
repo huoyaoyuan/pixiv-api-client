@@ -110,14 +110,14 @@ module PixivAuthentication =
         let mutable authResult = initialAuthResult
         member val RefreshThreshold = TimeSpan.FromMinutes(10L) with get, set
 
-        member this.GetAccessTokenAsync(handler: HttpMessageHandler) = 
-            let authResultSnap = authResult
-            if authResultSnap.validUntil - timeProvider.GetUtcNow() > this.RefreshThreshold
-            then ValueTask.FromResult authResultSnap.accessToken
-            else
-                async {
+        member this.GetAccessTokenAsync(handler: HttpMessageHandler) =
+            async {
+                let authResultSnap = authResult
+                if authResultSnap.validUntil - timeProvider.GetUtcNow() > this.RefreshThreshold
+                then return authResultSnap.accessToken
+                else
                     let httpMessageInvoker = new HttpMessageInvoker(handler, disposeHandler=false)
                     let! newAuthResult = AuthWithRefreshTokenAsync httpMessageInvoker authResultSnap.refreshToken timeProvider
                     authResult <- newAuthResult
                     return newAuthResult.accessToken
-                } |> Async.StartAsTask |> ValueTask<string>
+            }

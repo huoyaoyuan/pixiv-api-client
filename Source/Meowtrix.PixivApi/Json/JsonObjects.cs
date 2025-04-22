@@ -230,7 +230,7 @@ namespace Meowtrix.PixivApi.Json
         ImmutableArray<IllustSeriesDetails> IHasNextPage<IllustSeriesDetails>.Items => IllustSeriesDetails;
     }
 
-    public sealed record UserNovels(ImmutableArray<NovelDetail> Novels, Uri? NextUrl)
+    public sealed record NovelList(ImmutableArray<NovelDetail> Novels, Uri? NextUrl)
         : IHasNextPage<NovelDetail>
     {
         ImmutableArray<NovelDetail> IHasNextPage<NovelDetail>.Items => Novels;
@@ -276,7 +276,7 @@ namespace Meowtrix.PixivApi.Json
         bool IsConcluded,
         int ContentCount,
         int TotalCharacterCount,
-        // UserSummary User,
+        UserSummary User,
         string DisplayText,
         int NovelAiType,
         bool WatchlistAdded);
@@ -306,7 +306,7 @@ namespace Meowtrix.PixivApi.Json
     [JsonSerializable(typeof(AnimatedPictureMetadata))]
     [JsonSerializable(typeof(IllustSeriesInfo))]
     [JsonSerializable(typeof(UserIllustSeries))]
-    [JsonSerializable(typeof(UserNovels))]
+    [JsonSerializable(typeof(NovelList))]
     [JsonSerializable(typeof(NovelDetailResponse))]
     [JsonSerializable(typeof(NovelTextResponse))]
     [JsonSerializable(typeof(NovelSeriesResponse))]

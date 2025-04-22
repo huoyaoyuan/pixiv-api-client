@@ -467,13 +467,13 @@ public class PixivApiClient : IDisposable
             cancellationToken);
     }
 
-    public Task<UserNovels> GetUserNovelsAsync(
+    public Task<NovelList> GetUserNovelsAsync(
         int userId,
         CancellationToken cancellationToken = default)
     {
         return InvokeGetAsync(
             $"/v1/user/novels?user_id={userId}",
-            PixivJsonContext.Default.UserNovels,
+            PixivJsonContext.Default.NovelList,
             cancellationToken);
     }
 

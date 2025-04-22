@@ -8,9 +8,11 @@
   <ItemGroup>
     <Compile Include="PixivJson.fs" />
     <Compile Include="PixivAuthentication.fs" />
+    <Compile Include="PixivApiClient.fs" />
   </ItemGroup>
   
   <ItemGroup>
+    <PackageReference Include="FsHttp" Version="15.0.1" />
     <PackageReference Include="IdentityModel" Version="7.0.0" />
   </ItemGroup>
 
