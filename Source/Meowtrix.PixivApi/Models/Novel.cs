@@ -7,11 +7,9 @@ using Meowtrix.PixivApi.Json;
 
 namespace Meowtrix.PixivApi.Models
 {
-    public class Novel : IConstructible<Novel, NovelDetail>
+    public class Novel
     {
         private readonly PixivClient _client;
-
-        static Novel IConstructible<Novel, NovelDetail>.Construct(PixivClient client, NovelDetail api) => new(client, api);
 
         internal Novel(PixivClient client, NovelDetail api)
         {

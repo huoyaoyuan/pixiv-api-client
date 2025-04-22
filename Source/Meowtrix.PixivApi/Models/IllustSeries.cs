@@ -6,12 +6,10 @@ using Meowtrix.PixivApi.Json;
 
 namespace Meowtrix.PixivApi.Models
 {
-    public class IllustSeries : IConstructible<IllustSeries, IllustSeriesDetails>
+    public class IllustSeries
     {
         private readonly PixivClient _client;
         private readonly Uri _coverUri;
-
-        static IllustSeries IConstructible<IllustSeries, IllustSeriesDetails>.Construct(PixivClient client, IllustSeriesDetails api) => new(client, api);
 
         internal IllustSeries(PixivClient client, IllustSeriesDetails api)
         {
