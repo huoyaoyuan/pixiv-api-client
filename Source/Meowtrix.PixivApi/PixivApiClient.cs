@@ -81,7 +81,7 @@ public class PixivApiClient : IDisposable
         CancellationToken cancellationToken = default)
     {
         return InvokeGetAsync(
-            $"/v1/user/detail?user_id={userId}",
+            $"v1/user/detail?user_id={userId}",
             PixivJsonContext.Default.UserDetail,
             cancellationToken)!;
     }
@@ -91,7 +91,7 @@ public class PixivApiClient : IDisposable
         CancellationToken cancellationToken = default)
     {
         return InvokeGetAsync(
-            $"/v1/illust/detail?illust_id={illustId}",
+            $"v1/illust/detail?illust_id={illustId}",
             PixivJsonContext.Default.IllustDetailResponse,
             cancellationToken);
     }
@@ -102,7 +102,7 @@ public class PixivApiClient : IDisposable
         int offset = 0,
         CancellationToken cancellationToken = default)
     {
-        string url = $"/v1/user/illusts?user_id={userId}&offset={offset}";
+        string url = $"v1/user/illusts?user_id={userId}&offset={offset}";
         if (illustType is UserIllustType type)
             url += $"&type={type.ToQueryString()}";
         return InvokeGetAsync(
@@ -118,7 +118,7 @@ public class PixivApiClient : IDisposable
         string? tag = null,
         CancellationToken cancellationToken = default)
     {
-        string url = $"/v1/user/bookmarks/illust?user_id={userId}&restrict={restrict.ToQueryString()}";
+        string url = $"v1/user/bookmarks/illust?user_id={userId}&restrict={restrict.ToQueryString()}";
         if (maxBookmarkId != null)
             url += $"&max_bookmark_id={maxBookmarkId}";
         if (!string.IsNullOrWhiteSpace(tag))
@@ -135,7 +135,7 @@ public class PixivApiClient : IDisposable
         CancellationToken cancellationToken = default)
     {
         return InvokeGetAsync(
-            $"/v2/illust/follow?restrict={restrict.ToQueryString()}&offset={offset}",
+            $"v2/illust/follow?restrict={restrict.ToQueryString()}&offset={offset}",
             PixivJsonContext.Default.IllustList,
             cancellationToken);
     }
@@ -147,7 +147,7 @@ public class PixivApiClient : IDisposable
         CancellationToken cancellationToken = default)
     {
         return InvokeGetAsync(
-            $"/v1/illust/comments?illust_id={illustId}&offset={offset}&include_total_comments={(includeTotalComments ? "true" : "false")}",
+            $"v1/illust/comments?illust_id={illustId}&offset={offset}&include_total_comments={(includeTotalComments ? "true" : "false")}",
             PixivJsonContext.Default.IllustComments,
             cancellationToken);
     }
@@ -159,7 +159,7 @@ public class PixivApiClient : IDisposable
         CancellationToken cancellationToken = default)
     {
         return InvokePostAsync(
-            "/v1/illust/comment/add",
+            "v1/illust/comment/add",
             [
                 new("illust_id", illustId.ToString(NumberFormatInfo.InvariantInfo)),
                 new("comment", comment),
@@ -176,7 +176,7 @@ public class PixivApiClient : IDisposable
         IEnumerable<int>? seedIllustIds = null,
         CancellationToken cancellationToken = default)
     {
-        string url = $"/v2/illust/related?illust_id={illustId}";
+        string url = $"v2/illust/related?illust_id={illustId}";
         if (seedIllustIds != null)
             foreach (int seed in seedIllustIds)
                 url += $"&seed_illust_ids[]={seed}";
@@ -197,7 +197,7 @@ public class PixivApiClient : IDisposable
         bool includePrivacyPolicy = false,
         CancellationToken cancellationToken = default)
     {
-        string url = "/v1/illust/recommended";
+        string url = "v1/illust/recommended";
         url += $"?content_type={contentType.ToQueryString()}"
             + $"&offset={offset}"
             + $"&include_ranking_label={(includeRankingLabel ? "true" : "false")}"
@@ -230,7 +230,7 @@ public class PixivApiClient : IDisposable
         bool includePrivacyPolicy = false,
         CancellationToken cancellationToken = default)
     {
-        string url = "/v1/illust/recommended-nologin";
+        string url = "v1/illust/recommended-nologin";
         url += $"?content_type={contentType.ToQueryString()}"
             + $"&offset={offset}"
             + $"&include_ranking_label={(includeRankingLabel ? "true" : "false")}"
@@ -260,7 +260,7 @@ public class PixivApiClient : IDisposable
         int offset = 0,
         CancellationToken cancellationToken = default)
     {
-        string url = $"/v1/illust/ranking?mode={mode.ToQueryString()}&offset={offset}";
+        string url = $"v1/illust/ranking?mode={mode.ToQueryString()}&offset={offset}";
         if (date is not null)
             url += $"&date={date:yyyy-MM-dd}";
 
@@ -274,7 +274,7 @@ public class PixivApiClient : IDisposable
         CancellationToken cancellationToken = default)
     {
         return InvokeGetAsync(
-            "/v1/trending-tags/illust",
+            "v1/trending-tags/illust",
             PixivJsonContext.Default.TrendingTagsIllust,
             cancellationToken);
     }
@@ -290,7 +290,7 @@ public class PixivApiClient : IDisposable
         int offset = 0,
         CancellationToken cancellationToken = default)
     {
-        string url = $"/v1/search/illust?word={HttpUtility.UrlEncode(word)}&search_target={searchTarget.ToQueryString()}"
+        string url = $"v1/search/illust?word={HttpUtility.UrlEncode(word)}&search_target={searchTarget.ToQueryString()}"
             + $"&sort={sort.ToQueryString()}&offset={offset}";
         if (maxBookmarkCount is int max)
             url += $"&bookmark_num_max={max}";
@@ -312,7 +312,7 @@ public class PixivApiClient : IDisposable
         CancellationToken cancellationToken = default)
     {
         return InvokeGetAsync(
-            $"/v1/search/user?word={Uri.EscapeDataString(word)}",
+            $"v1/search/user?word={Uri.EscapeDataString(word)}",
             PixivJsonContext.Default.UsersList,
             cancellationToken);
     }
@@ -336,7 +336,7 @@ public class PixivApiClient : IDisposable
 #endif
 
         return InvokePostAsync(
-            "/v2/illust/bookmark/add",
+            "v2/illust/bookmark/add",
             [
                 new("illust_id", illustId.ToString(NumberFormatInfo.InvariantInfo)),
                 new("restrict", restrict.ToQueryString()),
@@ -357,7 +357,7 @@ public class PixivApiClient : IDisposable
         CancellationToken cancellationToken = default)
     {
         return InvokePostAsync(
-            "/v1/illust/bookmark/delete",
+            "v1/illust/bookmark/delete",
             [new("illust_id", illustId.ToString(NumberFormatInfo.InvariantInfo))],
             PixivJsonContext.Default.Object,
             cancellationToken);
@@ -369,7 +369,7 @@ public class PixivApiClient : IDisposable
         CancellationToken cancellationToken = default)
     {
         return InvokeGetAsync(
-            $"/v1/user/bookmark-tags/illust?restrict={restrict.ToQueryString()}&offset={offset}",
+            $"v1/user/bookmark-tags/illust?restrict={restrict.ToQueryString()}&offset={offset}",
             PixivJsonContext.Default.UserBookmarkTags,
             cancellationToken);
     }
@@ -381,7 +381,7 @@ public class PixivApiClient : IDisposable
         CancellationToken cancellationToken = default)
     {
         return InvokeGetAsync(
-            $"/v1/user/following?user_id={userId}&restrict={restrict.ToQueryString()}&offset={offset}",
+            $"v1/user/following?user_id={userId}&restrict={restrict.ToQueryString()}&offset={offset}",
             PixivJsonContext.Default.UsersList,
             cancellationToken);
     }
@@ -393,7 +393,7 @@ public class PixivApiClient : IDisposable
         CancellationToken cancellationToken = default)
     {
         return InvokeGetAsync(
-            $"/v1/user/follower?user_id={userId}&restrict={restrict.ToQueryString()}&offset={offset}",
+            $"v1/user/follower?user_id={userId}&restrict={restrict.ToQueryString()}&offset={offset}",
             PixivJsonContext.Default.UsersList,
             cancellationToken);
     }
@@ -404,7 +404,7 @@ public class PixivApiClient : IDisposable
         CancellationToken cancellationToken = default)
     {
         return InvokePostAsync(
-            "/v1/user/follow/add",
+            "v1/user/follow/add",
             [
                 new("user_id", userId.ToString(NumberFormatInfo.InvariantInfo)),
                 new("restrict", restrict.ToQueryString()),
@@ -418,7 +418,7 @@ public class PixivApiClient : IDisposable
         CancellationToken cancellationToken = default)
     {
         return InvokePostAsync(
-            "/v1/user/follow/delete",
+            "v1/user/follow/delete",
             [
                 new("user_id", userId.ToString(NumberFormatInfo.InvariantInfo)),
             ],
@@ -432,7 +432,7 @@ public class PixivApiClient : IDisposable
         CancellationToken cancellationToken = default)
     {
         return InvokeGetAsync(
-            $"/v1/user/mypixiv?user_id={userId}&offset={offset}",
+            $"v1/user/mypixiv?user_id={userId}&offset={offset}",
             PixivJsonContext.Default.UsersList,
             cancellationToken);
     }
@@ -442,7 +442,7 @@ public class PixivApiClient : IDisposable
         CancellationToken cancellationToken = default)
     {
         return InvokeGetAsync(
-            $"/v1/ugoira/metadata?illust_id={illustId}",
+            $"v1/ugoira/metadata?illust_id={illustId}",
             PixivJsonContext.Default.AnimatedPictureMetadata,
             cancellationToken);
     }
@@ -452,7 +452,7 @@ public class PixivApiClient : IDisposable
         CancellationToken cancellationToken = default)
     {
         return InvokeGetAsync(
-            $"/v1/illust/series?illust_series_id={illustSeriesId}",
+            $"v1/illust/series?illust_series_id={illustSeriesId}",
             PixivJsonContext.Default.IllustSeriesInfo,
             cancellationToken);
     }
@@ -462,7 +462,7 @@ public class PixivApiClient : IDisposable
         CancellationToken cancellationToken = default)
     {
         return InvokeGetAsync(
-            $"/v1/user/illust-series?user_id={userId}",
+            $"v1/user/illust-series?user_id={userId}",
             PixivJsonContext.Default.UserIllustSeries,
             cancellationToken);
     }
@@ -472,7 +472,7 @@ public class PixivApiClient : IDisposable
         CancellationToken cancellationToken = default)
     {
         return InvokeGetAsync(
-            $"/v1/user/novels?user_id={userId}",
+            $"v1/user/novels?user_id={userId}",
             PixivJsonContext.Default.NovelList,
             cancellationToken);
     }
@@ -482,7 +482,7 @@ public class PixivApiClient : IDisposable
         CancellationToken cancellationToken = default)
     {
         return InvokeGetAsync(
-            $"/v2/novel/detail?novel_id={novelId}",
+            $"v2/novel/detail?novel_id={novelId}",
             PixivJsonContext.Default.NovelDetailResponse,
             cancellationToken);
     }
@@ -492,7 +492,7 @@ public class PixivApiClient : IDisposable
         CancellationToken cancellationToken = default)
     {
         return InvokeGetAsync(
-            $"/v1/novel/text?novel_id={novelId}",
+            $"v1/novel/text?novel_id={novelId}",
             PixivJsonContext.Default.NovelTextResponse,
             cancellationToken);
     }
@@ -502,7 +502,7 @@ public class PixivApiClient : IDisposable
         CancellationToken cancellationToken = default)
     {
         return InvokeGetAsync(
-            $"/v2/novel/series?series_id={seriesId}",
+            $"v2/novel/series?series_id={seriesId}",
             PixivJsonContext.Default.NovelSeriesResponse,
             cancellationToken);
     }
@@ -512,9 +512,9 @@ public class PixivApiClient : IDisposable
         CancellationToken cancellationToken = default)
     {
 #if NET
-        return HttpClient.GetStringAsync($"/webview/v2/novel?id={novelId}", cancellationToken);
+        return HttpClient.GetStringAsync($"webview/v2/novel?id={novelId}", cancellationToken);
 #else
-        return HttpClient.GetStringAsync($"/webview/v2/novel?id={novelId}");
+        return HttpClient.GetStringAsync($"webview/v2/novel?id={novelId}");
 #endif
     }
 

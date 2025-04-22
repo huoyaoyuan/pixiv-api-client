@@ -33,7 +33,12 @@ type PixivApiClient(tokenManager: AccessTokenManager, innerHandler: HttpMessageH
     let httpClient = new HttpClient(innerHandler, disposeHandler,
         BaseAddress=Uri(BaseUrl),
         DefaultVersionPolicy=HttpVersionPolicy.RequestVersionOrHigher)
-        
+
+    // FsHttp uses UriBuilder, which doesn't support relative Uri
+    let http = http {
+        config_useBaseUrl BaseUrl
+    }
+
     interface IDisposable with
         member _.Dispose() = httpClient.Dispose()
 
@@ -57,7 +62,7 @@ type PixivApiClient(tokenManager: AccessTokenManager, innerHandler: HttpMessageH
 
     member this.GetUserDetailAsync (userId: int) =
         http {
-            GET "/v1/user/detail"
+            GET "v1/user/detail"
             query [
                 "user_id", userId.ToString()
             ]
@@ -66,7 +71,7 @@ type PixivApiClient(tokenManager: AccessTokenManager, innerHandler: HttpMessageH
         
     member this.GetIllustDetailAsync (illustId: int) =
         http {
-            GET "/v1/illust/detail"
+            GET "v1/illust/detail"
             query [
                 "illust_id", illustId.ToString()
             ]
@@ -75,7 +80,7 @@ type PixivApiClient(tokenManager: AccessTokenManager, innerHandler: HttpMessageH
 
     member this.GetUserIllustsAsync (userId: int) (illustType: UserIllustType voption) (offset: int) =
         http {
-            GET "/v1/user/illusts"
+            GET "v1/user/illusts"
             query [
                 "user_id", userId.ToString()
                 if illustType.IsSome then "illust_type", illustType.Value.ToString()
@@ -86,7 +91,7 @@ type PixivApiClient(tokenManager: AccessTokenManager, innerHandler: HttpMessageH
 
     member this.GetIllustFollowAsync (visibility: Visibility) (offset: int) =
         http {
-            GET "/v2/illust/follow"
+            GET "v2/illust/follow"
             query [
                 "visibility", visibility.ToString()
                 "offset", offset.ToString()
@@ -96,7 +101,7 @@ type PixivApiClient(tokenManager: AccessTokenManager, innerHandler: HttpMessageH
 
     member this.GetIllustRankingAsync (mode: IllustRankingMode, date: DateOnly voption, offset: int) =
         http {
-            GET "/v1/illust/ranking"
+            GET "v1/illust/ranking"
             query [
                 "mode", mode.ToString()
                 if date.IsSome then "date", date.Value.ToString("yyyy-MM-dd")
@@ -107,7 +112,7 @@ type PixivApiClient(tokenManager: AccessTokenManager, innerHandler: HttpMessageH
 
     member this.GetUserNovelsAsync (userId: int) =
         http {
-            GET "/v1/user/novels"
+            GET "v1/user/novels"
             query [
                 "user_id", userId.ToString()
             ]
@@ -116,7 +121,7 @@ type PixivApiClient(tokenManager: AccessTokenManager, innerHandler: HttpMessageH
         
     member this.GetNovelDetailAsync (novelId: int) =
         http {
-            GET "/v2/novel/detail"
+            GET "v2/novel/detail"
             query [
                 "novel_id", novelId.ToString()
             ]
@@ -125,7 +130,7 @@ type PixivApiClient(tokenManager: AccessTokenManager, innerHandler: HttpMessageH
         
     member this.GetNovelTextAsync (novelId: int) =
         http {
-            GET "/v1/novel/text"
+            GET "v1/novel/text"
             query [
                 "novel_id", novelId.ToString()
             ]
@@ -134,7 +139,7 @@ type PixivApiClient(tokenManager: AccessTokenManager, innerHandler: HttpMessageH
         
     member this.GetNovelSeriesAsync (seriesId: int) =
         http {
-            GET "/v2/novel/series"
+            GET "v2/novel/series"
             query [
                 "series_id", seriesId.ToString()
             ]
@@ -142,7 +147,7 @@ type PixivApiClient(tokenManager: AccessTokenManager, innerHandler: HttpMessageH
         |> this.sendAsync<NovelSeries>
 
     member this.GetNovelHtmlAsync (novelId: int) =
-        httpClient.GetStringAsync($"/webview/v2/novel?id={novelId}", Async.DefaultCancellationToken)
+        httpClient.GetStringAsync($"webview/v2/novel?id={novelId}", Async.DefaultCancellationToken)
         |> Async.AwaitTask
 
     member this.GetImageAsync (uri: Uri) =
