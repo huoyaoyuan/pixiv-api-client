@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using Meowtrix.PixivApi.Json;
 
@@ -37,9 +38,9 @@ namespace Meowtrix.PixivApi.Models
 
         public IAsyncEnumerable<Illust> GetIllustsAsync(CancellationToken cancellation)
         {
-            return _client.ToAsyncEnumerable<IllustSeriesInfo, IllustDetail, Illust>(
-                c => _client.Api.GetIllustSeriesAsync(Id, cancellation),
-                cancellation);
+            return _client.Api.EnumeratePagesAsync(
+                _client.Api.GetIllustSeriesAsync(Id, cancellation), cancellation)
+                .SelectMany(x => x.Illusts, (_, x) => new Illust(_client, x));
         }
     }
 }

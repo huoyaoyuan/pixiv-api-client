@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Meowtrix.PixivApi.Json;
@@ -70,19 +69,14 @@ namespace Meowtrix.PixivApi.Models
 
         public IReadOnlyList<IllustPage> Pages { get; }
 
-        public async IAsyncEnumerable<Comment> GetCommentsAsync([EnumeratorCancellation] CancellationToken cancellation = default)
+        public IAsyncEnumerable<Comment> GetCommentsAsync(CancellationToken cancellation = default)
         {
-            var response = await _client.Api.GetIllustCommentsAsync(
-                illustId: Id,
-                cancellationToken: cancellation).ConfigureAwait(false);
-
-            while (response is not null)
-            {
-                foreach (var c in response.Comments)
-                    yield return new Comment(_client, this, c);
-
-                response = await _client.Api.GetNextPageAsync(response, cancellation).ConfigureAwait(false);
-            }
+            return _client.Api.EnumeratePagesAsync(
+                _client.Api.GetIllustCommentsAsync(
+                    illustId: Id,
+                    cancellationToken: cancellation),
+                cancellation)
+                .SelectMany(x => x.Comments, (_, x) => new Comment(_client, this, x));
         }
 
         public async Task<Comment> PostCommentAsync(string content, Comment? parent = null)

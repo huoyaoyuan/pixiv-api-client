@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Net.Http;
 using System.Net.Http.Json;
+using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization.Metadata;
 using System.Threading;
 using System.Threading.Tasks;
@@ -531,7 +532,7 @@ public class PixivApiClient : IDisposable
             .EnsureSuccessStatusCode();
     }
 
-    public async ValueTask<T?> GetNextPageAsync<T>(
+    public async Task<T?> GetNextPageAsync<T>(
         T previous,
         CancellationToken cancellationToken = default)
         where T : class, IHasNextPage
@@ -545,5 +546,20 @@ public class PixivApiClient : IDisposable
             cancellationToken)
             .ConfigureAwait(false);
         return result ?? throw new InvalidOperationException("The api returns top-level null.");
+    }
+
+    public async IAsyncEnumerable<TPage> EnumeratePagesAsync<TPage>(
+        Task<TPage> initialPage,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        where TPage : class, IHasNextPage
+    {
+        var page = await initialPage.ConfigureAwait(false);
+
+        while (page is not null)
+        {
+            yield return page;
+
+            page = await GetNextPageAsync(page, cancellationToken).ConfigureAwait(false);
+        }
     }
 }
