@@ -30,10 +30,10 @@ namespace Meowtrix.PixivApi.Models
             "female" => Gender.Female,
             _ => Gender.Unknown
         };
-        public string Region => _profile.Region;
+        public string? Region => _profile.Region;
 
         public int TotalFollowUsers => _profile.TotalFollowUsers;
-        public int TotalMyPixivUsers => _profile.TotalMyPixivUsers;
+        public int TotalMyPixivUsers => _profile.TotalMypixivUsers;
         public int TotalIllusts => _profile.TotalIllusts;
         public int TotalManga => _profile.TotalManga;
         public int TotalNovels => _profile.TotalNovels;

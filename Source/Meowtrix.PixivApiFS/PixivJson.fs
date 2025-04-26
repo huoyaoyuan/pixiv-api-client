@@ -96,7 +96,7 @@ type NovelDetail =
       is_muted: bool;
       is_my_pixiv_only: bool;
       is_x_restricted: bool;
-      novel_ai_type: int; }
+      novel_ai_type: int }
 
 type NovelDetailResponse =
     { novel: NovelDetail }
@@ -107,11 +107,10 @@ type NovelList =
 
 type NovelTextResponse =
     { novel_marker: obj;
-      novel_text: string; }
+      novel_text: string }
 
 type NovelSeries =
-    { 
-      novel_series_detail:
+    { novel_series_detail:
         {| id: int;
            title: string;
            caption: string;
@@ -126,5 +125,4 @@ type NovelSeries =
       novel_series_first_novel: NovelDetail;
       novel_series_last_novel: NovelDetail;
       novels: NovelDetail list;
-      next_url: Uri voption
-    }
+      next_url: Uri voption }
