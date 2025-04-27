@@ -399,8 +399,6 @@ public sealed record NovelDetail
 
 public sealed record NovelDetailResponse(NovelDetail Novel);
 
-public sealed record NovelTextResponse(object NovelMarker, string NovelText);
-
 public record class NovelSeriesDetail
 {
     public required int Id { get; init; }
@@ -453,7 +451,6 @@ public record class NovelSeriesResponse(
 [JsonSerializable(typeof(UserIllustSeries))]
 [JsonSerializable(typeof(NovelList))]
 [JsonSerializable(typeof(NovelDetailResponse))]
-[JsonSerializable(typeof(NovelTextResponse))]
 [JsonSerializable(typeof(NovelSeriesResponse))]
 [JsonSourceGenerationOptions(
     PropertyNamingPolicy = JsonKnownNamingPolicy.SnakeCaseLower,

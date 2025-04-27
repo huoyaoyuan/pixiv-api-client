@@ -487,16 +487,6 @@ public class PixivApiClient : IDisposable
             cancellationToken);
     }
 
-    public Task<NovelTextResponse> GetNovelTextAsync(
-        int novelId,
-        CancellationToken cancellationToken = default)
-    {
-        return InvokeGetAsync(
-            $"v1/novel/text?novel_id={novelId}",
-            PixivJsonContext.Default.NovelTextResponse,
-            cancellationToken);
-    }
-
     public Task<NovelSeriesResponse> GetNovelSeriesAsync(
         int seriesId,
         CancellationToken cancellationToken = default)
