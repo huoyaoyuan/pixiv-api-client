@@ -24,6 +24,12 @@ namespace System.Net.Http
             using var response = await httpClient.GetAsync(uri, cancellationToken).ConfigureAwait(false);
             return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
         }
+
+        public static async Task<Stream> GetStreamAsync(this HttpClient httpClient, Uri uri, CancellationToken cancellationToken = default)
+        {
+            using var response = await httpClient.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
+            return await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
+        }
     }
 }
 #endif

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
@@ -44,6 +45,7 @@ public class PixivApiClient : IDisposable
             DefaultRequestHeaders =
             {
                 { "User-Agent", "PixivAndroidApp/5.0.166 (Android 12.0)" },
+                { "Referer", BaseUrl },
             },
 #if NET
             DefaultVersionPolicy = HttpVersionPolicy.RequestVersionOrHigher,
@@ -504,22 +506,14 @@ public class PixivApiClient : IDisposable
         return HttpClient.GetStringAsync($"webview/v2/novel?id={novelId}", cancellationToken);
     }
 
-    public async Task<HttpResponseMessage> GetImageAsync(Uri imageUri,
-        CancellationToken cancellation = default)
+    public Task<HttpResponseMessage> GetImageAsync(Uri imageUri, CancellationToken cancellation = default)
     {
-        using var request = new HttpRequestMessage(HttpMethod.Get, imageUri)
-        {
-            Headers =
-            {
-                Referrer = s_baseUri
-            },
-#if NET5_0_OR_GREATER
-            VersionPolicy = HttpVersionPolicy.RequestVersionOrHigher
-#endif
-        };
+        return HttpClient.GetAsync(imageUri, HttpCompletionOption.ResponseHeadersRead, cancellation);
+    }
 
-        return (await HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellation).ConfigureAwait(false))
-            .EnsureSuccessStatusCode();
+    public Task<Stream> GetImageStreamAsync(Uri imageUri, CancellationToken cancellation = default)
+    {
+        return HttpClient.GetStreamAsync(imageUri, cancellation);
     }
 
     public async Task<T?> GetNextPageAsync<T>(

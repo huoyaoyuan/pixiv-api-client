@@ -37,6 +37,7 @@ type PixivApiClient(tokenManager: AccessTokenManager, innerHandler: HttpMessageH
     // FsHttp uses UriBuilder, which doesn't support relative Uri
     let http = http {
         config_useBaseUrl BaseUrl
+        Referer BaseUrl
     }
 
     interface IDisposable with
@@ -45,12 +46,13 @@ type PixivApiClient(tokenManager: AccessTokenManager, innerHandler: HttpMessageH
     member private _.sendAsync<'a when 'a : not struct and 'a : not null> (req: HeaderContext) =
         async {
             let! token = tokenManager.GetAccessTokenAsync innerHandler
-            let! response =
-                httpClient.SendAsync(
-                    req {
-                        AuthorizationBearer token
-                    }
-                    |> Request.toHttpRequestMessage,
+            use request = 
+                req {
+                    AuthorizationBearer token
+                }
+                |> Request.toHttpRequestMessage
+            use! response =
+                httpClient.SendAsync(request,
                     Async.DefaultCancellationToken)
                 |> Async.AwaitTask
             let content = response.EnsureSuccessStatusCode().Content
@@ -144,14 +146,18 @@ type PixivApiClient(tokenManager: AccessTokenManager, innerHandler: HttpMessageH
     member this.GetImageAsync (uri: Uri) =
         async {
             let! token = tokenManager.GetAccessTokenAsync innerHandler
-            let request = 
+            use request = 
                 http {
                     GET (uri.ToString())
                     AuthorizationBearer token
-                    Referer BaseUrl
                 }
                 |> Request.toHttpRequestMessage
-            let! response = httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, Async.DefaultCancellationToken) |> Async.AwaitTask
+            return! httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, Async.DefaultCancellationToken) |> Async.AwaitTask
+        }
+
+    member this.GetImageStreamAsync (uri: Uri) =
+        async {
+            use! response = this.GetImageAsync uri
             return! response
                 .EnsureSuccessStatusCode()
                 .Content
