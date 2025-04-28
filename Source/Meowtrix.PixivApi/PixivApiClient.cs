@@ -501,11 +501,7 @@ public class PixivApiClient : IDisposable
         int novelId,
         CancellationToken cancellationToken = default)
     {
-#if NET
         return HttpClient.GetStringAsync($"webview/v2/novel?id={novelId}", cancellationToken);
-#else
-        return HttpClient.GetStringAsync($"webview/v2/novel?id={novelId}");
-#endif
     }
 
     public async Task<HttpResponseMessage> GetImageAsync(Uri imageUri,

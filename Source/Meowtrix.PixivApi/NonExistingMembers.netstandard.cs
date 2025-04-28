@@ -5,18 +5,24 @@ using System.Threading.Tasks;
 
 namespace System.Net.Http
 {
-    public static class HttpClientExtensions
+    internal static class HttpClientExtensions
     {
-        public static Task<string> ReadAsStringAsync(this HttpContent httpContent, CancellationToken cancellation = default)
+        public static Task<string> ReadAsStringAsync(this HttpContent httpContent, CancellationToken cancellationToken = default)
         {
-            cancellation.ThrowIfCancellationRequested();
+            cancellationToken.ThrowIfCancellationRequested();
             return httpContent.ReadAsStringAsync();
         }
 
-        public static Task<Stream> ReadAsStreamAsync(this HttpContent httpContent, CancellationToken cancellation = default)
+        public static Task<Stream> ReadAsStreamAsync(this HttpContent httpContent, CancellationToken cancellationToken = default)
         {
-            cancellation.ThrowIfCancellationRequested();
+            cancellationToken.ThrowIfCancellationRequested();
             return httpContent.ReadAsStreamAsync();
+        }
+
+        public static async Task<string> GetStringAsync(this HttpClient httpClient, string uri, CancellationToken cancellationToken = default)
+        {
+            using var response = await httpClient.GetAsync(uri, cancellationToken).ConfigureAwait(false);
+            return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
         }
     }
 }
