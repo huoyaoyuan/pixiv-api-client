@@ -17,9 +17,9 @@ namespace Meowtrix.PixivApi.Models
             Content = api.Comment;
             Created = api.Date;
             User = new UserInfo(client, api.User);
-            ParentCommentId = api.ParentComment.Id switch
+            ParentCommentId = api.ParentComment?.Id switch
             {
-                0 => null,
+                0 or null => null,
                 int other => other
             };
         }

@@ -13,11 +13,11 @@ public sealed class AuthUser
 
     public required string Name { get; init; }
 
-    public string? Account { get; init; }
+    public required string Account { get; init; }
 
-    public string? MailAddress { get; init; }
+    public required string MailAddress { get; init; }
 
-    public bool IsPremium { get; init; }
+    public required bool IsPremium { get; init; }
 
     public int XRestrict { get; init; }
 

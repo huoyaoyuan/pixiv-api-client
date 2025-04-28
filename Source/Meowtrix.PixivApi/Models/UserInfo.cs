@@ -27,7 +27,7 @@ namespace Meowtrix.PixivApi.Models
 
         public int Id { get; }
         public string Name { get; }
-        public string Account { get; }
+        public string? Account { get; }
         public bool IsFollowed { get; }
         public string? Comment { get; }
 
