@@ -105,10 +105,6 @@ type NovelList =
     { novels: NovelDetail list;
       next_url: Uri voption }
 
-type NovelTextResponse =
-    { novel_marker: obj;
-      novel_text: string }
-
 type NovelSeries =
     { novel_series_detail:
         {| id: int;

@@ -128,15 +128,6 @@ type PixivApiClient(tokenManager: AccessTokenManager, innerHandler: HttpMessageH
         }
         |> this.sendAsync<NovelDetailResponse>
         
-    member this.GetNovelTextAsync (novelId: int) =
-        http {
-            GET "v1/novel/text"
-            query [
-                "novel_id", novelId.ToString()
-            ]
-        }
-        |> this.sendAsync<NovelTextResponse>
-        
     member this.GetNovelSeriesAsync (seriesId: int) =
         http {
             GET "v2/novel/series"
