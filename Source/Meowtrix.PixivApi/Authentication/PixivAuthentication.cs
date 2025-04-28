@@ -1,7 +1,5 @@
 ﻿using System;
-#if NET9_0_OR_GREATER
 using System.Buffers.Text;
-#endif
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
@@ -122,14 +120,11 @@ public static class PixivAuthentication
 
 #endif
 
-#if NET9_0_OR_GREATER
+#if NET
         Span<char> urlSafeCodeChallenge = stackalloc char[43];
         Base64Url.EncodeToChars(sha, urlSafeCodeChallenge);
 #else
-        string urlSafeCodeChallenge = Convert.ToBase64String(sha)
-            .TrimEnd('=')
-            .Replace('+', '-')
-            .Replace('/', '_');
+        string urlSafeCodeChallenge = Base64Url.EncodeToString(sha);
 #endif
 
         string loginUrl = $"https://app-api.pixiv.net/web/v1/login?code_challenge={urlSafeCodeChallenge}&code_challenge_method=S256&client=pixiv-android";
