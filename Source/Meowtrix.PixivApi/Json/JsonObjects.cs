@@ -258,7 +258,7 @@ public sealed record PostIllustCommentResult(IllustComment Comment);
 
 public sealed record RecommendedIllusts(
     ImmutableArray<IllustDetail> Illusts,
-    ImmutableArray<object> RankingIllusts,
+    ImmutableArray<IllustDetail> RankingIllusts,
     bool ContestExists,
     JsonElement PrivacyPolicy,
     Uri? NextUrl)
@@ -274,8 +274,10 @@ public sealed record SearchIllustResult(ImmutableArray<IllustDetail> Illusts, Ur
     ImmutableArray<IllustDetail> IHasNextPage<IllustDetail>.Items => Illusts;
 }
 
-public sealed record UserBookmarkTags(ImmutableArray<object> BookmarkTags, Uri? NextUrl)
+public sealed record UserBookmarkTags(ImmutableArray<BookmarkedTag> BookmarkTags, Uri? NextUrl)
     : IHasNextPage;
+
+public sealed record BookmarkedTag(string Name, int Count);
 
 public sealed record UsersList(ImmutableArray<UserPreview> UserPreviews, Uri? NextUrl)
     : IHasNextPage<UserPreview>

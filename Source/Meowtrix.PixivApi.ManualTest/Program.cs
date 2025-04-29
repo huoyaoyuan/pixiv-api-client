@@ -101,7 +101,7 @@ namespace Meowtrix.PixivApi.ManualTest
             Debugger.Break();
 
             Console.WriteLine("Begin user/bookmark-tags/illust");
-            var bookmarkTags = await client.GetUserBookmarkTagsIllustAsync();
+            var bookmarkTags = await client.GetUserBookmarkTagsIllustAsync(userId: 1113943);
             Debugger.Break();
 
             Console.WriteLine("Begin user/following");

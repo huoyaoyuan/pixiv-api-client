@@ -62,6 +62,19 @@ public class PixivApiClient : IDisposable
         return result ?? throw new InvalidOperationException("The api returns top-level null.");
     }
 
+    private async Task<HttpResponseMessage> InvokePostAsync(string relativeUri, IEnumerable<KeyValuePair<string, string>> formBody, CancellationToken cancellationToken)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, new Uri(relativeUri, UriKind.RelativeOrAbsolute))
+        {
+            Content = new FormUrlEncodedContent(formBody),
+#if NET
+            VersionPolicy = HttpVersionPolicy.RequestVersionOrHigher,
+#endif
+        };
+        using var response = await HttpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
+        return response.EnsureSuccessStatusCode();
+    }
+
     private async Task<T> InvokePostAsync<T>(string relativeUri, IEnumerable<KeyValuePair<string, string>> formBody, JsonTypeInfo<T> jsonTypeInfo, CancellationToken cancellationToken)
     {
         using var request = new HttpRequestMessage(HttpMethod.Post, new Uri(relativeUri, UriKind.RelativeOrAbsolute))
@@ -350,7 +363,6 @@ public class PixivApiClient : IDisposable
 #endif
                     : Array.Empty<KeyValuePair<string, string>>())
             ],
-            PixivJsonContext.Default.Object,
             cancellationToken);
     }
 
@@ -361,17 +373,17 @@ public class PixivApiClient : IDisposable
         return InvokePostAsync(
             "v1/illust/bookmark/delete",
             [new("illust_id", illustId.ToString(NumberFormatInfo.InvariantInfo))],
-            PixivJsonContext.Default.Object,
             cancellationToken);
     }
 
     public Task<UserBookmarkTags> GetUserBookmarkTagsIllustAsync(
+        int userId,
         Visibility restrict = Visibility.Public,
         int offset = 0,
         CancellationToken cancellationToken = default)
     {
         return InvokeGetAsync(
-            $"v1/user/bookmark-tags/illust?restrict={restrict.ToQueryString()}&offset={offset}",
+            $"v1/user/bookmark-tags/illust?user_id={userId}&restrict={restrict.ToQueryString()}&offset={offset}",
             PixivJsonContext.Default.UserBookmarkTags,
             cancellationToken);
     }
@@ -411,7 +423,6 @@ public class PixivApiClient : IDisposable
                 new("user_id", userId.ToString(NumberFormatInfo.InvariantInfo)),
                 new("restrict", restrict.ToQueryString()),
             ],
-            PixivJsonContext.Default.Object,
             cancellationToken);
     }
 
@@ -424,7 +435,6 @@ public class PixivApiClient : IDisposable
             [
                 new("user_id", userId.ToString(NumberFormatInfo.InvariantInfo)),
             ],
-            PixivJsonContext.Default.Object,
             cancellationToken);
     }
 
