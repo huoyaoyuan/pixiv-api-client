@@ -1,0 +1,6 @@
+<Project>
+  <!-- Clear -->
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+</Project>
