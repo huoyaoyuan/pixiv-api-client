@@ -41,8 +41,8 @@
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETCoreApp'">
     <PackageReference Include="Portable.System.DateTimeOnly" Version="9.0.1" />
-    <PackageReference Include="System.Collections.Immutable" Version="9.0.9" />
-    <PackageReference Include="System.Net.Http.Json" Version="9.0.9" />
+    <PackageReference Include="System.Collections.Immutable" Version="9.0.10" />
+    <PackageReference Include="System.Net.Http.Json" Version="9.0.10" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
@@ -52,16 +52,16 @@
   </ItemGroup>
 
   <ItemGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible($(TargetFramework), 'net8.0')) != 'true'">
-    <PackageReference Include="Microsoft.Bcl.TimeProvider" Version="9.0.9" />
+    <PackageReference Include="Microsoft.Bcl.TimeProvider" Version="9.0.10" />
   </ItemGroup>
   
   <ItemGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible($(TargetFramework), 'net9.0')) != 'true'">
-    <PackageReference Include="Microsoft.Bcl.Memory" Version="10.0.0-rc.1.25451.107" />
-    <PackageReference Include="System.Text.Json" Version="9.0.9" />
+    <PackageReference Include="Microsoft.Bcl.Memory" Version="10.0.0-rc.2.25502.107" />
+    <PackageReference Include="System.Text.Json" Version="9.0.10" />
   </ItemGroup>
 
   <ItemGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible($(TargetFramework), 'net10.0')) != 'true'">
-    <PackageReference Include="System.Linq.AsyncEnumerable" Version="10.0.0-rc.1.25451.107" />
+    <PackageReference Include="System.Linq.AsyncEnumerable" Version="10.0.0-rc.2.25502.107" />
   </ItemGroup>
 
 </Project>
