@@ -1,16 +1,8 @@
 <Project>
 
   <PropertyGroup Condition="'$(Language)' == 'C#'">
-    <LangVersion>13.0</LangVersion>
+    <LangVersion>14.0</LangVersion>
     <Nullable Condition="'$(Nullable)' == ''">enable</Nullable>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Language)' == 'VB'">
-    <LangVersion>16</LangVersion>
-    <OptionExplicit>On</OptionExplicit>
-    <OptionInfer>On</OptionInfer>
-    <OptionStrict>On</OptionStrict>
-    <OptionCompare>Binary</OptionCompare>
   </PropertyGroup>
 
 </Project>

@@ -121,15 +121,14 @@ namespace Meowtrix.PixivApi
         [MemberNotNull(nameof(CurrentUser))]
         public int CurrentUserId => CurrentUser?.Id ?? throw new InvalidOperationException("No user login.");
 
-        private CultureInfo? _requestLanguage;
         public CultureInfo? RequestLanguage
         {
-            get => _requestLanguage;
+            get => field;
             set
             {
-                if (_requestLanguage != value)
+                if (field != value)
                 {
-                    _requestLanguage = value;
+                    field = value;
                     SetRequestHeader(Api.HttpClient, value);
                 }
             }
